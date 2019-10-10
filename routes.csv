@@ -1,0 +1,12 @@
+p, anonymous, /api/hook/*, POST
+p, anonymous, /api/user/login, (POST|GET)
+p, anonymous, /api/user/callback, GET
+
+p, reader, /api/user/profile, GET
+p, reader, /api/repositories*, GET
+p, reader, /api/jobs/*, GET
+p, reader, /api/jobs/*, DELETE
+
+g, , anonymous
+g, owner, reader
+g, admin, owner

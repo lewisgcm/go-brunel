@@ -1,0 +1,258 @@
+package mongo
+
+import (
+	"context"
+	"fmt"
+	"go-brunel/internal/pkg/server/store"
+	"go-brunel/internal/pkg/shared"
+	"time"
+
+	"github.com/mongodb/mongo-go-driver/bson"
+	"github.com/mongodb/mongo-go-driver/bson/primitive"
+	"github.com/mongodb/mongo-go-driver/mongo"
+	"github.com/mongodb/mongo-go-driver/x/bsonx"
+	"github.com/pkg/errors"
+)
+
+const (
+	jobCollectionName = "job"
+)
+
+type JobStore struct {
+	Database *mongo.Database
+}
+
+type mongoJob struct {
+	ObjectID     primitive.ObjectID `bson:"_id,omitempty"`
+	RepositoryID primitive.ObjectID `bson:"repository_id"`
+	store.Job    `bson:",inline"`
+}
+
+type mongoJobUpdate struct {
+	State     *shared.JobState `bson:"state,omitempty"`
+	StoppedAt *time.Time       `bson:"stopped_at,omitempty"`
+}
+
+func (r *JobStore) Next() (*store.Job, error) {
+	var job mongoJob
+	err := r.
+		Database.
+		Collection(jobCollectionName).
+		FindOneAndUpdate(
+			context.Background(),
+			bson.M{"state": shared.JobStateWaiting},
+			bson.M{"$set": bson.M{"state": shared.JobStateProcessing, "started_at": time.Now()}},
+		).
+		Decode(&job)
+
+	if err != nil {
+		if err != mongo.ErrNoDocuments {
+			return nil, errors.Wrap(err, "error getting next available job")
+		}
+		return nil, nil
+	}
+	job.Job.ID = shared.JobID(job.ObjectID.Hex())
+	job.Job.RepositoryID = job.RepositoryID.Hex()
+
+	return &job.Job, nil
+}
+
+func (r *JobStore) Get(id shared.JobID) (store.Job, error) {
+	jobID, err := primitive.ObjectIDFromHex(string(id))
+	if err != nil {
+		return store.Job{}, errors.Wrap(err, "error parsing id")
+	}
+
+	var mJob mongoJob
+	err = r.
+		Database.
+		Collection(jobCollectionName).
+		FindOne(
+			context.Background(),
+			bson.M{"_id": jobID},
+		).Decode(&mJob)
+	if err == mongo.ErrNoDocuments {
+		return store.Job{}, store.ErrorNotFound
+	}
+	if err != nil {
+		return store.Job{}, errors.Wrap(err, "error getting job")
+	}
+
+	mJob.Job.ID = shared.JobID(mJob.ObjectID.Hex())
+	mJob.Job.RepositoryID = mJob.RepositoryID.Hex()
+	return mJob.Job, nil
+}
+
+func (r *JobStore) Add(j store.Job) (shared.JobID, error) {
+	mJob := mongoJob{Job: j}
+	repoID, err := primitive.ObjectIDFromHex(string(j.RepositoryID))
+	if err != nil {
+		return shared.JobID(""), errors.Wrap(err, "error parsing id")
+	}
+	mJob.RepositoryID = repoID
+
+	result, err := r.
+		Database.
+		Collection(jobCollectionName).
+		InsertOne(
+			context.Background(),
+			mJob,
+		)
+	if err != nil {
+		return shared.JobID(""), errors.Wrap(err, "error adding job")
+	}
+	return shared.JobID(result.InsertedID.(primitive.ObjectID).String()), nil
+}
+
+func (r *JobStore) update(id shared.JobID, update mongoJobUpdate) error {
+	objectID, err := primitive.ObjectIDFromHex(string(id))
+	if err != nil {
+		return errors.Wrap(err, "error parsing id")
+	}
+	_, err = r.
+		Database.
+		Collection(jobCollectionName).
+		UpdateOne(
+			context.Background(),
+			bson.M{"_id": objectID},
+			bson.M{"$set": update},
+		)
+	return errors.Wrap(err, "error setting job state")
+}
+
+func (r *JobStore) UpdateStoppedAtByID(id shared.JobID, t time.Time) error {
+	return r.update(id, mongoJobUpdate{StoppedAt: &t})
+}
+
+func (r *JobStore) UpdateStateByID(id shared.JobID, s shared.JobState) error {
+	return r.update(id, mongoJobUpdate{State: &s})
+}
+
+func (r *JobStore) FilterByRepositoryID(
+	repositoryID string,
+	filter string,
+	pageIndex int64,
+	pageSize int64,
+	sortColumn string,
+	sortOrder int,
+) (store.JobListPage, error) {
+	page := store.JobListPage{}
+	page.Jobs = []store.Job{}
+
+	repositoryObjectID, err := primitive.ObjectIDFromHex(repositoryID)
+	if err != nil {
+		return page, errors.Wrap(err, "error parsing id")
+	}
+
+	bsonFilter := []bson.M{
+		{"$match": bson.M{"repository_id": repositoryObjectID}},
+		{"$match": bson.M{
+			"$or": []bson.M{
+				{"commit.branch": bsonx.Regex(fmt.Sprintf(".*%s.*", filter), "")},
+				{"commit.revision": bsonx.Regex(fmt.Sprintf(".*%s.*", filter), "")},
+				{"started_by": bsonx.Regex(fmt.Sprintf(".*%s.*", filter), "")},
+			},
+		},
+		},
+	}
+
+	decoder, err := r.
+		Database.
+		Collection(jobCollectionName).Aggregate(
+		context.Background(),
+		append(
+			bsonFilter,
+			bson.M{"$sort": bson.M{string(sortColumn): sortOrder}},
+			bson.M{"$skip": pageIndex * pageSize},
+			bson.M{"$limit": pageSize},
+		),
+	)
+	if err != nil {
+		return page, errors.Wrap(err, "error fetching jobs")
+	}
+
+	for decoder.Next(context.Background()) {
+		var r mongoJob
+		err = decoder.Decode(&r)
+		if err != nil {
+			return page, errors.Wrap(err, "error decoding job")
+		}
+		r.Job.ID = shared.JobID(r.ObjectID.Hex())
+		r.Job.RepositoryID = r.RepositoryID.Hex()
+		page.Jobs = append(page.Jobs, r.Job)
+	}
+
+	decoder, err = r.
+		Database.
+		Collection(jobCollectionName).Aggregate(
+		context.Background(),
+		append(
+			bsonFilter,
+			bson.M{"$count": "job_count"},
+		),
+	)
+	if err != nil {
+		return page, errors.Wrap(err, "error counting jobs")
+	}
+
+	if decoder.Next(context.Background()) {
+		err = decoder.Decode(&page)
+		if err != nil {
+			return page, errors.Wrap(err, "error decoding job count")
+		}
+	}
+	return page, nil
+}
+
+//func (r *JobStore) GetDetail(id shared.JobID) (models.JobDetail, error) {
+//	objectID, err := primitive.ObjectIDFromHex(string(id))
+//	if err != nil {
+//		return models.JobDetail{}, err
+//	}
+//
+//	decoder, err := r.
+//		Database.
+//		Collection(jobCollectionName).Aggregate(
+//		context.Background(),
+//		[]bson.M{
+//			{"$match": bson.M{"_id": objectID}},
+//			{
+//				"$lookup": bson.M{
+//					"from": "job_container",
+//					"let":  bson.M{"job_id": "$_id"},
+//					"as":   "stages",
+//					"pipeline": []bson.M{
+//						{"$match": bson.M{"$expr": bson.M{"$eq": []string{"$job_id", "$$job_id"}}}},
+//						{
+//							"$lookup": bson.M{
+//								"from": "job_container_log",
+//								"let":  bson.M{"container_id": "$container_id"},
+//								"as":   "logs",
+//								"pipeline": []bson.M{
+//									{"$match": bson.M{"$expr": bson.M{"$eq": []string{"$container_id", "$$container_id"}}}},
+//									{"$sort": bson.M{"time": +1}},
+//								},
+//							},
+//						},
+//						{"$sort": bson.M{"started_at": -1}},
+//						{"$group": bson.M{"_id": "$meta.stage", "containers": bson.M{"$push": "$$ROOT"}}},
+//					},
+//				},
+//			},
+//		},
+//	)
+//	if err != nil {
+//		return models.JobDetail{}, errors.Wrap(err, "error fetching job")
+//	}
+//
+//	if decoder.Next(context.Background()) {
+//		var j mongoQueryJobDetail
+//		err = decoder.Decode(&j)
+//		if err != nil {
+//			return models.JobDetail{}, errors.Wrap(err, "error decoding job")
+//		}
+//		j.ID = shared.JobID(j.ObjectID.Hex())
+//		return j.JobDetail, nil
+//	}
+//	return models.JobDetail{}, data.ErrorNotFound
+//}

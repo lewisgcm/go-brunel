@@ -1,0 +1,72 @@
+# Configure job state and logs in mongodb
+persistence: mongo
+mongo:
+  uri: mongodb://root:example@localhost:27017
+  db: brunel
+
+#notification: gitlab
+#gitlab:
+#  url: https://gitlab.com/api/v4/
+#  secret:
+
+jwt:
+  secret: asdasdadasdasd
+  default-role: admin
+
+server-name: http://localhost:3000
+
+oauth:
+  gitlab:
+    key: e1188e2af731adbd7c37b6071c6aac152218b97acccd7ce2e68ea84f21495df6
+    secret: 218fd534ac77259692d60b9d83509fb0de3e4f1c1da04fd2f4b80eb917592d86
+
+remote:
+  listen: 0.0.0.0:8885
+  credentials:
+    cert: |
+      -----BEGIN CERTIFICATE-----
+      MIIC5DCCAc+gAwIBAgIQDsz94F4J1+yUBFnV4tft7DANBgkqhkiG9w0BAQsFADAR
+      MQ8wDQYDVQQDEwZicnVuZWwwHhcNMTkwNTAyMTMwODI2WhcNMjAwMTIyMTMwODI2
+      WjARMQ8wDQYDVQQDEwZicnVuZWwwggEeMA0GCSqGSIb3DQEBAQUAA4IBCwAwggEG
+      AoH+Cw9WXmWTcr9ZmRss1vSn3vTsT9GmpyfKzcRoqno2ahgING9kgA7MLu4tEpxW
+      Q4vapPVpCBmt8RHGRtIrW5p797RfGBBy0y7SCGS/y3GlCGrZui6E4VgfvwB/YSV9
+      bvW/3kHkdDQBY6RbStU6d0sHusmFoktey3JfVexHh0wE0f69cOxIyACmGSaqPNxB
+      DUnOkjPOTYDoN4+q13P4GgvHQnZ5GidiL5BVmbJ1sAtfdfexvcb3ggFU3TB5r1ZQ
+      WkGmKjIMpXy36VV1qxl0Z3XMzNkIk1j1k3X4bvsxUOozAB6FCIfx9/LqH9pJDf1Q
+      TbyNvuYcBfiHJ5pbnglB3OsCAwEAAaM/MD0wDgYDVR0PAQH/BAQDAgWgMB0GA1Ud
+      JQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAMBgNVHRMBAf8EAjAAMA0GCSqGSIb3
+      DQEBCwUAA4H/AArox0P5R3aHiq6r8lDM41+//2P0up6wJtiTto5v1+MdzQ8yR4y3
+      Y04risGPu/fKPiS1QYHt7sd+dedhyMvdgFG2ijTBc1VXUxz9FniXgNT4gNgHz6cP
+      Y/L4r/Bv5CIYWTHQ7HZSB3EoaW0Hvb38dh21N07oP+2YqXt6a/hvcIf1dAhsrUiN
+      6KVDyIZrN5oyAk4T7TGSh93f5pEoBpIbAZkp+uPz4ZrvWYo6R5T9aCJEIqwLs/W9
+      mf9jt9r43XTSNt8cXsE6NghMXGMf7mahVYo8zuxRWqKnCqRg9jp9ZFvxlGxP5zg2
+      b1y58PErvrp3RE6teADNUWV4OUVXTwzf
+      -----END CERTIFICATE-----
+    key: |
+      -----BEGIN RSA PRIVATE KEY-----
+      MIIEjwIBAAKB/gsPVl5lk3K/WZkbLNb0p9707E/Rpqcnys3EaKp6NmoYCDRvZIAO
+      zC7uLRKcVkOL2qT1aQgZrfERxkbSK1uae/e0XxgQctMu0ghkv8txpQhq2bouhOFY
+      H78Af2ElfW71v95B5HQ0AWOkW0rVOndLB7rJhaJLXstyX1XsR4dMBNH+vXDsSMgA
+      phkmqjzcQQ1JzpIzzk2A6DePqtdz+BoLx0J2eRonYi+QVZmydbALX3X3sb3G94IB
+      VN0wea9WUFpBpioyDKV8t+lVdasZdGd1zMzZCJNY9ZN1+G77MVDqMwAehQiH8ffy
+      6h/aSQ39UE28jb7mHAX4hyeaW54JQdzrAgMBAAECgf4IjrFxEH7pxgx5XoFvQJWy
+      +SbvC3Q62ZsdYt7pKO55YGbYy2ejfc+WcEsHn1dPpCJkiE3gKp5fbDVSDsPleL56
+      hmEdqXxu0kdIn0uXCjN7M9GLMPs3sIu/qY7lh7Bp7lOqkKlHEAYTJtRMLneyXad5
+      avuu+0o5eCEzxkIB+VuxHWKJ5zzfFkitFcMYzf+PvbqB/jCv5E2o7LiChGQhzkCy
+      ar4smdC8spwV4Fz9ce45G7xKfzt0L4D2C8/9fwirNXfooZ+NnObcjKssmdw/zclf
+      ejwC0q3Rgu0kk2sA+hACRkgY5Z+4V/3UXYTKosEXVlPgxyBMC0QLlrrb5Vm44QJ/
+      NiQsXc4i6ayX9MCIbhxn2zq4TpYgZ29ko/Bpdrl0yU0RgNkxalYqfZB+vNwQE7YO
+      VlFHGokBf09eDXUeeV2UHCcXl3MkwOKg5/PigXvCyiIyfZg42uF+UXVUL3lFBxVg
+      3FmXA+hwBOmt/a9fYM1R2spz3WT34hIsSZbZ83KgfwJ/NEua5bk8Fb51374NcKph
+      9QSoErkqTsbESc4aPW2gQnwgYgskktB+yUJ3sC29Nr/n5KLZr/nYCMAaH0q2oYGd
+      i67H1nlbmDVb4IN0CTHs5PigW1cqicmqoqvRgjwiPJIE19syR42MvMH2azRy0a8Y
+      7IKTX8lQjG4fGwUXSJwNlQJ/LMOX0y9eemnzca/GnZPq4r4YKRHDVQIq6ckaycjo
+      oI+SC0CItOztUMgpoakpucJq9D9bVLs2e7Z5gxL00U/n56cCwHu5RambdGyXOIvF
+      MC86I9G6IG8Ua/FgW6gexI6OeWGxlM+X3tf+vaNEbtsT9JwzVDfpJAf2ihmptrlt
+      rQJ/C6LzMcD5HMGHyySoKvTO3U2O9LOdNXBHR0EEV7zoF0M1lXtzRPP98lzG8z4K
+      R3+GYzrVg7Htn2zXozTl1KRZ4TYgI5pXhlQBQMEfddhVJVIppImN3qEwRghDk148
+      JAw95aZR1tgpg+sJISvHjN8Qhbg8gOjz8nuikkmct7x5zQJ/Lis3by4iJSf1XsAY
+      +N9is7FNS6j/yhmUfcpnC4JU8cqMBY5VPfySlxE0HZtArgPGOPvSK1YMYX/mlKyb
+      muPNZ4ZxGS702ALh927S1qyZG/b1ITTuyYpe61h9eOHZjXPkgosY5l6vOXv0dJi7
+      RZ3v/BH9KiugrgWZ0qtZ7QumqQ==
+      -----END RSA PRIVATE KEY-----
