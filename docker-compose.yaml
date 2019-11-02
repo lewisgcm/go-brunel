@@ -3,7 +3,7 @@ version: '3.1'
 services:
 
   mongo:
-    image: mongo:4.1.8
+    image: mongo:4.2.1-bionic
     restart: always
     environment:
       MONGO_INITDB_DATABASE: brunel

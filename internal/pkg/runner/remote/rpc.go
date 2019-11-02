@@ -17,7 +17,7 @@ func rpcError(err error) error {
 }
 
 func NewRPCClient(credentials remote.Credentials, endpoint string) (Remote, error) {
-	tlsConfig, err := remote.ClientConfig(credentials)
+	tlsConfig, err := credentials.ClientConfig()
 	if err != nil {
 		return nil, errors.Wrap(err, "error generating TLS configuration for connecting to RPC endpoint")
 	}

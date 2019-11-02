@@ -19,6 +19,7 @@ type Config struct {
 	// Jobs are cloned in this directory in the format WorkingDirectory + jobID, in kubernetes it should be the root of the
 	// volumeClaimName volume mount location.
 	WorkingDirectory string `mapstructure:"working-directory"`
+	EnvironmentFile  string `mapstructure:"env-file"`
 
 	Runtime    shared.RuntimeType
 	Kubernetes *shared.KubernetesConfig
@@ -136,5 +137,7 @@ func (config *Config) environment() (environment.Factory, error) {
 			Remote: r,
 		}, nil
 	}
-	return &environment.LocalEnvironmentFactory{}, nil
+	return &environment.LocalEnvironmentFactory{
+		DotEnvPath: config.EnvironmentFile,
+	}, nil
 }

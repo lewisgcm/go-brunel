@@ -72,3 +72,5 @@ require (
 replace github.com/Sirupsen/logrus v1.3.0 => github.com/sirupsen/logrus v1.3.0
 
 replace sourcegraph.com/sourcegraph/go-diff v0.5.1 => github.com/sourcegraph/go-diff v0.5.1
+
+go 1.13
