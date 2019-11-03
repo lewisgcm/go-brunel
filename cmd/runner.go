@@ -25,8 +25,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	flag.String(shared.ConfigFile, "", "configuration file for the runner")
-	flag.String(shared.WorkingDirectory, dir + "/", "the working directory for pipelines")
+	flag.String(shared.ConfigFile, "", "configuration file path")
+	flag.String(shared.WorkingDirectory, dir + "/", "the working directory for jobs")
 	flag.String(shared.EnvironmentFile, "", "an environment file to load environment variables from")
 
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)

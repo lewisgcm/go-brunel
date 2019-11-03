@@ -8,13 +8,20 @@ package pipeline
 
 import (
 	"context"
+	"fmt"
 	"go-brunel/internal/pkg/runner/recorder"
 	"go-brunel/internal/pkg/runner/runtime"
 	"go-brunel/internal/pkg/shared"
 	"go-brunel/internal/pkg/shared/util"
 	"log"
+	"regexp"
+	"time"
 
 	"github.com/pkg/errors"
+)
+
+var (
+	defaultWaitTimeout = 30 * time.Second
 )
 
 type Pipeline struct {
@@ -44,7 +51,7 @@ func (pipeline *Pipeline) executeStage(context context.Context, jobID shared.Job
 	// If we have services, dispatch them
 	if stage.Services != nil {
 		for _, sidecar := range stage.Services {
-			// Dispatch the container, it may not be started/ready at this point
+			// Dispatch the container, it may not be started/stopWaiting at this point
 			containerID, err := pipeline.Runtime.DispatchContainer(context, jobID, sidecar)
 			if containerID != shared.EmptyContainerID {
 				containerIDs = append(containerIDs, containerID)
@@ -59,9 +66,9 @@ func (pipeline *Pipeline) executeStage(context context.Context, jobID shared.Job
 				return containerIDs, errors.Wrap(err, "error recording step service container creation")
 			}
 
-			// Wait for our container to be ready, then mark it as running
+			// Wait for our container to be stopWaiting, then mark it as running
 			if err = pipeline.Runtime.WaitForContainer(context, containerID, shared.ContainerWaitCondition{State: shared.ContainerWaitRunning}); err != nil {
-				return containerIDs, errors.Wrap(err, "error waiting for step container to be ready")
+				return containerIDs, errors.Wrap(err, "error waiting for step container to be stopWaiting")
 			}
 
 			if err = pipeline.Recorder.RecordContainerState(containerID, shared.ContainerStateRunning); err != nil {
@@ -73,22 +80,54 @@ func (pipeline *Pipeline) executeStage(context context.Context, jobID shared.Job
 			 * it does mean we can have real time logs when running them.
 			 * TODO handle this better and capture error?
 			 */
+			stopWaiting := make(chan bool)
+			timeoutDuration := defaultWaitTimeout
+			if sidecar.Wait != nil && sidecar.Wait.Timeout != nil {
+				timeoutDuration = time.Duration(*sidecar.Wait.Timeout) * time.Second
+			}
+			timeout := time.NewTimer(timeoutDuration)
+
+			var regex *regexp.Regexp
+			if sidecar.Wait != nil {
+				log.Println("waiting for container output to match regex: ", sidecar.Wait.Output)
+				regex = regexp.MustCompile(sidecar.Wait.Output)
+
+				go func() {
+					<-timeout.C
+					stopWaiting <- true
+				}()
+			}
+
 			go func() {
 				_ = pipeline.Runtime.CopyLogsForContainer(
 					context,
 					containerID,
 					&util.LoggerWriter{
-						Recorder: func(log string) error {
-							return pipeline.Recorder.RecordContainerLog(containerID, log, shared.LogTypeStdOut)
+						Recorder: func(logLine string) error {
+							if regex != nil && regex.MatchString(logLine) {
+								stopWaiting <- true
+							}
+							return pipeline.Recorder.RecordContainerLog(containerID, logLine, shared.LogTypeStdOut)
 						},
 					},
 					&util.LoggerWriter{
-						Recorder: func(log string) error {
-							return pipeline.Recorder.RecordContainerLog(containerID, log, shared.LogTypeStdOut)
+						Recorder: func(logLine string) error {
+							if regex != nil && regex.MatchString(logLine) {
+								stopWaiting <- true
+							}
+							return pipeline.Recorder.RecordContainerLog(containerID, logLine, shared.LogTypeStdOut)
 						},
 					},
 				)
 			}()
+
+			if sidecar.Wait != nil {
+				<-stopWaiting
+				regex = nil
+				if !timeout.Stop() {
+					return containerIDs, errors.New(fmt.Sprintf("error waiting for container output to match regex %s", sidecar.Wait.Output))
+				}
+			}
 		}
 	}
 

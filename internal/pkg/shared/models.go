@@ -63,6 +63,12 @@ type ContainerResourcesUnits struct {
 	Memory string
 }
 
+// WaitFor allows users to specify rules for waiting for sidecar containers, e.g wait for a specific output etc
+type WaitFor struct {
+	Output string
+	Timeout *int
+}
+
 // Container is used for defining a container for dispatch as part of the pipeline.
 // Add commands to be run in the container shell.
 type Container struct {
@@ -74,6 +80,7 @@ type Container struct {
 	WorkingDir  string `yaml:"working_dir"`
 	Privileged  bool
 	Resources   *ContainerResources
+	Wait 		*WaitFor
 }
 
 // ContainerMeta is used for handling additional container meta data such as the containers stage or if it is a service.
