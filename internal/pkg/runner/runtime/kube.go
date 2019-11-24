@@ -389,7 +389,7 @@ func (pipeline *KubeRuntime) DispatchContainer(context context.Context, jobID sh
 						Image:   "busybox",
 						Command: []string{"sh", "-c", "--"},
 						// Tail the entire file, retry and be quiet about it :)
-						Args: []string{"tail -F -q -n +1 /var/log/pods/$POD_ID/" + string(containerID) + "/0.log"},
+						Args: []string{"tail -F -q -n +1 /var/log/pods/*$POD_ID/*" + string(containerID) + "/0.log"},
 						Env: []corev1.EnvVar{
 							{
 								Name: "POD_ID",

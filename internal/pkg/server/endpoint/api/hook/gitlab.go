@@ -61,6 +61,14 @@ func (handler *webHookHandler) gitLab(r *http.Request) (interface{}, int, error)
 		return api.NotFound()
 	}
 
+	if !repository.IsValid() {
+		return api.BadRequest(nil, "invalid project name or namespace supplied")
+	}
+
+	if !job.IsValid() {
+		return api.BadRequest(nil, "invalid branch or revision supplied")
+	}
+
 	repo, err := handler.repositoryStore.AddOrUpdate(repository)
 	if err != nil {
 		return api.InternalServerError(err, "error storing gitlab hook event repository")

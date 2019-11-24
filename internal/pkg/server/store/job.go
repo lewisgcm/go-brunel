@@ -21,6 +21,10 @@ type Job struct {
 	StoppedAt    *time.Time `bson:"stopped_at"`
 }
 
+func (job *Job) IsValid() bool {
+	return job.Commit.Branch != "" && job.Commit.Revision != ""
+}
+
 type JobDetail struct {
 	Job    `bson:",inline"`
 	Stages []struct {

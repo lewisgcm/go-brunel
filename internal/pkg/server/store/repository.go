@@ -16,6 +16,10 @@ type Repository struct {
 	CreatedAt time.Time `bson:"created_at"`
 }
 
+func (repository *Repository) IsValid() bool {
+	return repository.Name != "" && repository.Project != ""
+}
+
 type RepositoryStore interface {
 	AddOrUpdate(repository Repository) (Repository, error)
 

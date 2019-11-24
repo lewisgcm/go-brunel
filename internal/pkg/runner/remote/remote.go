@@ -14,7 +14,7 @@ type Remote interface {
 	// Check if the job is cancelled
 	HasBeenCancelled(id shared.JobID) (bool, error)
 
-	// Log should messages of a given type for a job
+	// Log should store messages of a given type for a job
 	Log(id shared.JobID, message string, logType shared.LogType) error
 
 	// AddContainer should log a container against a given JobID. The containerID is the ID returned by the
