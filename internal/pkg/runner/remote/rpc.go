@@ -52,9 +52,9 @@ func (c *rpcClient) HasBeenCancelled(id shared.JobID) (bool, error) {
 	return reply, rpcError(e)
 }
 
-func (c *rpcClient) Log(id shared.JobID, message string, logType shared.LogType) error {
+func (c *rpcClient) Log(id shared.JobID, message string, logType shared.LogType, stage string) error {
 	return rpcError(
-		c.client.Call("RPC.Log", &remote.LogRequest{Id: id, Message: message, LogType: logType}, &remote.Empty{}),
+		c.client.Call("RPC.Log", &remote.LogRequest{Id: id, Message: message, LogType: logType, Stage: stage}, &remote.Empty{}),
 	)
 }
 

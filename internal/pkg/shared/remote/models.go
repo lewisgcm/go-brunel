@@ -10,6 +10,7 @@ type SetJobStateRequest struct {
 type LogRequest struct {
 	Id      shared.JobID
 	Message string
+	Stage 	string
 	LogType shared.LogType
 }
 

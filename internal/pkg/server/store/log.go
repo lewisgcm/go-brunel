@@ -9,6 +9,7 @@ type Log struct {
 	JobID   shared.JobID   `bson:"-"`
 	Message string         `bson:"message"`
 	LogType shared.LogType `bson:"type"`
+	Stage 	string		   `bson:"stage"`
 	Time    time.Time
 }
 

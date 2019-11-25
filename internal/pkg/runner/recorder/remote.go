@@ -16,9 +16,9 @@ type RemoteRecorder struct {
 	Remote remote.Remote
 }
 
-func (recorder *RemoteRecorder) RecordLog(jobID shared.JobID, log string, logType shared.LogType) error {
+func (recorder *RemoteRecorder) RecordLog(jobID shared.JobID, log string, logType shared.LogType, stage string) error {
 	return errors.Wrap(
-		recorder.Remote.Log(jobID, log, logType),
+		recorder.Remote.Log(jobID, log, logType, stage),
 		"error recording log",
 	)
 }

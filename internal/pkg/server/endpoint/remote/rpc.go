@@ -77,6 +77,7 @@ func (t *RPC) Log(args *remote.LogRequest, reply *remote.Empty) error {
 			JobID:   args.Id,
 			Message: args.Message,
 			LogType: args.LogType,
+			Stage: 	 args.Stage,
 			Time:    time.Now(),
 		}),
 		"error storing log",

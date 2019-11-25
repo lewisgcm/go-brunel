@@ -24,6 +24,8 @@ type JobState uint8
 // LogType is used to denote the type of log message, this is used for recording job and container logs
 type LogType uint8
 
+type StageID string
+
 // Exported constants here are for various purposes. The LogTypeStd* are for use in the recorders to specify the type of log line being recorded.
 // JobState is used to denote what state a job is in.
 const (
@@ -45,6 +47,8 @@ const (
 
 	// EmptyContainerID denotes an empty container ID, used in error returns
 	EmptyContainerID ContainerID = ""
+
+	EmptyStageID StageID = ""
 )
 
 // ContainerWaitCondition are used as conditions when waiting for a container

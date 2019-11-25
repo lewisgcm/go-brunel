@@ -23,11 +23,15 @@ type JobHandler struct {
 	WorkSpace      WorkSpace
 }
 
+const (
+	endStage = "end"
+)
+
 // Handle will process a job trigger event and will record the status of the job
 func (handler *JobHandler) Handle(event trigger.Event) {
 	log.Printf("running in directory: %s\n", event.WorkDir)
 	if err := handler.processJob(event.Context, event); err != nil {
-		if err := handler.Recorder.RecordLog(event.Job.ID, err.Error(), shared.LogTypeStdErr); err != nil {
+		if err := handler.Recorder.RecordLog(event.Job.ID, err.Error(), shared.LogTypeStdErr, endStage); err != nil {
 			log.Println(err)
 		}
 		if event.Context.Err() != nil {

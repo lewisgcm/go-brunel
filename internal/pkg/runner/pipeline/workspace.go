@@ -25,12 +25,13 @@ type LocalWorkSpace struct {
 
 const (
 	pipelineFile = ".brunel.jsonnet"
+	workspaceStage = "preparing"
 )
 
 func (w *LocalWorkSpace) Prepare(event trigger.Event) (*shared.Spec, error) {
 	progress := &util.LoggerWriter{
 		Recorder: func(log string) error {
-			return w.Recorder.RecordLog(event.Job.ID, log, shared.LogTypeStdOut)
+			return w.Recorder.RecordLog(event.Job.ID, log, shared.LogTypeStdOut, workspaceStage)
 		},
 	}
 

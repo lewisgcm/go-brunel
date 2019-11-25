@@ -16,7 +16,7 @@ import (
 type LocalRecorder struct {
 }
 
-func (recorder LocalRecorder) RecordLog(jobID shared.JobID, message string, logType shared.LogType) error {
+func (recorder LocalRecorder) RecordLog(jobID shared.JobID, message string, logType shared.LogType, stage string) error {
 	log.Println(message)
 	return nil
 }
