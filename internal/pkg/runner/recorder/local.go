@@ -16,13 +16,29 @@ import (
 type LocalRecorder struct {
 }
 
-func (recorder LocalRecorder) RecordLog(jobID shared.JobID, message string, logType shared.LogType, stage string) error {
+func (recorder LocalRecorder) RecordLog(jobID shared.JobID, message string, logType shared.LogType, stageID shared.StageID) error {
 	log.Println(message)
 	return nil
 }
 
+func (recorder LocalRecorder) RecordStageState(jobID shared.JobID, id shared.StageID, state shared.StageState) error {
+	switch state {
+	case shared.StageStateRunning:
+		log.Println("running stage ", id)
+		break
+	case shared.StageStateError:
+		log.Println("error executing stage ", id)
+		break
+	case shared.StageStateSuccess:
+		log.Println("completed stage ", id)
+		break
+	}
+
+	return nil
+}
+
 func (recorder LocalRecorder) RecordContainer(jobID shared.JobID, containerID shared.ContainerID, meta shared.ContainerMeta, container shared.Container, state shared.ContainerState) error {
-	log.Printf("starting container in stage [%s] with id [%s] and spec: \n", meta.Stage, containerID)
+	log.Printf("starting container in stage [%s] with id [%s] and spec: \n", meta.StageID, containerID)
 	log.Println("---")
 	b := bytes.Buffer{}
 	if e := json.NewEncoder(&b).Encode(container); e != nil {

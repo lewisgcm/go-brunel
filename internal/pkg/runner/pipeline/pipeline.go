@@ -43,7 +43,7 @@ func (pipeline *Pipeline) cleanUp(context context.Context, containerIDs []shared
 	return err
 }
 
-func (pipeline *Pipeline) executeStage(context context.Context, jobID shared.JobID, stageName string, stage shared.Stage) ([]shared.ContainerID, error) {
+func (pipeline *Pipeline) executeStage(context context.Context, jobID shared.JobID, stageID shared.StageID, stage shared.Stage) ([]shared.ContainerID, error) {
 
 	// We use this to return any containers that need cleaned up during an error
 	var containerIDs []shared.ContainerID
@@ -61,7 +61,7 @@ func (pipeline *Pipeline) executeStage(context context.Context, jobID shared.Job
 			}
 
 			// Record our container as starting
-			err = pipeline.Recorder.RecordContainer(jobID, containerID, shared.ContainerMeta{Stage: stageName, Service: true}, sidecar, shared.ContainerStateStarting)
+			err = pipeline.Recorder.RecordContainer(jobID, containerID, shared.ContainerMeta{StageID: stageID, Service: true}, sidecar, shared.ContainerStateStarting)
 			if err != nil {
 				return containerIDs, errors.Wrap(err, "error recording step service container creation")
 			}
@@ -144,7 +144,7 @@ func (pipeline *Pipeline) executeStage(context context.Context, jobID shared.Job
 				return containerIDs, errors.Wrap(err, "error dispatching step container")
 			}
 
-			if err = pipeline.Recorder.RecordContainer(jobID, containerID, shared.ContainerMeta{Stage: stageName, Service: false}, container, shared.ContainerStateStarting); err != nil {
+			if err = pipeline.Recorder.RecordContainer(jobID, containerID, shared.ContainerMeta{StageID: stageID, Service: false}, container, shared.ContainerStateStarting); err != nil {
 				return containerIDs, errors.Wrap(err, "error recording step container creation")
 			}
 
@@ -204,15 +204,19 @@ func (pipeline *Pipeline) Execute(ctx context.Context, spec shared.Spec, working
 		return errors.Wrap(err, "error initializing runtime config")
 	}
 
-	for stageName, stage := range spec.Stages {
-		log.Printf("executing stage '%s'\n", stageName)
+	for stageID, stage := range spec.Stages {
+		e := pipeline.Recorder.RecordStageState(jobID, stageID, shared.StageStateRunning)
+		if e != nil {
+			err = util.ErrorAppend(err, errors.Wrap(e, "error recording stage state"))
+			break
+		}
 
 		// Here we need to execute the stage and cleanup left over containers
 		// If we get an error, dont return instead set the error and handle it at the end.
 		// This way we can pass them back up the stack
-		containerIds, e := pipeline.executeStage(ctx, jobID, stageName, stage)
+		containerIds, e := pipeline.executeStage(ctx, jobID, stageID, stage)
 		if e != nil {
-			err = util.ErrorAppend(err, errors.Wrap(e, "error running build stage"))
+			err = util.ErrorAppend(err, errors.Wrap(e, fmt.Sprintf("error running %s stage", stageID)))
 		}
 
 		e = pipeline.cleanUp(context.Background(), containerIds)
@@ -220,7 +224,15 @@ func (pipeline *Pipeline) Execute(ctx context.Context, spec shared.Spec, working
 			err = util.ErrorAppend(err, errors.Wrap(e, "error cleaning up containers from stage"))
 		}
 
-		log.Printf("finished executing stage '%s'\n", stageName)
+		state := shared.StageStateSuccess
+		if err != nil {
+			state = shared.StageStateError
+		}
+		e = pipeline.Recorder.RecordStageState(jobID, stageID, state)
+		if e != nil {
+			err = util.ErrorAppend(err, errors.Wrap(e, "error recording stage state"))
+			break
+		}
 	}
 
 	e := pipeline.Runtime.Terminate(context.Background(), jobID)

@@ -17,6 +17,7 @@ type RPC struct {
 	LogStore        store.LogStore
 	ContainerStore  store.ContainerStore
 	RepositoryStore store.RepositoryStore
+	StageStore      store.StageStore
 }
 
 func (t *RPC) GetNextAvailableJob(args *remote.Empty, reply *remote.GetNextAvailableJobResponse) error {
@@ -77,11 +78,32 @@ func (t *RPC) Log(args *remote.LogRequest, reply *remote.Empty) error {
 			JobID:   args.Id,
 			Message: args.Message,
 			LogType: args.LogType,
-			Stage: 	 args.Stage,
+			StageID: args.StageID,
 			Time:    time.Now(),
 		}),
 		"error storing log",
 	)
+}
+
+func (t *RPC) SetStageState(args *remote.SetStageStateRequest, reply *remote.Empty) error {
+	var startTime time.Time
+	var stopTime time.Time
+
+	if args.State > shared.StageStateRunning {
+		stopTime = time.Now()
+	} else {
+		startTime = time.Now()
+	}
+
+	err := t.StageStore.AddOrUpdate(store.Stage{
+		ID:        args.Id,
+		JobID:     args.JobID,
+		State:     args.State,
+		StartedAt: &startTime,
+		StoppedAt: &stopTime,
+	})
+
+	return errors.Wrap(err, "error storing stage stopped time")
 }
 
 func (t *RPC) AddContainer(args *remote.AddContainerRequest, reply *remote.Empty) error {

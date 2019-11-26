@@ -24,7 +24,11 @@ type JobState uint8
 // LogType is used to denote the type of log message, this is used for recording job and container logs
 type LogType uint8
 
+// This is a unique identifier for a stage
 type StageID string
+
+// This is the current state of a stage
+type StageState uint8
 
 // Exported constants here are for various purposes. The LogTypeStd* are for use in the recorders to specify the type of log line being recorded.
 // JobState is used to denote what state a job is in.
@@ -44,6 +48,10 @@ const (
 
 	ContainerWaitRunning ContainerWaitState = 1 << 0
 	ContainerWaitStopped ContainerWaitState = 1 << 1
+
+	StageStateRunning StageState = 0
+	StageStateSuccess StageState = 1
+	StageStateError   StageState = 2
 
 	// EmptyContainerID denotes an empty container ID, used in error returns
 	EmptyContainerID ContainerID = ""
@@ -69,7 +77,7 @@ type ContainerResourcesUnits struct {
 
 // WaitFor allows users to specify rules for waiting for sidecar containers, e.g wait for a specific output etc
 type WaitFor struct {
-	Output string
+	Output  string
 	Timeout *int
 }
 
@@ -84,12 +92,12 @@ type Container struct {
 	WorkingDir  string `yaml:"working_dir"`
 	Privileged  bool
 	Resources   *ContainerResources
-	Wait 		*WaitFor
+	Wait        *WaitFor
 }
 
 // ContainerMeta is used for handling additional container meta data such as the containers stage or if it is a service.
 type ContainerMeta struct {
-	Stage   string
+	StageID StageID
 	Service bool
 }
 
@@ -106,7 +114,7 @@ type Spec struct {
 	Version     string
 	Description string
 	Maintainers []string
-	Stages      map[string]Stage
+	Stages      map[StageID]Stage
 }
 
 // Commit is used to denote a commit for a job

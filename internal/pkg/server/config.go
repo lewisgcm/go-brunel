@@ -103,7 +103,7 @@ func (config *Config) GetOAuthProviders() ([]goth.Provider, error) {
 	return providers, nil
 }
 
-func (config *Config) GetJobRepository() (store.JobStore, error) {
+func (config *Config) GetJobStore() (store.JobStore, error) {
 	switch config.Persistence {
 	case shared.PersistenceTypeMongo:
 		if config.Mongo == nil {
@@ -121,7 +121,25 @@ func (config *Config) GetJobRepository() (store.JobStore, error) {
 	}
 }
 
-func (config *Config) GetUserRepository() (store.UserStore, error) {
+func (config *Config) GetStageStore() (store.StageStore, error) {
+	switch config.Persistence {
+	case shared.PersistenceTypeMongo:
+		if config.Mongo == nil {
+			return nil, errors.New("no mongo configuration detected")
+		}
+		database, err := config.Mongo.GetMongoDatabase()
+		if err != nil {
+			return nil, err
+		}
+		return &mongo.StageStore{
+			Database: database,
+		}, nil
+	default:
+		return nil, errors.New("no persistence configuration detected")
+	}
+}
+
+func (config *Config) GetUserStore() (store.UserStore, error) {
 	switch config.Persistence {
 	case shared.PersistenceTypeMongo:
 		if config.Mongo == nil {
@@ -139,7 +157,7 @@ func (config *Config) GetUserRepository() (store.UserStore, error) {
 	}
 }
 
-func (config *Config) GetRepositoryRepository() (store.RepositoryStore, error) {
+func (config *Config) GetRepositoryStore() (store.RepositoryStore, error) {
 	switch config.Persistence {
 	case shared.PersistenceTypeMongo:
 		if config.Mongo == nil {
@@ -157,7 +175,7 @@ func (config *Config) GetRepositoryRepository() (store.RepositoryStore, error) {
 	}
 }
 
-func (config *Config) GetLogRepository() (store.LogStore, error) {
+func (config *Config) GetLogStore() (store.LogStore, error) {
 	switch config.Persistence {
 	case shared.PersistenceTypeMongo:
 		if config.Mongo == nil {
@@ -175,7 +193,7 @@ func (config *Config) GetLogRepository() (store.LogStore, error) {
 	}
 }
 
-func (config *Config) GetContainerRepository() (store.ContainerStore, error) {
+func (config *Config) GetContainerStore() (store.ContainerStore, error) {
 	switch config.Persistence {
 	case shared.PersistenceTypeMongo:
 		if config.Mongo == nil {

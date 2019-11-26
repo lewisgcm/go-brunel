@@ -16,6 +16,7 @@ func Server(
 	lr store.LogStore,
 	cr store.ContainerStore,
 	rr store.RepositoryStore,
+	sr store.StageStore,
 	notify notify.Notify,
 	credentials remote.Credentials,
 	listen string,
@@ -25,6 +26,7 @@ func Server(
 		LogStore:        lr,
 		ContainerStore:  cr,
 		RepositoryStore: rr,
+		StageStore:      sr,
 		Notify:          notify,
 	}
 	err := rpc.Register(service)

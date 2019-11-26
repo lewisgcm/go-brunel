@@ -15,10 +15,10 @@ type Remote interface {
 	HasBeenCancelled(id shared.JobID) (bool, error)
 
 	// Log should store messages of a given type for a job
-	Log(id shared.JobID, message string, logType shared.LogType, stage string) error
+	Log(id shared.JobID, message string, logType shared.LogType, stageID shared.StageID) error
 
-	// Add stage will add a new stage to the pipeline output
-	AddStage(name string) (shared.StageID, error)
+	// SetStageState will record the state of a stage
+	SetStageState(jobID shared.JobID, id shared.StageID, state shared.StageState) error
 
 	// AddContainer should log a container against a given JobID. The containerID is the ID returned by the
 	// runtime config the container is running in (e.g docker, kube etc).

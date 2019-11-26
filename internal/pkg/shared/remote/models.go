@@ -10,8 +10,14 @@ type SetJobStateRequest struct {
 type LogRequest struct {
 	Id      shared.JobID
 	Message string
-	Stage 	string
+	StageID shared.StageID
 	LogType shared.LogType
+}
+
+type SetStageStateRequest struct {
+	Id    shared.StageID
+	JobID shared.JobID
+	State shared.StageState
 }
 
 type AddContainerRequest struct {

@@ -52,9 +52,19 @@ func (c *rpcClient) HasBeenCancelled(id shared.JobID) (bool, error) {
 	return reply, rpcError(e)
 }
 
-func (c *rpcClient) Log(id shared.JobID, message string, logType shared.LogType, stage string) error {
+func (c *rpcClient) Log(id shared.JobID, message string, logType shared.LogType, stageID shared.StageID) error {
 	return rpcError(
-		c.client.Call("RPC.Log", &remote.LogRequest{Id: id, Message: message, LogType: logType, Stage: stage}, &remote.Empty{}),
+		c.client.Call("RPC.Log", &remote.LogRequest{Id: id, Message: message, LogType: logType, StageID: stageID}, &remote.Empty{}),
+	)
+}
+
+func (c *rpcClient) SetStageState(jobID shared.JobID, id shared.StageID, state shared.StageState) error {
+	return rpcError(
+		c.client.Call("RPC.SetStageState", &remote.SetStageStateRequest{
+			Id:    id,
+			JobID: jobID,
+			State: state,
+		}, &remote.Empty{}),
 	)
 }
 

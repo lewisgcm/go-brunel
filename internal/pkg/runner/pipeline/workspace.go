@@ -24,7 +24,7 @@ type LocalWorkSpace struct {
 }
 
 const (
-	pipelineFile = ".brunel.jsonnet"
+	pipelineFile   = ".brunel.jsonnet"
 	workspaceStage = "preparing"
 )
 

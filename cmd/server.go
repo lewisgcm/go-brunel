@@ -58,27 +58,32 @@ func main() {
 		log.Fatal(err)
 	}
 
-	jobRepository, err := serverConfig.GetJobRepository()
+	jobStore, err := serverConfig.GetJobStore()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	userRepository, err := serverConfig.GetUserRepository()
+	userStore, err := serverConfig.GetUserStore()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	repositoryRepository, err := serverConfig.GetRepositoryRepository()
+	repositoryStore, err := serverConfig.GetRepositoryStore()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	logRepository, err := serverConfig.GetLogRepository()
+	logStore, err := serverConfig.GetLogStore()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	containerRepository, err := serverConfig.GetContainerRepository()
+	containerStore, err := serverConfig.GetContainerStore()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	stageStore, err := serverConfig.GetStageStore()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -94,10 +99,11 @@ func main() {
 	}
 
 	err = remote.Server(
-		jobRepository,
-		logRepository,
-		containerRepository,
-		repositoryRepository,
+		jobStore,
+		logStore,
+		containerStore,
+		repositoryStore,
+		stageStore,
 		notifier,
 		*serverConfig.Remote.Credentials,
 		serverConfig.Remote.Listen,
@@ -115,11 +121,11 @@ func main() {
 		// security.Middleware("keymatch_model.conf", "routes.csv", jwtSerializer),
 		middleware.Recoverer,
 	)
-	router.Mount("/api/hook", hook.Routes(jobRepository, repositoryRepository, notifier))
-	router.Mount("/api/repository", repository.Routes(repositoryRepository, jobRepository))
-	router.Mount("/api/job", job.Routes(jobRepository, logRepository, containerRepository, jwtSerializer))
-	router.Mount("/api/container", container.Routes(logRepository, jwtSerializer))
-	router.Mount("/api/user", user.Routes(userRepository, oauths, jwtSerializer))
+	router.Mount("/api/hook", hook.Routes(jobStore, repositoryStore, notifier))
+	router.Mount("/api/repository", repository.Routes(repositoryStore, jobStore))
+	router.Mount("/api/job", job.Routes(jobStore, logStore, containerStore, jwtSerializer))
+	router.Mount("/api/container", container.Routes(logStore, jwtSerializer))
+	router.Mount("/api/user", user.Routes(userStore, oauths, jwtSerializer))
 
 	walkFunc := func(method string, route string, handler http.Handler, middleware ...func(http.Handler) http.Handler) error {
 		log.Info("registering route: ", method, " ", route)

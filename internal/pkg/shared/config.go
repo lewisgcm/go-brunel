@@ -29,7 +29,7 @@ type NotificationType string
 const (
 	ConfigFile                              = "config-file"
 	WorkingDirectory                        = "working-directory"
-	EnvironmentFile							= "env-file"
+	EnvironmentFile                         = "env-file"
 	PersistenceTypeMongo   PersistenceType  = "mongo"
 	RuntimeTypeKubernetes  RuntimeType      = "kubernetes"
 	NotificationTypeGitLab NotificationType = "gitlab"
