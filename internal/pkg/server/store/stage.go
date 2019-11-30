@@ -15,4 +15,6 @@ type Stage struct {
 
 type StageStore interface {
 	AddOrUpdate(stage Stage) error
+
+	Get(jobID shared.JobID) ([]Stage, error)
 }

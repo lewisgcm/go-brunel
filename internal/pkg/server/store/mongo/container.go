@@ -78,7 +78,7 @@ func (r *ContainerStore) UpdateStartedAtByContainerID(id shared.ContainerID, t t
 	return r.update(id, mongoContainerUpdate{StartedAt: &t})
 }
 
-func (r *ContainerStore) FilterByCreatedTimeAndJobID(i shared.JobID, t time.Time) ([]store.Container, error) {
+func (r *ContainerStore) FilterContainerLogByContainerIDFromTime(i shared.JobID, t time.Time) ([]store.Container, error) {
 	containers := []store.Container{}
 	jobID, err := primitive.ObjectIDFromHex(string(i))
 	if err != nil {

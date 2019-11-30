@@ -24,14 +24,26 @@ type LocalWorkSpace struct {
 }
 
 const (
-	pipelineFile   = ".brunel.jsonnet"
-	workspaceStage = "preparing"
+	pipelineFile = ".brunel.jsonnet"
+
+	preparingStageID  shared.StageID = "prepare"
+	cleaningUpStageID shared.StageID = "clean"
 )
 
 func (w *LocalWorkSpace) Prepare(event trigger.Event) (*shared.Spec, error) {
+	err := w.Recorder.RecordStageState(event.Job.ID, preparingStageID, shared.StageStateRunning)
+	if err != nil {
+		return nil, errors.Wrap(
+			err,
+			"error recording job state",
+		)
+	}
+
+	_ = w.Recorder.RecordLog(event.Job.ID, "preparing workspace", shared.LogTypeStdOut, preparingStageID)
+
 	progress := &util.LoggerWriter{
 		Recorder: func(log string) error {
-			return w.Recorder.RecordLog(event.Job.ID, log, shared.LogTypeStdOut, workspaceStage)
+			return w.Recorder.RecordLog(event.Job.ID, log, shared.LogTypeStdOut, preparingStageID)
 		},
 	}
 
@@ -43,12 +55,16 @@ func (w *LocalWorkSpace) Prepare(event trigger.Event) (*shared.Spec, error) {
 			Revision:      event.Job.Commit.Revision,
 			Progress:      progress,
 		}); err != nil {
+			e := w.Recorder.RecordStageState(event.Job.ID, preparingStageID, shared.StageStateError)
+
 			return nil, errors.Wrap(
-				util.ErrorAppend(err, progress.Close()),
+				util.ErrorAppend(err, util.ErrorAppend(progress.Close(), e)),
 				"error cloning repository",
 			)
 		}
 	}
+
+	_ = w.Recorder.RecordLog(event.Job.ID, "parsing specification", shared.LogTypeStdOut, preparingStageID)
 
 	p := parser.JsonnetParser{
 		WorkingDirectory: event.WorkDir,
@@ -63,14 +79,46 @@ func (w *LocalWorkSpace) Prepare(event trigger.Event) (*shared.Spec, error) {
 		err = errors.Wrap(err, "error parsing pipeline specification")
 	}
 
-	return spec, util.ErrorAppend(err, progress.Close())
+	if e := progress.Close(); e != nil {
+		err = util.ErrorAppend(err, e)
+	}
+
+	stageState := shared.StageStateSuccess
+	if err != nil {
+		stageState = shared.StageStateError
+	}
+
+	e := w.Recorder.RecordStageState(event.Job.ID, preparingStageID, stageState)
+	if e != nil {
+		err = util.ErrorAppend(err, e)
+	}
+
+	return spec, err
 }
 
 func (w *LocalWorkSpace) CleanUp(event trigger.Event) error {
+	err := w.Recorder.RecordStageState(event.Job.ID, cleaningUpStageID, shared.StageStateRunning)
+	if err != nil {
+		err = errors.Wrap(err, "error recording stage")
+	}
+
+	_ = w.Recorder.RecordLog(event.Job.ID, "cleaning workspace", shared.LogTypeStdOut, cleaningUpStageID)
+
 	if event.Job.Repository != trigger.LocalRepository {
 		if e := os.RemoveAll(event.WorkDir); e != nil {
-			return errors.Wrap(e, "error cleaning up workspace")
+			err = util.ErrorAppend(err, errors.Wrap(e, "error cleaning up workspace"))
 		}
 	}
+
+	stageState := shared.StageStateSuccess
+	if err != nil {
+		stageState = shared.StageStateError
+	}
+
+	e := w.Recorder.RecordStageState(event.Job.ID, cleaningUpStageID, stageState)
+	if e != nil {
+		err = util.ErrorAppend(err, errors.Wrap(e, "error recording stage"))
+	}
+
 	return nil
 }

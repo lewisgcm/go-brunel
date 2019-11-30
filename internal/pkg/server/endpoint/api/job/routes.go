@@ -15,6 +15,7 @@ import (
 type jobHandler struct {
 	jobStore       store.JobStore
 	logStore       store.LogStore
+	stageStore     store.StageStore
 	containerStore store.ContainerStore
 	jwtSerializer  security.TokenSerializer
 }
@@ -43,7 +44,14 @@ func (handler *jobHandler) progress(r *http.Request) (interface{}, int, error) {
 		Containers    []store.Container
 		Logs          []store.Log
 		ContainerLogs []store.ContainerLog
+		Stages        []store.Stage
 	}{}
+
+	s, err := handler.stageStore.Get(id)
+	if err != nil {
+		return api.InternalServerError(err, "error getting job stages")
+	}
+	details.Stages = s
 
 	// Read out containers with a matching job id
 	c, err := handler.containerStore.FilterByCreatedTimeAndJobID(id, since)
@@ -109,11 +117,13 @@ func Routes(
 	jobStore store.JobStore,
 	logStore store.LogStore,
 	containerStore store.ContainerStore,
+	stageStore store.StageStore,
 	jwtSerializer security.TokenSerializer,
 ) *chi.Mux {
 	handler := jobHandler{
 		jobStore:       jobStore,
 		logStore:       logStore,
+		stageStore:     stageStore,
 		containerStore: containerStore,
 		jwtSerializer:  jwtSerializer,
 	}
