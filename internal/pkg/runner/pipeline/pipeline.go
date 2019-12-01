@@ -115,7 +115,7 @@ func (pipeline *Pipeline) executeStage(context context.Context, jobID shared.Job
 							if regex != nil && regex.MatchString(logLine) {
 								stopWaiting <- true
 							}
-							return pipeline.Recorder.RecordContainerLog(containerID, logLine, shared.LogTypeStdOut)
+							return pipeline.Recorder.RecordContainerLog(containerID, logLine, shared.LogTypeStdErr)
 						},
 					},
 				)
@@ -172,7 +172,7 @@ func (pipeline *Pipeline) executeStage(context context.Context, jobID shared.Job
 				},
 				&util.LoggerWriter{
 					Recorder: func(log string) error {
-						return pipeline.Recorder.RecordContainerLog(containerID, log, shared.LogTypeStdOut)
+						return pipeline.Recorder.RecordContainerLog(containerID, log, shared.LogTypeStdErr)
 					},
 				},
 			)
