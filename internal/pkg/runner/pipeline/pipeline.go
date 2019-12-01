@@ -161,7 +161,7 @@ func (pipeline *Pipeline) executeStage(context context.Context, jobID shared.Job
 				return containerIDs, errors.Wrap(err, "error recording step container state")
 			}
 
-			// Get the logs from the container, THIS WILL BLOCK until the container stops, i.e it runs to completion
+			// FindAllByJobID the logs from the container, THIS WILL BLOCK until the container stops, i.e it runs to completion
 			err = pipeline.Runtime.CopyLogsForContainer(
 				context,
 				containerID,

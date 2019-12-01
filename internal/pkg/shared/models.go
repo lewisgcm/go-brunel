@@ -55,8 +55,7 @@ const (
 
 	// EmptyContainerID denotes an empty container ID, used in error returns
 	EmptyContainerID ContainerID = ""
-
-	EmptyStageID StageID = ""
+	EmptyStageID     StageID     = ""
 )
 
 // ContainerWaitCondition are used as conditions when waiting for a container

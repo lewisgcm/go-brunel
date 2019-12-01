@@ -34,7 +34,7 @@ func (r *StageStore) AddOrUpdate(stage store.Stage) error {
 	return errors.Wrap(err, "error adding or updating stage")
 }
 
-func (r *StageStore) Get(jobID shared.JobID) ([]store.Stage, error) {
+func (r *StageStore) FindAllByJobID(jobID shared.JobID) ([]store.Stage, error) {
 	stages := []store.Stage{}
 	decoder, err := r.
 		Database.

@@ -41,45 +41,87 @@ func (handler *jobHandler) progress(r *http.Request) (interface{}, int, error) {
 	}
 
 	details := struct {
-		Containers    []store.Container
-		Logs          []store.Log
-		ContainerLogs []store.ContainerLog
-		Stages        []store.Stage
+		Stages []struct {
+			store.Stage
+			Containers []struct {
+				store.Container
+				Logs []store.ContainerLog
+			}
+			Logs []store.Log
+		}
 	}{}
 
-	s, err := handler.stageStore.Get(id)
+	stages, err := handler.stageStore.FindAllByJobID(id)
 	if err != nil {
 		return api.InternalServerError(err, "error getting job stages")
 	}
-	details.Stages = s
 
 	// Read out containers with a matching job id
-	c, err := handler.containerStore.FilterByCreatedTimeAndJobID(id, since)
+	containers, err := handler.containerStore.FilterByJobID(id)
 	if err != nil {
 		if err == store.ErrorNotFound {
 			return api.NotFound()
 		}
 		return api.InternalServerError(err, "error getting job containers")
 	}
-	details.Containers = c
 
 	// Read our the job level logs with the
-	l, err := handler.logStore.FilterLogByJobIDFromTime(id, since)
+	logs, err := handler.logStore.FilterLogByJobIDFromTime(id, since)
 	if err != nil {
 		if err == store.ErrorNotFound {
 			return api.NotFound()
 		}
 		return api.InternalServerError(err, "error getting job logs")
 	}
-	details.Logs = l
 
-	// Read out the container level logs
-	for _, c := range details.Containers {
-		l, err := handler.logStore.FilterContainerLogByContainerIDFromTime(c.ContainerID, since)
-		if err != nil {
-			return api.InternalServerError(err, "error container logs")
+	// Map out out object for reading the UI
+	for _, stage := range stages {
+
+		var mappedContainers []struct {
+			store.Container
+			Logs []store.ContainerLog
 		}
-		details.ContainerLogs = append(details.ContainerLogs, l...)
+
+		for _, c := range containers {
+			if c.Meta.StageID != stage.ID {
+				continue
+			}
+
+			l, err := handler.logStore.FilterContainerLogByContainerIDFromTime(c.ContainerID, since)
+			if err != nil {
+				return api.InternalServerError(err, "error container logs")
+			}
+
+			mappedContainers = append(
+				mappedContainers,
+				struct {
+					store.Container
+					Logs []store.ContainerLog
+				}{Container: c, Logs: l},
+			)
+		}
+
+		var stageLogs []store.Log
+		for _, l := range logs {
+			if l.StageID == stage.ID {
+				stageLogs = append(stageLogs, l)
+			}
+		}
+
+		mappedStage := struct {
+			store.Stage
+			Containers []struct {
+				store.Container
+				Logs []store.ContainerLog
+			}
+			Logs []store.Log
+		}{
+			Stage:      stage,
+			Containers: mappedContainers,
+			Logs:       stageLogs,
+		}
+
+		details.Stages = append(details.Stages, mappedStage)
 	}
 
 	return details, http.StatusOK, nil

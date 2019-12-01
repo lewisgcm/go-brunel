@@ -78,7 +78,7 @@ func (r *ContainerStore) UpdateStartedAtByContainerID(id shared.ContainerID, t t
 	return r.update(id, mongoContainerUpdate{StartedAt: &t})
 }
 
-func (r *ContainerStore) FilterContainerLogByContainerIDFromTime(i shared.JobID, t time.Time) ([]store.Container, error) {
+func (r *ContainerStore) FilterByJobID(i shared.JobID) ([]store.Container, error) {
 	containers := []store.Container{}
 	jobID, err := primitive.ObjectIDFromHex(string(i))
 	if err != nil {
@@ -91,7 +91,7 @@ func (r *ContainerStore) FilterContainerLogByContainerIDFromTime(i shared.JobID,
 		Aggregate(
 			context.Background(),
 			[]bson.M{
-				{"$match": bson.M{"job_id": jobID, "created_at": bson.M{"$gte": primitive.DateTime(t.Unix())}}},
+				{"$match": bson.M{"job_id": jobID}},
 				{"$sort": bson.M{"created_at": 1}},
 			},
 		)

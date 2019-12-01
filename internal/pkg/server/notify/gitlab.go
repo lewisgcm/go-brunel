@@ -19,7 +19,7 @@ func (notify *GitLabNotify) Notify(id shared.JobID) error {
 	// client := &http.Client{}
 	// stateText := "pending"
 
-	//job, err := notify.Repository.Get(id)
+	//job, err := notify.Repository.FindAllByJobID(id)
 	//if err != nil {
 	//	return errors.Wrap(err, "error getting job")
 	//}

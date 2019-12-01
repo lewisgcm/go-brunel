@@ -26,5 +26,5 @@ type ContainerStore interface {
 
 	UpdateStartedAtByContainerID(id shared.ContainerID, t time.Time) error
 
-	FilterByCreatedTimeAndJobID(jobID shared.JobID, t time.Time) ([]Container, error)
+	FilterByJobID(jobID shared.JobID) ([]Container, error)
 }
