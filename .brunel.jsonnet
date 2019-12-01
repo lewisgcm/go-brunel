@@ -35,7 +35,7 @@
                     },
                     working_dir: "/workspace/src/go-brunel",
                     entrypoint: "sh",
-                    args: [ "-c", "--", "for i in $(seq 1 10); do echo $i; sleep 1; done; cat asdasdasdasd" ]
+                    args: [ "-c", "--", "for i in $(seq 1 10); do echo $i; sleep 1; done; echo 'sdasd' > /dev/stderr; cat asdasd;" ]
                 },
                 {
                     image: "byrnedo/alpine-curl",
