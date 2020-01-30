@@ -17,6 +17,7 @@ import (
 	"go-brunel/internal/pkg/server/endpoint/remote"
 	"go-brunel/internal/pkg/shared"
 	"net/http"
+	"os"
 
 	log "github.com/Sirupsen/logrus"
 
@@ -26,6 +27,19 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
+
+func FileServer(router *chi.Mux) {
+	root := "./web"
+	fs := http.FileServer(http.Dir(root))
+
+	router.Get("/*", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := os.Stat(root + r.RequestURI); os.IsNotExist(err) {
+			http.StripPrefix(r.RequestURI, fs).ServeHTTP(w, r)
+		} else {
+			fs.ServeHTTP(w, r)
+		}
+	})
+}
 
 func main() {
 	flag.String(shared.ConfigFile, "", "configuration file for the server")
@@ -126,6 +140,7 @@ func main() {
 	router.Mount("/api/job", job.Routes(jobStore, logStore, containerStore, stageStore, jwtSerializer))
 	router.Mount("/api/container", container.Routes(logStore, jwtSerializer))
 	router.Mount("/api/user", user.Routes(userStore, oauths, jwtSerializer))
+	FileServer(router)
 
 	walkFunc := func(method string, route string, handler http.Handler, middleware ...func(http.Handler) http.Handler) error {
 		log.Info("registering route: ", method, " ", route)
