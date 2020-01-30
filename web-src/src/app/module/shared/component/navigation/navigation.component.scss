@@ -1,0 +1,26 @@
+.avatar {
+    height: inherit;
+    white-space: nowrap;
+    height: 48px;
+    line-height: 48px;
+    margin-right: -10px;
+}
+
+.avatar > span {
+    display: inline-block;
+    height: 100%;
+    vertical-align: middle;
+}
+
+img {
+    max-width: 80%;
+    max-height: 80%;
+    vertical-align: middle;
+    border-radius: 50%;
+}
+
+.username {
+    display: inline-block;
+    font-size: 0.7em;
+    padding-right: 15px;
+}

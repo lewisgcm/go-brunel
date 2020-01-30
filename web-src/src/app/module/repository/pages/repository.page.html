@@ -1,0 +1,11 @@
+<div class="container">
+    <app-repository-list (search)="onSearch($event)"
+        (repositorySelect)="onSelect($event.ID)"
+        [repositories]="repositories"
+        [loading]="searchLoading" >
+    </app-repository-list>
+    <app-repository-detail *ngIf="selectedRepository"
+        [repository]="selectedRepository"
+        (jobSelect)="onJobSelect($event)" >
+    </app-repository-detail>
+</div>

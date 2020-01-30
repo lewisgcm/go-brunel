@@ -1,0 +1,134 @@
+@import '../../../../../mixins';
+
+.default-stage {
+    fill: lightgrey;
+}
+
+line {
+    stroke: lightslategrey;
+    stroke-width: 5;
+}
+
+.stage {
+    fill: #3f51b5;
+    stroke-width: 2px;
+    stroke: #2a3577;
+    cursor: pointer;
+
+    &.error {
+        fill: #b53f3f;
+        stroke: darkred;
+    }
+
+    &.running {
+        fill: lightgrey;
+        stroke: darkgray;
+    }
+
+    span.duration {
+        float: right;
+        padding-right: 15px;
+    }
+}
+
+.stage:hover {
+    stroke-width: 5px;
+}
+
+.containers {
+    margin: 0;
+}
+
+.logs {
+    margin: 0;
+    list-style: none;
+    background-color: black;
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+    background-image: none !important;
+}
+
+ul.stages {
+    padding: 0;
+    list-style-type: none;
+    background: black;
+    color: white;
+    margin: 0;
+    font-weight: normal;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+ul.stages > li {
+    background-color: #2a3577;
+
+    &.error {
+        background-color: #b53f3f;
+    }
+
+    a.stage {
+        @include disable-selection;
+        display: block;
+        width: 100%;
+        padding: 15px 0;
+        border-bottom: 5px solid white;
+
+        mat-icon {
+            vertical-align: middle;
+        }
+    }
+
+    ul.containers {
+        border-bottom: 5px solid white;
+    }
+}
+
+ul.stages > li:nth-child(even) {
+    background-color: #3f51b5;
+
+    &.error {
+        background-color: #772a2a;
+    }
+}
+
+.container-logs {
+    @extend .logs;
+}
+
+ul.tree,
+ul.tree > ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+ul.tree > ul {
+    margin-left: 10px;
+}
+
+$tree-line-color: white;
+
+ul.tree > li {
+    margin: 0 11px;
+    padding: 0 7px;
+    border-left: 1px solid $tree-line-color;
+}
+
+ul.tree > li:last-child {
+    border-left: none;
+}
+
+ul.tree > li:before {
+    position: relative;
+    top: -0.3em;
+    height: 1em;
+    width: 12px;
+    color: white;
+    border-bottom: 1px solid $tree-line-color;
+    content: "";
+    display: inline-block;
+    left: -7px;
+}
+
+ul.tree > li:last-child:before {
+    border-left: 1px solid $tree-line-color;
+}

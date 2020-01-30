@@ -1,0 +1,42 @@
+<mat-form-field>
+    <input matInput placeholder="Filter by branch, revision or user" (keyup)="filterSubject.next($event.target.value)">
+</mat-form-field>
+
+<mat-progress-bar *ngIf="loading" mode="query"></mat-progress-bar>
+<div class="progress-space" *ngIf="!loading"></div>
+
+<table mat-table [dataSource]="data?.Jobs" class="mat-elevation-z8" matSort matSortActive="created_at" matSortDirection="desc" matSortDisableClear>
+    <ng-container matColumnDef="state">
+        <th mat-header-cell *matHeaderCellDef style="width: 70px;" mat-sort-header> State. </th>
+        <td mat-cell *matCellDef="let element">
+            <span [class]="stateColor(element)" [matTooltip]="state(element)">
+                <mat-icon>{{stateIcon(element)}}</mat-icon>
+            </span>
+        </td>
+    </ng-container>
+
+    <ng-container matColumnDef="branch">
+        <th mat-header-cell *matHeaderCellDef> Branch. </th>
+        <td mat-cell *matCellDef="let element">{{element.Commit.Branch}}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="created_at">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Created. </th>
+        <td mat-cell *matCellDef="let element">{{element.CreatedAt}}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="duration">
+        <th mat-header-cell *matHeaderCellDef> Duration. </th>
+        <td mat-cell *matCellDef="let element">{{element.Duration}}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="started_by">
+        <th mat-header-cell *matHeaderCellDef> Started By. </th>
+        <td mat-cell *matCellDef="let element">{{element.StartedBy}}</td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="onClick(row)"></tr>
+</table>
+
+<mat-paginator [pageSizeOptions]="[5, 10, 20]" [length]="data?.Count" showFirstLastButtons></mat-paginator>
