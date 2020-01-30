@@ -22,6 +22,8 @@ FROM alpine:3.9.5
 RUN mkdir -p /opt/brunel/web/ && \
     apk add --no-cache libc6-compat
 
+WORKDIR /opt/brunel/
+
 COPY --from=build-go /app/server /opt/brunel/server
 COPY --from=build-node /web/dist/* /opt/brunel/web/
 
