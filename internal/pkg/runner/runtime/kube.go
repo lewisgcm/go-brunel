@@ -302,7 +302,7 @@ func (pipeline *KubeRuntime) DispatchContainer(context context.Context, jobID sh
 			corev1.VolumeMount{
 				Name:      "workspace",
 				MountPath: container.WorkingDir,
-				SubPath:   safeJobID(jobID),
+				SubPath:   string(jobID),
 			},
 		)
 	}

@@ -88,7 +88,7 @@ type Container struct {
 	Hostname    string
 	EntryPoint  string
 	Args        []string
-	WorkingDir  string `yaml:"working_dir"`
+	WorkingDir  string
 	Privileged  bool
 	Resources   *ContainerResources
 	Wait        *WaitFor

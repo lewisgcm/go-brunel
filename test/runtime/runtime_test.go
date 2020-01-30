@@ -118,7 +118,7 @@ func TestSimpleContainerFailure(t *testing.T) {
 			t.Error("expecting error when waiting for faulty container")
 		}
 
-		// Get our stdout and stderr and make sure they match the values we echoed in in the container
+		// FindAllByJobID our stdout and stderr and make sure they match the values we echoed in in the container
 		// Args section. We use our mock writer, that is basically just a string writer with a noop close
 		var stdOut strings.Builder
 		var stdErr strings.Builder
@@ -200,7 +200,7 @@ func TestContainerWait(t *testing.T) {
 			t.Error("error returned when waiting for either running or stopped", err)
 		}
 
-		// Get our stdout and stderr and make sure they match the values we echoed in in the container
+		// FindAllByJobID our stdout and stderr and make sure they match the values we echoed in in the container
 		// Args section. We use our mock writer, that is basically just a string writer with a noop close
 		var stdOut strings.Builder
 		var stdErr strings.Builder
