@@ -1,2 +1,7 @@
-vendor/runner.yaml
+runner.yaml
 server.yaml
+bin
+runner
+cover.out
+.vscode
+.idea
