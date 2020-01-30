@@ -1,6 +1,10 @@
 web-src/node_modules
 web
+runner.yaml
+server.yaml
 bin
 runner
 server
 cover.out
+.vscode
+.idea

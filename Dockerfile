@@ -27,4 +27,4 @@ WORKDIR /opt/brunel/
 COPY --from=build-go /app/server /opt/brunel/server
 COPY --from=build-node /web/dist/* /opt/brunel/web/
 
-CMD [ "/opt/brunel/server" ]
+ENTRYPOINT [ "/opt/brunel/server" ]
