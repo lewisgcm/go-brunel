@@ -18,7 +18,7 @@ run-server:
 	go run cmd/server.go --config-file ./server.yaml
 
 run-runner-local:
-	go run cmd/runner.go --config-file ./runner-kube-local.yaml
+	go run cmd/runner.go --config-file ./runner.yaml
 
 cover:
 	go test -coverprofile cover.out go-brunel/internal...
