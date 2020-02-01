@@ -1,11 +1,12 @@
 # Build node app
 FROM node:12.14.1-alpine as build-node
 
-COPY ./web-src /web
+COPY ./web-src /web-src
 
-RUN cd /web && \
-	npm install && \
-	npm run build -- --prod --output-path="/web/dist"
+RUN cd /web-src && \
+    apk add --no-cache python make g++ && \
+	npm ci && \
+	npm run build
 
 # Golang build
 FROM golang:1.13.7-buster as build-go
@@ -25,6 +26,6 @@ RUN mkdir -p /opt/brunel/web/ && \
 WORKDIR /opt/brunel/
 
 COPY --from=build-go /app/server /opt/brunel/server
-COPY --from=build-node /web/dist/* /opt/brunel/web/
+COPY --from=build-node /web-src/build/* /opt/brunel/web/
 
 ENTRYPOINT [ "/opt/brunel/server" ]

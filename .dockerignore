@@ -1,4 +1,5 @@
 web-src/node_modules
+web-src/build
 web
 runner.yaml
 server.yaml
