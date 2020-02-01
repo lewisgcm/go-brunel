@@ -5,6 +5,7 @@ import (
 	"go-brunel/internal/pkg/server/security"
 	"go-brunel/internal/pkg/server/store"
 	"go-brunel/internal/pkg/shared"
+	"log"
 	"net/http"
 	"time"
 
@@ -16,18 +17,23 @@ type jobHandler struct {
 	jwtSerializer security.TokenSerializer
 }
 
-func (handler *jobHandler) logs(r *http.Request) (interface{}, int, error) {
+func (handler *jobHandler) logs(w http.ResponseWriter,  r *http.Request) {
 	id := shared.ContainerID(chi.URLParam(r, "id"))
 	since, err := api.ParseQueryTime(r, "since", false, time.Time{})
 	if err != nil {
-		return api.BadRequest(err, "invalid 'since' query parameter")
+		log.Println("error parsing since time", err)
+		return
 	}
 
 	logs, err := handler.logStore.FilterContainerLogByContainerIDFromTime(id, since)
 	if err != nil {
-		return api.InternalServerError(err, "error getting container logs")
+		log.Println("error querying container logs", err)
 	}
-	return logs, http.StatusOK, nil
+
+	for _, i := range logs {
+		w.Write([]byte(i.Message))
+		w.Write([]byte("\n"))
+	}
 }
 
 func Routes(repository store.LogStore, jwtSerializer security.TokenSerializer) *chi.Mux {
@@ -36,6 +42,6 @@ func Routes(repository store.LogStore, jwtSerializer security.TokenSerializer) *
 		jwtSerializer: jwtSerializer,
 	}
 	router := chi.NewRouter()
-	router.Get("/{id}/logs", api.Handle(handler.logs))
+	router.Get("/{id}/logs", handler.logs)
 	return router
 }

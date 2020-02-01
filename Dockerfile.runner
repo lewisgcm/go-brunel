@@ -1,0 +1,20 @@
+# Golang build
+FROM golang:1.13.7-buster as build-go
+
+COPY . /app
+
+RUN cd /app && \
+    go get -d -v ./... && \
+    go build cmd/runner.go
+
+# All together now :)
+FROM alpine:3.9.5
+
+RUN mkdir -p /opt/brunel/ && \
+    apk add --no-cache libc6-compat
+
+WORKDIR /opt/brunel/
+
+COPY --from=build-go /app/runner /opt/brunel/runner
+
+ENTRYPOINT [ "/opt/brunel/runner" ]

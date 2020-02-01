@@ -47,8 +47,7 @@ func (handler *authHandler) oAuthComplete(w http.ResponseWriter, user goth.User)
 	// TODO this could be nicer: https://stackoverflow.com/questions/9153445/how-to-communicate-between-iframe-and-the-parent-site
 	if _, err := fmt.Fprintf(
 		w,
-		`<html><head></head><body><script>localStorage.setItem('%s', "%s"); window.location.href = '/';</script></body></html>`,
-		localStorageJwtKey,
+		`<html><head></head><body><script>window.opener.postMessage({token: '%s'}, '*');</script></body></html>`,
 		token,
 	); err != nil {
 		log.Error("error occurred attempting to write jwt to client ", err)
