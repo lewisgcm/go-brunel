@@ -1,11 +1,11 @@
 import React, {useState, useEffect} from 'react';
-
-import {withDependency} from '../../container';
-import {RepositoryJobsComponent} from './RepositoryJobsComponent';
-import {RepositoryService, RepositoryJobPage} from '../../services';
 import {match} from 'react-router';
-import {tap, delay, debounceTime, switchMap} from 'rxjs/operators';
 import {BehaviorSubject} from 'rxjs';
+import {tap, delay, debounceTime, switchMap} from 'rxjs/operators';
+
+import {withDependency} from '../../../container';
+import {RepositoryJobsComponent} from '../components/RepositoryJobsComponent';
+import {RepositoryService, RepositoryJobPage} from '../../../services';
 
 interface Props {
 	match: match<{ repositoryId: string }>;

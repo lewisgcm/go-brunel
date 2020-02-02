@@ -11,7 +11,7 @@ import {
 	createStyles,
 } from '@material-ui/core/styles';
 
-import {CurrentUser} from './CurrentUser';
+import {CurrentUser} from '../containers/CurrentUser';
 
 const useStyles = makeStyles((theme: Theme) =>
 	createStyles({

@@ -78,6 +78,34 @@ func (r *ContainerStore) UpdateStartedAtByContainerID(id shared.ContainerID, t t
 	return r.update(id, mongoContainerUpdate{StartedAt: &t})
 }
 
+func (r *ContainerStore) GetContainerState(id shared.ContainerID) (*shared.ContainerState, error) {
+	decoder, err := r.
+		Database.
+		Collection(jobContainerCollectionName).
+		Aggregate(
+			context.Background(),
+			[]bson.M{
+				{"$match": bson.M{"container_id": id}},
+			},
+		)
+	if err != nil {
+		return nil, errors.Wrap(err, "error getting container state")
+	}
+
+	for decoder.Next(context.Background()) {
+		var c mongoContainer
+		err = decoder.Decode(&c)
+		if err != nil {
+			return nil, errors.Wrap(err, "error decoding container")
+		}
+		c.Container.ID = c.ID.Hex()
+		c.Container.JobID = shared.JobID(c.JobID.Hex())
+
+		return &c.Container.State, nil
+	}
+	return nil, errors.New("could not find container")
+}
+
 func (r *ContainerStore) FilterByJobID(i shared.JobID) ([]store.Container, error) {
 	containers := []store.Container{}
 	jobID, err := primitive.ObjectIDFromHex(string(i))

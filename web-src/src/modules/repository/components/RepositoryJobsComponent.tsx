@@ -15,7 +15,6 @@ import {
 	TableCell,
 	TableBody,
 	LinearProgress,
-	CircularProgress,
 	Icon,
 	TableHead,
 	TableSortLabel,
@@ -25,7 +24,8 @@ import {
 import {
 	RepositoryJobPage,
 	JobState, RepositoryJob,
-} from '../../services';
+} from '../../../services';
+import {useHistory} from "react-router";
 
 interface Props {
     isLoading: boolean;
@@ -40,6 +40,7 @@ interface Props {
     onRowsPerPageChange: (rowsPerPage: number) => void;
     onSearch: (term: string) => void;
 }
+
 const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
 		sort: {
@@ -73,14 +74,30 @@ const useStyles = makeStyles((theme: Theme) =>
 			width: '100%',
 			paddingBottom: theme.spacing(3),
 		},
+        '@keyframes spinRound': {
+            from: {
+                transform: 'rotate(0deg)',
+            },
+            to: {
+                transform: 'rotate(360deg)',
+            }
+        },
+        inProgress: {
+            color: theme.palette.grey.A200,
+            position: 'relative',
+            top: 3,
+            animation: '$spinRound 2s linear infinite',
+        }
 	}),
 );
 
-function jobStatus(state: JobState): React.ReactNode {
+function jobStatus(classes: any, state: JobState): React.ReactNode {
 	switch (state) {
 	case JobState.Processing:
 	case JobState.Waiting:
-		return <CircularProgress size={24} thickness={4} />;
+		return <Tooltip title={'In Progress'}>
+            <Icon className={classes.inProgress}>loop</Icon>
+		</Tooltip>;
 	case JobState.Failed:
 		return <Icon color="error">error</Icon>;
 	case JobState.Cancelled:
@@ -94,7 +111,7 @@ function jobStatus(state: JobState): React.ReactNode {
 }
 
 function duration(job: RepositoryJob): string {
-	if ( job.StartedAt && job.StoppedAt ) {
+	if (job.StartedAt && job.StoppedAt) {
 		return moment
 			.duration(moment(job.StoppedAt).diff(moment(job.StartedAt))).humanize();
 	}
@@ -117,6 +134,7 @@ export function RepositoryJobsComponent(
 	}: Props,
 ) {
 	const classes = useStyles();
+	const history = useHistory();
 
 	return (
 		<div>
@@ -160,10 +178,11 @@ export function RepositoryJobsComponent(
 								return (
 									<TableRow
 										hover
-										// onClick={event => handleClick(event, row.name)}
+										onClick={() => history.push(`/job/${job.ID}`)}
 										key={job.ID}
+                                        style={{cursor: 'pointer'}}
 									>
-										<TableCell align="center">{jobStatus(job.State)}</TableCell>
+										<TableCell align="center">{jobStatus(classes, job.State)}</TableCell>
 										<TableCell align="left">
 											{job.Commit.Branch.replace('refs/heads/', '')}
 										</TableCell>

@@ -138,7 +138,7 @@ func main() {
 	router.Mount("/api/hook", hook.Routes(jobStore, repositoryStore, notifier))
 	router.Mount("/api/repository", repository.Routes(repositoryStore, jobStore))
 	router.Mount("/api/job", job.Routes(jobStore, logStore, containerStore, stageStore, jwtSerializer))
-	router.Mount("/api/container", container.Routes(logStore, jwtSerializer))
+	router.Mount("/api/container", container.Routes(logStore, containerStore, jwtSerializer))
 	router.Mount("/api/user", user.Routes(userStore, oauths, jwtSerializer))
 	FileServer(router)
 

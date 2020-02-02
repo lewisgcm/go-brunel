@@ -6,8 +6,6 @@ interface Props extends RouteProps {
 }
 
 export const ProtectedRoute = ({isAuthenticated, ...props}: Props) => {
-	return isAuthenticated ?
-		<Route {...props} /> :
-		<Redirect to={'/user/login'} />;
+	return isAuthenticated ? <Route {...props} /> : <Redirect to={'/'} />;
 };
 

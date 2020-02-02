@@ -97,7 +97,7 @@ func (handler *jobHandler) progress(r *http.Request) (interface{}, int, error) {
 				struct {
 					store.Container
 					Logs []store.ContainerLog
-				}{Container: c, Logs: l},
+				}{Container: c},
 			)
 		}
 

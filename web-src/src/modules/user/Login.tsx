@@ -7,8 +7,7 @@ import {FaGitlab, FaGithub} from 'react-icons/fa';
 
 import {withDependency} from '../../container';
 import {AuthService} from '../../services';
-import {OAuthPopup} from '../layout/OAuthPopup';
-import {setAuthenticated} from '../layout';
+import {setAuthenticated, OAuthPopup} from '../layout';
 
 interface Props {
 	setLoggedIn: () => void;

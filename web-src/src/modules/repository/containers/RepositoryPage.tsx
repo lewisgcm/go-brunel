@@ -3,11 +3,11 @@ import {match, useHistory} from 'react-router';
 import {BehaviorSubject} from 'rxjs';
 import {debounceTime, switchMap, tap} from 'rxjs/operators';
 
+import {Drawer} from '../../layout';
 import {RepositoryJobs} from './RepositoryJobs';
-import {Drawer} from '../layout/Drawer';
-import {withDependency} from '../../container';
-import {Repository, RepositoryService} from '../../services';
-import {RepositoryListComponent} from './RepositoryListComponent';
+import {withDependency} from '../../../container';
+import {Repository, RepositoryService} from '../../../services';
+import {RepositoryListComponent} from '../components/RepositoryListComponent';
 
 interface Props {
 	match: match<{repositoryId: string}>;

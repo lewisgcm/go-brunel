@@ -22,6 +22,8 @@ type ContainerStore interface {
 
 	UpdateStateByContainerID(id shared.ContainerID, state shared.ContainerState) error
 
+	GetContainerState(id shared.ContainerID) (*shared.ContainerState, error)
+
 	UpdateStoppedAtByContainerID(id shared.ContainerID, time time.Time) error
 
 	UpdateStartedAtByContainerID(id shared.ContainerID, t time.Time) error

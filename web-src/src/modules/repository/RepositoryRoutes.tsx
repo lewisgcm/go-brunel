@@ -1,7 +1,7 @@
 import React from 'react';
 import {Route, match} from 'react-router-dom';
 
-import {RepositoryPage} from './RepositoryPage';
+import {RepositoryPage} from './containers/RepositoryPage';
 
 interface Props {
 	match: match;

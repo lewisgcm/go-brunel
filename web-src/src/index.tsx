@@ -5,17 +5,19 @@ import {Provider} from 'react-redux';
 import {Container} from 'inversify';
 
 import App from './App';
-import {DependencyProvider} from './container';
-import {AuthService, RepositoryService, UserService} from './services';
 import {store} from './store';
+import {DependencyProvider} from './container';
+import {AuthService, JobService, RepositoryService, UserService} from './services';
 import {setAuthenticated} from './modules/layout';
 
 const container = new Container();
-
 const authService = new AuthService();
+
 container.bind(AuthService).toConstantValue(authService);
 container.bind(RepositoryService).toSelf();
 container.bind(UserService).toSelf();
+container.bind(JobService).toSelf();
+
 store.dispatch(setAuthenticated(authService.isAuthenticated()))
 
 ReactDOM.render(

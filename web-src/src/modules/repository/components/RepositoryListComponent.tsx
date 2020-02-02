@@ -16,7 +16,7 @@ import {
 
 import {Link} from 'react-router-dom';
 
-import {Repository} from '../../services';
+import {Repository} from '../../../services';
 
 const useStyles = makeStyles((theme: Theme) =>
 	createStyles({

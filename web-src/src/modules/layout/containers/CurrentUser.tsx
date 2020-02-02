@@ -10,9 +10,9 @@ import {
 import MoreIcon from '@material-ui/icons/MoreVert';
 import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
 
-import {withDependency} from '../../container';
-import {AuthService, UserService} from '../../services';
-import {setAuthenticated} from './actions';
+import {withDependency} from '../../../container';
+import {AuthService, UserService} from '../../../services';
+import {setAuthenticated} from '../actions';
 
 interface Dependencies {
 	authService: AuthService;

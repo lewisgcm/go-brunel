@@ -1,12 +1,11 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import {Route} from 'react-router';
-import {Layout, State} from './modules/layout';
+import {Redirect, Route} from 'react-router';
 import {BrowserRouter, Switch} from 'react-router-dom';
 
+import {JobRoutes} from "./modules/job";
 import {RepositoryRoutes} from './modules/repository';
-import {ProtectedRoute} from './modules/layout/ProtectedRoute';
-import {getAuthenticated} from './modules/layout/selectors';
+import {getAuthenticated, ProtectedRoute, Layout, State} from './modules/layout';
 import {Login} from './modules/user/Login';
 
 require('./App.css');
@@ -22,7 +21,12 @@ export default connect(
 					<ProtectedRoute isAuthenticated={isAuthenticated}
 						path='/repository'
 						component={RepositoryRoutes} />
+                    <ProtectedRoute isAuthenticated={isAuthenticated}
+                                    path='/job'
+                                    component={JobRoutes} />
 					<Route path={'/user/login'} component={Login} exact/>
+                    {!isAuthenticated && <Redirect to={'/user/login'} />}
+                    {isAuthenticated && <Redirect to={'/repository'} />}
 				</Switch>
 			</Layout>
 		</BrowserRouter>
