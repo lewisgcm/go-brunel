@@ -52,11 +52,17 @@ export interface Stage {
     StoppedAt: string;
 }
 
+export enum ContainerState {
+	Starting = 0,
+	Running = 1,
+	Stopped = 2,
+}
+
 export interface Container {
     ID: string;
     JobID: string;
     ContainerID: string;
-    State: number;
+    State: ContainerState;
     Meta: {
         StageID: string;
         Service: boolean;
@@ -196,94 +202,99 @@ const LAST_STAGE_ID = 'clean';
 
 @injectable()
 export class JobService {
-    constructor(private _authService: AuthService) { }
+	constructor(private _authService: AuthService) { }
 
-    public get(id: string): Observable<Job> {
-        return from(fetch(
-            `/api/job/${id}`,
-            {headers: this._authService.getAuthHeaders()},
-        )).pipe(
-            switchMap((response) => response.json()),
-        );
-    }
+	public get(id: string): Observable<Job> {
+		return from(fetch(
+			`/api/job/${id}`,
+			{headers: this._authService.getAuthHeaders()},
+		)).pipe(
+			switchMap((response) => response.json()),
+		);
+	}
 
-    public containerLogs(containerId: string): Observable<string> {
-        return from(fetch(
-            `/api/container/${containerId}/logs`,
-            {headers: this._authService.getAuthHeaders()},
-        )).pipe(
-            switchMap((response) => response.text()),
-        );
-    }
+	public containerLogs(containerId: string): Observable<string> {
+		return from(fetch(
+			`/api/container/${containerId}/logs`,
+			{headers: this._authService.getAuthHeaders()},
+		)).pipe(
+			switchMap((response) => response.text()),
+		);
+	}
 
-    public progress(id: string): Observable<JobProgress> {
-        return timer(0, POLL_INTERVAL_MS).pipe(
-            map(
-                (i) => {
-                    // Get everything from the start of time on first poll
-                    if (i === 0) {
-                        return 0;
-                    } else {
-                        // Otherwise only get things since our last poll
-                        return (Date.now() - POLL_INTERVAL_MS);
-                    }
-                },
-            ),
-            switchMap(
-                (since) => from(fetch(
-                    `/api/job/${id}/progress?since=${since}`,
-                    {
-                        headers: this._authService.getAuthHeaders(),
-                    }
-                )).pipe(
-                    switchMap((response) => response.json()),
-                )
-            ),
-            scan(
-                (accumulated: JobProgress, current: JobProgress) => {
-                    if (accumulated === null) {
-                        return current;
-                    }
+	public progress(id: string): Observable<JobProgress> {
+		return timer(0, POLL_INTERVAL_MS).pipe(
+			map(
+				(i) => {
+					// Get everything from the start of time on first poll
+					if (i === 0) {
+						return 0;
+					} else {
+						// Otherwise only get things since our last poll
+						return (Date.now() - POLL_INTERVAL_MS);
+					}
+				},
+			),
+			switchMap(
+				(since) => from(fetch(
+					`/api/job/${id}/progress?since=${since}`,
+					{
+						headers: this._authService.getAuthHeaders(),
+					},
+				)).pipe(
+					switchMap((response) => response.json()),
+				),
+			),
+			scan(
+				(accumulated: JobProgress, current: JobProgress) => {
+					if (accumulated === null) {
+						return current;
+					}
 
-                    current.Stages.forEach(
-                        (stage) => {
-                            let oldStage = accumulated.Stages
-                                .find(s => s.ID === stage.ID);
+					if (!current.Stages) {
+						current.Stages = [];
+					}
 
-                            if (oldStage) {
-                                stage.Logs = (oldStage.Logs || []).concat(stage.Logs);
+					current.Stages.forEach(
+						(stage) => {
+							const oldStage = accumulated.Stages
+								.find((s) => s.ID === stage.ID);
 
-                                (stage.Containers || []).forEach(
-                                    (container) => {
-                                        if (oldStage) {
-                                            let oldContainer = (oldStage.Containers || [])
-                                                .find(c => c.ID === container.ID);
+							stage.Logs = stage.Logs || [];
 
-                                            if (oldContainer) {
-                                                container.Logs = oldContainer.Logs.concat(container.Logs);
-                                            }
-                                        }
-                                    }
-                                );
-                            }
-                        }
-                    );
+							if (oldStage) {
+								stage.Logs = (oldStage.Logs || []).concat(stage.Logs);
 
-                    return current;
-                },
-                {
-                    Stages: []
-                }
-            ),
-            takeWhile(
-                (progress: JobProgress, index) => {
-                    const finalStage = progress
-                        .Stages
-                        .find(s => s.ID === LAST_STAGE_ID);
+								(stage.Containers || []).forEach(
+									(container) => {
+										if (oldStage) {
+											const oldContainer = (oldStage.Containers || [])
+												.find((c) => c.ID === container.ID);
 
-                    return index === 0 || !(finalStage && finalStage.State > StageState.Running);
-                }
-            ),
-        );
-    }
+											if (oldContainer) {
+												container.Logs = oldContainer.Logs.concat(container.Logs);
+											}
+										}
+									},
+								);
+							}
+						},
+					);
+
+					return current;
+				},
+				{
+					Stages: [],
+				},
+			),
+			takeWhile(
+				(progress: JobProgress, index) => {
+					const finalStage = progress.Stages
+						.find((s) => s.ID === LAST_STAGE_ID);
+
+					return index === 0 || !(finalStage && finalStage.State > StageState.Running);
+				},
+			),
+		);
+	}
 }

@@ -25,7 +25,7 @@ import {
 	RepositoryJobPage,
 	JobState, RepositoryJob,
 } from '../../../services';
-import {useHistory} from "react-router";
+import {useHistory} from 'react-router';
 
 interface Props {
     isLoading: boolean;
@@ -43,26 +43,26 @@ interface Props {
 
 const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
-		sort: {
+		'sort': {
 			'& .MuiTableSortLabel-icon': {
 				opacity: 0,
 				fontSize: '1.3em',
 				fontWeight: 'bold',
 			},
 		},
-		duration: {
+		'duration': {
 			width: '10em',
 		},
-		hidden: {
+		'hidden': {
 			visibility: 'hidden',
 		},
-		headerRow: {
+		'headerRow': {
 			'& .MuiTableCell-root': {
 				fontSize: `12px`,
 				opacity: 0.7,
 			},
 		},
-		footer: {
+		'footer': {
 			'fontSize': '12px !important',
 			'opacity': 0.9,
 			'& .MuiTypography-root': {
@@ -70,24 +70,24 @@ const useStyles = makeStyles((theme: Theme) =>
 				opacity: 0.9,
 			},
 		},
-		search: {
+		'search': {
 			width: '100%',
 			paddingBottom: theme.spacing(3),
 		},
-        '@keyframes spinRound': {
-            from: {
-                transform: 'rotate(0deg)',
-            },
-            to: {
-                transform: 'rotate(360deg)',
-            }
-        },
-        inProgress: {
-            color: theme.palette.grey.A200,
-            position: 'relative',
-            top: 3,
-            animation: '$spinRound 2s linear infinite',
-        }
+		'@keyframes spinRound': {
+			from: {
+				transform: 'rotate(0deg)',
+			},
+			to: {
+				transform: 'rotate(360deg)',
+			},
+		},
+		'inProgress': {
+			color: theme.palette.grey.A200,
+			position: 'relative',
+			top: 3,
+			animation: '$spinRound 2s linear infinite',
+		},
 	}),
 );
 
@@ -96,12 +96,16 @@ function jobStatus(classes: any, state: JobState): React.ReactNode {
 	case JobState.Processing:
 	case JobState.Waiting:
 		return <Tooltip title={'In Progress'}>
-            <Icon className={classes.inProgress}>loop</Icon>
+			<Icon className={classes.inProgress}>loop</Icon>
 		</Tooltip>;
 	case JobState.Failed:
-		return <Icon color="error">error</Icon>;
+		return <Tooltip title={'Failed'}>
+			<Icon color="error">error</Icon>
+		</Tooltip>;
 	case JobState.Cancelled:
-		return <Icon color="secondary">cancel</Icon>;
+		return <Tooltip title={'Cancelled'}>
+			<Icon color="secondary">cancel</Icon>
+		</Tooltip>;
 	case JobState.Success:
 		return <Tooltip title={'Success'}><Icon color="primary"
 					 style={{color: 'rgb(0, 100, 0)', position: 'relative', top: 3}} >
@@ -180,7 +184,7 @@ export function RepositoryJobsComponent(
 										hover
 										onClick={() => history.push(`/job/${job.ID}`)}
 										key={job.ID}
-                                        style={{cursor: 'pointer'}}
+										style={{cursor: 'pointer'}}
 									>
 										<TableCell align="center">{jobStatus(classes, job.State)}</TableCell>
 										<TableCell align="left">
