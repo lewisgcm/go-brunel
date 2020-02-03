@@ -198,30 +198,33 @@ func (pipeline *Pipeline) executeStage(context context.Context, jobID shared.Job
 }
 
 func (pipeline *Pipeline) Execute(ctx context.Context, spec shared.Spec, workingDir string, jobID shared.JobID) error {
-	log.Println("initializing runtime")
-	err := pipeline.Runtime.Initialize(ctx, jobID, workingDir)
-	if err != nil {
-		return errors.Wrap(err, "error initializing runtime config")
-	}
 
 	for stageID, stage := range spec.Stages {
+
+		log.Println("initializing runtime")
+		err := pipeline.Runtime.Initialize(ctx, jobID, workingDir)
+		if err != nil {
+			err = errors.Wrap(err, "error initializing container runtime")
+		}
+
 		e := pipeline.Recorder.RecordStageState(jobID, stageID, shared.StageStateRunning)
 		if e != nil {
 			err = util.ErrorAppend(err, errors.Wrap(e, "error recording stage state"))
-			break
 		}
 
 		// Here we need to execute the stage and cleanup left over containers
 		// If we get an error, dont return instead set the error and handle it at the end.
 		// This way we can pass them back up the stack
-		containerIds, e := pipeline.executeStage(ctx, jobID, stageID, stage)
-		if e != nil {
-			err = util.ErrorAppend(err, errors.Wrap(e, fmt.Sprintf("error running %s stage", stageID)))
-		}
+		if err == nil {
+			containerIds, e := pipeline.executeStage(ctx, jobID, stageID, stage)
+			if e != nil {
+				err = util.ErrorAppend(err, errors.Wrap(e, fmt.Sprintf("error running %s stage", stageID)))
+			}
 
-		e = pipeline.cleanUp(context.Background(), containerIds)
-		if e != nil {
-			err = util.ErrorAppend(err, errors.Wrap(e, "error cleaning up containers from stage"))
+			e = pipeline.cleanUp(context.Background(), containerIds)
+			if e != nil {
+				err = util.ErrorAppend(err, errors.Wrap(e, "error cleaning up containers from stage"))
+			}
 		}
 
 		state := shared.StageStateSuccess
@@ -231,14 +234,18 @@ func (pipeline *Pipeline) Execute(ctx context.Context, spec shared.Spec, working
 		e = pipeline.Recorder.RecordStageState(jobID, stageID, state)
 		if e != nil {
 			err = util.ErrorAppend(err, errors.Wrap(e, "error recording stage state"))
-			break
+		}
+
+		e = pipeline.Runtime.Terminate(context.Background(), jobID)
+		if e != nil {
+			err = util.ErrorAppend(err, errors.Wrap(e, "error terminating container"))
+		}
+
+		if err != nil {
+			e = pipeline.Recorder.RecordLog(jobID, err.Error(), shared.LogTypeStdErr, stageID)
+			return util.ErrorAppend(err, errors.Wrap(e, "error recording failure"))
 		}
 	}
 
-	e := pipeline.Runtime.Terminate(context.Background(), jobID)
-	if e != nil {
-		err = util.ErrorAppend(err, errors.Wrap(e, "error terminating container"))
-	}
-
-	return err
+	return nil
 }

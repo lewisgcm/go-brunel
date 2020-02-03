@@ -27,20 +27,12 @@ export interface Log {
     StageID: string;
 }
 
-export interface ContainerLog extends Log {
-    ContainerID: string;
-}
-
 export interface JobProgress {
     Stages: JobStage[];
 }
 
-export interface JobContainer extends Container {
-    Logs: ContainerLog[];
-}
-
 export interface JobStage extends Stage {
-    Containers: JobContainer[];
+    Containers: Container[];
     Logs: Log[];
 }
 
@@ -263,20 +255,9 @@ export class JobService {
 							stage.Logs = stage.Logs || [];
 
 							if (oldStage) {
-								stage.Logs = (oldStage.Logs || []).concat(stage.Logs);
+								oldStage.Logs = oldStage.Logs || [];
 
-								(stage.Containers || []).forEach(
-									(container) => {
-										if (oldStage) {
-											const oldContainer = (oldStage.Containers || [])
-												.find((c) => c.ID === container.ID);
-
-											if (oldContainer) {
-												container.Logs = oldContainer.Logs.concat(container.Logs);
-											}
-										}
-									},
-								);
+								stage.Logs = oldStage.Logs.concat(stage.Logs);
 							}
 						},
 					);
@@ -292,8 +273,10 @@ export class JobService {
 					const finalStage = progress.Stages
 						.find((s) => s.ID === LAST_STAGE_ID);
 
-					return index === 0 || !(finalStage && finalStage.State > StageState.Running);
+					return index === 0 ||
+						!(finalStage && finalStage.State > StageState.Running);
 				},
+				true,
 			),
 		);
 	}

@@ -8,9 +8,9 @@ interface Props {
 }
 
 export function JobRoutes({match}: Props) {
-    return <React.Fragment>
-        <Route path={`${match.path}/:jobId`}
-               exact
-               component={JobComponent} />
-    </React.Fragment>;
+	return <React.Fragment>
+		<Route path={`${match.path}/:jobId`}
+			exact
+			component={JobComponent} />
+	</React.Fragment>;
 }

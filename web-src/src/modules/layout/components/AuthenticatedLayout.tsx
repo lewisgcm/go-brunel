@@ -1,8 +1,8 @@
 import React from 'react';
+import {Link} from 'react-router-dom';
 import AppBar from '@material-ui/core/AppBar';
+import {Button} from '@material-ui/core';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import IconButton from '@material-ui/core/IconButton';
-import MenuIcon from '@material-ui/icons/Menu';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import {
@@ -22,12 +22,6 @@ const useStyles = makeStyles((theme: Theme) =>
 			width: `100%`,
 			zIndex: theme.zIndex.drawer + 1,
 		},
-		menuButton: {
-			marginRight: theme.spacing(2),
-			[theme.breakpoints.up('sm')]: {
-				display: 'none',
-			},
-		},
 		toolbar: theme.mixins.toolbar,
 		content: {
 			flexGrow: 1,
@@ -36,6 +30,9 @@ const useStyles = makeStyles((theme: Theme) =>
 		},
 		grow: {
 			flexGrow: 1,
+		},
+		title: {
+			marginRight: theme.spacing(1),
 		},
 	}),
 );
@@ -48,27 +45,17 @@ interface ResponsiveDrawerProps {
 export function AuthenticatedLayout(props: ResponsiveDrawerProps) {
 	const {children} = props;
 	const classes = useStyles();
-	const [mobileOpen, setMobileOpen] = React.useState(false);
-
-	const handleDrawerToggle = () => {
-		setMobileOpen(!mobileOpen);
-	};
 
 	return (
 		<div className={classes.root}>
 			<CssBaseline />
 			<AppBar position="fixed" className={classes.appBar}>
 				<Toolbar>
-					<IconButton
-						color="inherit"
-						edge="start"
-						onClick={handleDrawerToggle}
-						className={classes.menuButton} >
-						<MenuIcon />
-					</IconButton>
-					<Typography variant="h6" noWrap>
+					<Typography className={classes.title} variant="h6" noWrap>
 						Brunel CI
 					</Typography>
+					<Button component={Link} to={'/repository'} color="inherit">Repositories</Button>
+					<Button component={Link} to={'/environment'} color="inherit">Environments</Button>
 					<div className={classes.grow} />
 					<CurrentUser/>
 				</Toolbar>

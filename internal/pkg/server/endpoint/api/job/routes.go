@@ -41,15 +41,19 @@ func (handler *jobHandler) progress(r *http.Request) (interface{}, int, error) {
 	}
 
 	details := struct {
+		Job    store.Job
 		Stages []struct {
 			store.Stage
-			Containers []struct {
-				store.Container
-				Logs []store.ContainerLog
-			}
-			Logs []store.Log
+			Containers []store.Container
+			Logs       []store.Log
 		}
 	}{}
+
+	job, err := handler.jobStore.Get(id)
+	if err != nil {
+		return api.InternalServerError(err, "error getting job")
+	}
+	details.Job = job
 
 	stages, err := handler.stageStore.FindAllByJobID(id)
 	if err != nil {
@@ -77,28 +81,14 @@ func (handler *jobHandler) progress(r *http.Request) (interface{}, int, error) {
 	// Map out out object for reading the UI
 	for _, stage := range stages {
 
-		var mappedContainers []struct {
-			store.Container
-			Logs []store.ContainerLog
-		}
+		var stageContainers []store.Container
 
 		for _, c := range containers {
 			if c.Meta.StageID != stage.ID {
 				continue
 			}
 
-			l, err := handler.logStore.FilterContainerLogByContainerIDFromTime(c.ContainerID, since)
-			if err != nil {
-				return api.InternalServerError(err, "error container logs")
-			}
-
-			mappedContainers = append(
-				mappedContainers,
-				struct {
-					store.Container
-					Logs []store.ContainerLog
-				}{Container: c},
-			)
+			stageContainers = append(stageContainers, c)
 		}
 
 		var stageLogs []store.Log
@@ -110,14 +100,11 @@ func (handler *jobHandler) progress(r *http.Request) (interface{}, int, error) {
 
 		mappedStage := struct {
 			store.Stage
-			Containers []struct {
-				store.Container
-				Logs []store.ContainerLog
-			}
-			Logs []store.Log
+			Containers []store.Container
+			Logs       []store.Log
 		}{
 			Stage:      stage,
-			Containers: mappedContainers,
+			Containers: stageContainers,
 			Logs:       stageLogs,
 		}
 

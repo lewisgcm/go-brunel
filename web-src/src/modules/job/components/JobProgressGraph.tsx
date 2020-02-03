@@ -1,7 +1,8 @@
 import React from 'react';
-import {JobStage, JobState, StageState} from '../../../services';
 import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
 import {FaCheck, FaTimes, FaSync} from 'react-icons/fa';
+
+import {JobStage, StageState} from '../../../services';
 
 interface StageGraphProps {
     stages: JobStage[];
@@ -29,7 +30,7 @@ const useStyles = makeStyles((theme: Theme) =>
 		'stage': {
 			'color': 'white',
 			'fill': '#2e7d2e',
-			'&:hover': {
+			'&:hover, &.selected': {
 				strokeWidth: '5px',
 				stroke: '#4bd24b',
 				cursor: 'pointer',
@@ -40,10 +41,10 @@ const useStyles = makeStyles((theme: Theme) =>
 			'&.in-progress': {
 				fill: 'grey',
 			},
-			'&.error:hover': {
+			'&.error:hover, &.error.selected': {
 				stroke: '#ff5858',
 			},
-			'&.in-progress:hover': {
+			'&.in-progress:hover, &.in-progress.selected': {
 				stroke: 'darkgrey',
 			},
 		},
@@ -61,21 +62,22 @@ const useStyles = makeStyles((theme: Theme) =>
 	}),
 );
 
-function jobStateClass(state: StageState): string {
+function jobStateClass(state: StageState, isSelected: boolean): string {
+	const selected = isSelected ? 'selected' : '';
 	switch (state) {
 	case StageState.Running:
-		return 'in-progress';
+		return `in-progress ${selected}`;
 	case StageState.Error:
-		return 'error';
+		return `error ${selected}`;
 	default:
-		return '';
+		return `${selected}`;
 	}
 }
 
 export const JobProgressGraph = (props: StageGraphProps) => {
 	const classes = useStyles();
-	return <svg width="100%" height="100" viewBox={`0 0 300 100`} className={classes.svg} >
 
+	return <svg width="100%" height="100" viewBox={`0 0 300 100`} className={classes.svg} >
 		<g>
 			{/* Render the starting point in our graph. */}
 			<g transform={`translate(${-stageSpacing}, 50) rotate(0)`} >
@@ -90,7 +92,7 @@ export const JobProgressGraph = (props: StageGraphProps) => {
 						onClick={() => props.onStageSelect(stage)} >
 						<line x1={0} y1="0" x2={stageSpacing} y2="0" className={classes.line} />
 						<text x="0" y="35" textAnchor="middle" className={classes.stageText}>{stage.ID}</text>
-						<g className={`${classes.stage} ${jobStateClass(stage.State)}`}>
+						<g className={`${classes.stage} ${jobStateClass(stage.State, stage.ID === props.selectedStageId)}`}>
 							<circle cx="0" cy="0" r="20" />
 							<g>
 								{stage.State === StageState.Running && <g transform={'translate(0, 0)'}>

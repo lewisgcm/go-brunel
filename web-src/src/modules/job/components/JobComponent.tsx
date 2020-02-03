@@ -1,10 +1,13 @@
 import React, {useEffect, useState} from 'react';
+import {match, useHistory} from 'react-router';
+import {AppBar, Button, Toolbar, Typography} from '@material-ui/core';
+import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
+
 import {withDependency} from '../../../container';
 import {JobProgress, JobService} from '../../../services';
-import {match} from 'react-router';
 import {JobProgressGraph} from './JobProgressGraph';
 import {JobContainerLogs} from './JobContainerLogs';
-import {Typography} from '@material-ui/core';
+import {JobStageLogs} from './JobStageLogs';
 
 interface Dependencies {
     jobService: JobService;
@@ -14,12 +17,27 @@ interface Props {
     match: match<{jobId: string}>;
 }
 
-export const JobComponent = withDependency<Props, Dependencies>((container) => ({
-	jobService: container.get(JobService),
-}))(({jobService, match}) => {
+const useStyles = makeStyles((theme: Theme) =>
+	createStyles({
+		appBar: {
+			zIndex: theme.zIndex.drawer + 1,
+		},
+	}),
+);
+
+export const JobComponent = withDependency<Props, Dependencies>(
+	(container) => ({
+		jobService: container.get(JobService),
+	}),
+)(({jobService, match}) => {
+	const history = useHistory();
+	const classes = useStyles();
 	const {jobId} = match.params;
 	const [jobProgress, setJobProgress] = useState<JobProgress>({Stages: []});
-	const [selectedStage, setSelectedStage] = useState<string | undefined>();
+	const [selectedStage, setSelectedStage] = useState();
+	const stageSelect = (newStageId: string) => {
+		setSelectedStage(newStageId);
+	};
 
 	useEffect(() => {
 		const subscription = jobService
@@ -28,7 +46,7 @@ export const JobComponent = withDependency<Props, Dependencies>((container) => (
 				(progress) => {
 					setJobProgress(progress);
 					if (!selectedStage && progress.Stages.length) {
-						setSelectedStage(progress.Stages[0].ID);
+						stageSelect(progress.Stages[0].ID);
 					}
 				},
 			);
@@ -39,16 +57,24 @@ export const JobComponent = withDependency<Props, Dependencies>((container) => (
 	}, [jobService, jobId, selectedStage]);
 
 	return <div>
+		<AppBar className={classes.appBar} elevation={0}>
+			<Toolbar>
+				<Button color={'inherit'}
+					onClick={() => history.goBack()}>
+					{'Back'}
+				</Button>
+			</Toolbar>
+		</AppBar>
 		<JobProgressGraph stages={jobProgress.Stages}
-			onStageSelect={(s) => setSelectedStage(s.ID)}
+			onStageSelect={(s) => stageSelect(s.ID)}
 			selectedStageId={selectedStage} />
-		{jobProgress.Stages.filter((s) => s.ID === selectedStage).map(
-			(s) => {
-				return s.Logs.length > 0 ? <div key={s.ID} className={'term-container'} >
-					{s.Logs.map((l, i)=> <React.Fragment key={`${l.StageID}-${i}`}>{l.Message} <br/></React.Fragment>)}
-				</div> : <React.Fragment key={s.ID}></React.Fragment>;
-			},
-		)}
+		{jobProgress
+			.Stages
+			.filter((s) => s.ID === selectedStage)
+			.map(
+				(s) => <JobStageLogs key={s.ID} stage={s} />,
+			)
+		}
 		{jobProgress.Stages
 			.filter((s) => s.ID === selectedStage)
 			.flatMap((s) => (s.Containers || []))
@@ -57,7 +83,8 @@ export const JobComponent = withDependency<Props, Dependencies>((container) => (
 					<Typography>
 						{c.Spec.Image}
 					</Typography>
-					<JobContainerLogs containerId={c.ContainerID} containerState={c.State}/>
+					<JobContainerLogs containerId={c.ContainerID}
+						containerState={c.State} />
 				</React.Fragment>;
 			})}
 	</div>;
