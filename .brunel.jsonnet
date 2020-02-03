@@ -40,7 +40,7 @@
                 {
                     image: "byrnedo/alpine-curl",
                     entrypoint: "sh",
-                    args: [ "-c", "--", "curl http://nginx" ]
+                    args: [ "-c", "--", "cur http://nginx" ]
                 },
                 {
                     image: "byrnedo/alpine-curl",
