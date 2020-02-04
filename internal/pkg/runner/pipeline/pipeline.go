@@ -33,11 +33,11 @@ func (pipeline *Pipeline) cleanUp(context context.Context, containerIDs []shared
 	var err error
 	for _, containerID := range containerIDs {
 		if e := pipeline.Runtime.TerminateContainer(context, containerID); e != nil {
-			return util.ErrorAppend(err, errors.Wrap(e, "error terminating container"))
+			err = util.ErrorAppend(err, errors.Wrap(e, "error terminating container"))
 		}
 
 		if e := pipeline.Recorder.RecordContainerState(containerID, shared.ContainerStateStopped); e != nil {
-			return util.ErrorAppend(err, errors.Wrap(e, "error updating terminating container status"))
+			err = util.ErrorAppend(err, errors.Wrap(e, "error updating terminating container status"))
 		}
 	}
 	return err
@@ -57,22 +57,22 @@ func (pipeline *Pipeline) executeStage(context context.Context, jobID shared.Job
 				containerIDs = append(containerIDs, containerID)
 			}
 			if err != nil {
-				return containerIDs, errors.Wrap(err, "error dispatching step service container")
+				return containerIDs, errors.Wrap(err, "error dispatching sidecar service container")
 			}
 
 			// Record our container as starting
 			err = pipeline.Recorder.RecordContainer(jobID, containerID, shared.ContainerMeta{StageID: stageID, Service: true}, sidecar, shared.ContainerStateStarting)
 			if err != nil {
-				return containerIDs, errors.Wrap(err, "error recording step service container creation")
+				return containerIDs, errors.Wrap(err, "error recording sidecar service container creation")
 			}
 
-			// Wait for our container to be stopWaiting, then mark it as running
+			// Wait for our container to be running, then mark it as running
 			if err = pipeline.Runtime.WaitForContainer(context, containerID, shared.ContainerWaitCondition{State: shared.ContainerWaitRunning}); err != nil {
-				return containerIDs, errors.Wrap(err, "error waiting for step container to be stopWaiting")
+				return containerIDs, errors.Wrap(err, "error waiting for sidecar service container to be running")
 			}
 
 			if err = pipeline.Recorder.RecordContainerState(containerID, shared.ContainerStateRunning); err != nil {
-				return containerIDs, errors.Wrap(err, "error recording step container state")
+				return containerIDs, errors.Wrap(err, "error recording sidecar service container")
 			}
 
 			/**
@@ -89,7 +89,7 @@ func (pipeline *Pipeline) executeStage(context context.Context, jobID shared.Job
 
 			var regex *regexp.Regexp
 			if sidecar.Wait != nil {
-				log.Println("waiting for container output to match regex: ", sidecar.Wait.Output)
+				log.Println("waiting for sidecar service container output to match regex: ", sidecar.Wait.Output)
 				regex = regexp.MustCompile(sidecar.Wait.Output)
 
 				go func() {
@@ -125,7 +125,7 @@ func (pipeline *Pipeline) executeStage(context context.Context, jobID shared.Job
 				<-stopWaiting
 				regex = nil
 				if !timeout.Stop() {
-					return containerIDs, errors.New(fmt.Sprintf("error waiting for container output to match regex %s", sidecar.Wait.Output))
+					return containerIDs, errors.New(fmt.Sprintf("error waiting for sidecar service container output to match regex %s", sidecar.Wait.Output))
 				}
 			}
 		}

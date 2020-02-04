@@ -11,7 +11,7 @@ type Remote interface {
 	// SetJobState set the state of the job with given id
 	SetJobState(id shared.JobID, state shared.JobState) error
 
-	// Check if the job is cancelled
+	// HasBeenCancelled checks if the job is cancelled
 	HasBeenCancelled(id shared.JobID) (bool, error)
 
 	// Log should store messages of a given type for a job
