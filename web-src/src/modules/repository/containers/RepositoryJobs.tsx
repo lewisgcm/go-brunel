@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {match} from 'react-router';
-import {BehaviorSubject} from 'rxjs';
-import {tap, delay, debounceTime, switchMap} from 'rxjs/operators';
+import {ReplaySubject} from 'rxjs';
+import {tap, debounceTime, switchMap} from 'rxjs/operators';
 
 import {withDependency} from '../../../container';
 import {RepositoryJobsComponent} from '../components/RepositoryJobsComponent';
@@ -32,7 +32,7 @@ export const RepositoryJobs = withDependency<Props, Dependencies>(
 	({repositoryService, match}) => {
 		const {repositoryId} = match.params;
 		const rowsPerPageOptions = [5, 10, 15, 20];
-		const [subject] = useState(new BehaviorSubject<QueryParams>({} as any));
+		const [subject] = useState(new ReplaySubject<QueryParams>(1));
 		const [isLoading, setIsLoading] = useState(false);
 		const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 		const [sortColumn, setSortColumn] = useState('created_at');
@@ -52,11 +52,10 @@ export const RepositoryJobs = withDependency<Props, Dependencies>(
 
 				const subscription = subject
 					.pipe(
-						debounceTime(200),
+						debounceTime(300),
 						tap((s) => {
 							setIsLoading(true);
 						}),
-						delay(400),
 						switchMap((state) => repositoryService
 							.jobs(
 								state.repositoryId,

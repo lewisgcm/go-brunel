@@ -5,6 +5,7 @@ import {BrowserRouter, Switch} from 'react-router-dom';
 
 import {JobRoutes} from "./modules/job";
 import {RepositoryRoutes} from './modules/repository';
+import {EnvironmentRoutes} from "./modules/environment";
 import {getAuthenticated, ProtectedRoute, Layout, State} from './modules/layout';
 import {Login} from './modules/user/Login';
 
@@ -21,9 +22,15 @@ export default connect(
 					<ProtectedRoute isAuthenticated={isAuthenticated}
 						path='/repository'
 						component={RepositoryRoutes} />
+
                     <ProtectedRoute isAuthenticated={isAuthenticated}
                                     path='/job'
                                     component={JobRoutes} />
+
+					<ProtectedRoute isAuthenticated={isAuthenticated}
+									path='/environment'
+									component={EnvironmentRoutes} />
+
 					<Route path={'/user/login'} component={Login} exact/>
                     {!isAuthenticated && <Redirect to={'/user/login'} />}
                     {isAuthenticated && <Redirect to={'/repository'} />}

@@ -45,6 +45,7 @@ const (
 	ContainerStateStarting ContainerState = 0
 	ContainerStateRunning  ContainerState = 1
 	ContainerStateStopped  ContainerState = 2
+	ContainerStateError    ContainerState = 3
 
 	ContainerWaitRunning ContainerWaitState = 1 << 0
 	ContainerWaitStopped ContainerWaitState = 1 << 1

@@ -29,7 +29,7 @@ require (
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/godbus/dbus v4.1.0+incompatible // indirect
 	github.com/gogo/protobuf v1.2.1 // indirect
-	github.com/golang/mock v1.3.0
+	github.com/golang/mock v1.4.0
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/btree v1.0.0 // indirect
 	github.com/google/go-cmp v0.3.0 // indirect
@@ -70,6 +70,7 @@ require (
 	github.com/xdg/stringprep v0.0.0-20180714160509-73f8eece6fdc // indirect
 	golang.org/x/text v0.3.2 // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
+	google.golang.org/appengine v1.5.0 // indirect
 	google.golang.org/grpc v1.27.0 // indirect
 	gopkg.in/go-playground/webhooks.v5 v5.9.0
 	gopkg.in/inf.v0 v0.9.1 // indirect

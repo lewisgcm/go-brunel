@@ -36,13 +36,18 @@ export const RepositoryPage = withDependency<Props, Dependencies>(
 	const [search, setSearch] = useState('');
 	const [isLoading, setLoading] = useState(false);
 	const [repositoryItems, setRepositoryItems] = useState<Repository[]>([]);
+	const [selectedRepositoryId, setSelectedRepositoryId] = useState<string | undefined>();
+
+	if (selectedRepositoryId !== match.params.repositoryId) {
+		setSelectedRepositoryId(match.params.repositoryId);
+	}
 
 	useEffect(
 		() => {
 			const subscription = subject
 				.pipe(
-					tap(() => setLoading(true)),
 					debounceTime(300),
+					tap(() => setLoading(true)),
 					switchMap((term) => repositoryService.list(term)),
 					tap(() => setLoading(false)),
 				).subscribe(
@@ -69,7 +74,8 @@ export const RepositoryPage = withDependency<Props, Dependencies>(
 		sidebar={() => <RepositoryListComponent
 			isLoading={isLoading}
 			repositories={repositoryItems}
-			onClick={() => {}}
+			selectedRepositoryId={selectedRepositoryId}
+			onClick={(r) => setSelectedRepositoryId(r.ID)}
 			onSearch={setSearch}/>}
 		content={content(match)}/>;
 });

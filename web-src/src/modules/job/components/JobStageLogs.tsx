@@ -10,5 +10,5 @@ export function JobStageLogs({stage}: {stage: JobStage}) {
 			</React.Fragment>)}
 		</div>;
 	}
-	return <React.Fragment key={stage.ID}></React.Fragment>;
+	return <React.Fragment key={stage.ID} />;
 }

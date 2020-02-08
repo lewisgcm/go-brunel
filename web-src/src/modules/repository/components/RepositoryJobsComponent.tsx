@@ -88,6 +88,9 @@ const useStyles = makeStyles((theme: Theme) =>
 			top: 3,
 			animation: '$spinRound 2s linear infinite',
 		},
+		'cancelled': {
+			color: theme.palette.grey.A200,
+		},
 	}),
 );
 
@@ -104,11 +107,11 @@ function jobStatus(classes: any, state: JobState): React.ReactNode {
 		</Tooltip>;
 	case JobState.Cancelled:
 		return <Tooltip title={'Cancelled'}>
-			<Icon color="secondary">cancel</Icon>
+			<Icon className={classes.cancelled}>cancel</Icon>
 		</Tooltip>;
 	case JobState.Success:
 		return <Tooltip title={'Success'}><Icon color="primary"
-					 style={{color: 'rgb(0, 100, 0)', position: 'relative', top: 3}} >
+			style={{color: 'rgb(0, 100, 0)', position: 'relative', top: 3}} >
 				check_circle
 		</Icon></Tooltip>;
 	}

@@ -1,10 +1,11 @@
 import React, {useEffect, useState} from 'react';
 import {match, useHistory} from 'react-router';
-import {AppBar, Button, Toolbar, Typography} from '@material-ui/core';
+import {AppBar, Button, Toolbar, Typography, withStyles} from '@material-ui/core';
 import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
+import {red} from '@material-ui/core/colors';
 
 import {withDependency} from '../../../container';
-import {JobProgress, JobService} from '../../../services';
+import {Job, JobProgress, JobService, JobState} from '../../../services';
 import {JobProgressGraph} from './JobProgressGraph';
 import {JobContainerLogs} from './JobContainerLogs';
 import {JobStageLogs} from './JobStageLogs';
@@ -22,8 +23,21 @@ const useStyles = makeStyles((theme: Theme) =>
 		appBar: {
 			zIndex: theme.zIndex.drawer + 1,
 		},
+		grow: {
+			flexGrow: 1,
+		},
 	}),
 );
+
+const CancelButton = withStyles((theme: Theme) => ({
+	root: {
+		'color': theme.palette.getContrastText(red[500]),
+		'backgroundColor': red[700],
+		'&:hover': {
+			backgroundColor: red[900],
+		},
+	},
+}))(Button);
 
 export const JobComponent = withDependency<Props, Dependencies>(
 	(container) => ({
@@ -33,13 +47,29 @@ export const JobComponent = withDependency<Props, Dependencies>(
 	const history = useHistory();
 	const classes = useStyles();
 	const {jobId} = match.params;
+	const [job, setJob] = useState<Job | undefined>();
 	const [jobProgress, setJobProgress] = useState<JobProgress>({Stages: []});
 	const [selectedStage, setSelectedStage] = useState();
+
 	const stageSelect = (newStageId: string) => {
 		setSelectedStage(newStageId);
 	};
 
+	const onCancel = () => {
+		jobService.cancel(jobId).subscribe(
+			() => {},
+		);
+	};
+
 	useEffect(() => {
+		jobService
+			.get(jobId)
+			.subscribe(
+				(job) => {
+					setJob(job)
+				}
+			);
+
 		const subscription = jobService
 			.progress(jobId)
 			.subscribe(
@@ -63,6 +93,10 @@ export const JobComponent = withDependency<Props, Dependencies>(
 					onClick={() => history.goBack()}>
 					{'Back'}
 				</Button>
+				<span className={classes.grow}/>
+				{job && job.State === JobState.Processing && <CancelButton onClick={() => onCancel()}>
+					Cancel
+				</CancelButton>}
 			</Toolbar>
 		</AppBar>
 		<JobProgressGraph stages={jobProgress.Stages}

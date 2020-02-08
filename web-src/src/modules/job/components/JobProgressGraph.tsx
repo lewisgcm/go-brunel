@@ -77,10 +77,10 @@ function jobStateClass(state: StageState, isSelected: boolean): string {
 export const JobProgressGraph = (props: StageGraphProps) => {
 	const classes = useStyles();
 
-	return <svg width="100%" height="100" viewBox={`0 0 300 100`} className={classes.svg} >
+	return <svg width="100%" height="100" viewBox={`0 0 ${(props.stages.length + 1) * stageSpacing} 100`} className={classes.svg} >
 		<g>
 			{/* Render the starting point in our graph. */}
-			<g transform={`translate(${-stageSpacing}, 50) rotate(0)`} >
+			<g transform={`translate(0, 50) rotate(0)`} >
 				<line x1={0} y1="0" x2={stageSpacing} y2="0" className={classes.line} />
 				<text x="0" y="35" textAnchor="middle" className={classes.stageText}>start</text>
 				<circle cx="0" cy="0" r="10" className={classes.default} />
@@ -88,7 +88,7 @@ export const JobProgressGraph = (props: StageGraphProps) => {
 			{
 				props.stages.map(
 					(stage, index) => <g key={stage.ID}
-						transform={`translate(${index * stageSpacing}, 50) rotate(0)`}
+						transform={`translate(${(index + 1) * stageSpacing}, 50) rotate(0)`}
 						onClick={() => props.onStageSelect(stage)} >
 						<line x1={0} y1="0" x2={stageSpacing} y2="0" className={classes.line} />
 						<text x="0" y="35" textAnchor="middle" className={classes.stageText}>{stage.ID}</text>
@@ -115,7 +115,7 @@ export const JobProgressGraph = (props: StageGraphProps) => {
 				)
 			}
 			{/* Render the ending point in our graph. */}
-			<g transform={`translate(${props.stages.length * stageSpacing},50) rotate(0)`} >
+			<g transform={`translate(${(props.stages.length + 1) * stageSpacing},50) rotate(0)`} >
 				<text x="0" y="35" textAnchor="middle" className={classes.stageText}>end</text>
 				<circle cx="0" cy="0" r="10" className={classes.default} />
 			</g>

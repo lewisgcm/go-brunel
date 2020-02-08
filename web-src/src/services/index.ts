@@ -5,70 +5,71 @@ import jwtDecode from 'jwt-decode';
 import moment from 'moment';
 
 export interface Commit {
-    Branch: string;
-    Revision: string;
+	Branch: string;
+	Revision: string;
 }
 
 export interface Job {
-    ID: string;
-    StartedBy: string;
-    CreatedAt: string;
-    StartedAt: string;
-    StoppedAt: string;
-    Duration: string | number;
-    State: JobState;
-    Commit: Commit;
+	ID: string;
+	StartedBy: string;
+	CreatedAt: string;
+	StartedAt: string;
+	StoppedAt: string;
+	Duration: string | number;
+	State: JobState;
+	Commit: Commit;
 }
 
 export interface Log {
-    Message: string;
-    Type: number;
-    Time: string;
-    StageID: string;
+	Message: string;
+	Type: number;
+	Time: string;
+	StageID: string;
 }
 
 export interface JobProgress {
-    Stages: JobStage[];
+	Stages: JobStage[];
 }
 
 export interface JobStage extends Stage {
-    Containers: Container[];
-    Logs: Log[];
+	Containers: Container[];
+	Logs: Log[];
 }
 
 export interface Stage {
-    ID: string;
-    JobID: string;
-    StartedAt: string;
-    State: number;
-    StoppedAt: string;
+	ID: string;
+	JobID: string;
+	StartedAt: string;
+	State: number;
+	StoppedAt: string;
 }
 
 export enum ContainerState {
 	Starting = 0,
 	Running = 1,
 	Stopped = 2,
+	Error = 3,
 }
 
 export interface Container {
-    ID: string;
-    JobID: string;
-    ContainerID: string;
-    State: ContainerState;
-    Meta: {
-        StageID: string;
-        Service: boolean;
-    };
-    Spec: any;
-    CreatedAt: string;
-    StartedAt: string;
-    StoppedAt: string;
+	ID: string;
+	JobID: string;
+	ContainerID: string;
+	State: ContainerState;
+	Meta: {
+		StageID: string;
+		Service: boolean;
+	};
+	Spec: any;
+	CreatedAt: string;
+	StartedAt: string;
+	StoppedAt: string;
 }
 
 export enum StageState {
-    Running = 0,
-    Success = 1,
-    Error = 2
+	Running = 0,
+	Success = 1,
+	Error = 2
 }
 
 export interface User {
@@ -194,7 +195,8 @@ const LAST_STAGE_ID = 'clean';
 
 @injectable()
 export class JobService {
-	constructor(private _authService: AuthService) { }
+	constructor(private _authService: AuthService) {
+	}
 
 	public get(id: string): Observable<Job> {
 		return from(fetch(
@@ -202,6 +204,15 @@ export class JobService {
 			{headers: this._authService.getAuthHeaders()},
 		)).pipe(
 			switchMap((response) => response.json()),
+		);
+	}
+
+	public cancel(id: string): Observable<void> {
+		return from(fetch(
+			`/api/job/${id}`,
+			{headers: this._authService.getAuthHeaders(), method: 'DELETE'},
+		)).pipe(
+			switchMap((response) => response.text() as Promise<any>),
 		);
 	}
 

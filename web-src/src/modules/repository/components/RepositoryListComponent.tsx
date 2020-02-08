@@ -36,6 +36,9 @@ const useStyles = makeStyles((theme: Theme) =>
 			textAlign: 'center',
 			paddingTop: theme.spacing(1),
 		},
+		selectedItem: {
+			backgroundColor: theme.palette.grey[300],
+		},
 	}),
 );
 
@@ -44,11 +47,13 @@ interface Props {
 	repositories: Repository[];
 	onClick: (repository: Repository) => void;
 	onSearch: (term: string) => void;
+	selectedRepositoryId?: string;
 }
 
 export function RepositoryListComponent({
 	isLoading,
 	repositories,
+	selectedRepositoryId,
 	onClick,
 	onSearch,
 }: Props) {
@@ -62,7 +67,7 @@ export function RepositoryListComponent({
 		{repositories.map(
 			(r) => {
 				return <ListItem
-					className={classes.listItem}
+					className={`${classes.listItem} ${selectedRepositoryId === r.ID ? classes.selectedItem : ''}`}
 					button
 					component={Link}
 					key={r.ID}

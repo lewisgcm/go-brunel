@@ -92,17 +92,17 @@ func (mr *MockRemoteMockRecorder) HasBeenCancelled(arg0 interface{}) *gomock.Cal
 }
 
 // Log mocks base method
-func (m *MockRemote) Log(arg0 shared.JobID, arg1 string, arg2 shared.LogType) error {
+func (m *MockRemote) Log(arg0 shared.JobID, arg1 string, arg2 shared.LogType, arg3 shared.StageID) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Log", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "Log", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Log indicates an expected call of Log
-func (mr *MockRemoteMockRecorder) Log(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockRemoteMockRecorder) Log(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Log", reflect.TypeOf((*MockRemote)(nil).Log), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Log", reflect.TypeOf((*MockRemote)(nil).Log), arg0, arg1, arg2, arg3)
 }
 
 // SearchForSecret mocks base method
@@ -161,4 +161,18 @@ func (m *MockRemote) SetJobState(arg0 shared.JobID, arg1 shared.JobState) error 
 func (mr *MockRemoteMockRecorder) SetJobState(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetJobState", reflect.TypeOf((*MockRemote)(nil).SetJobState), arg0, arg1)
+}
+
+// SetStageState mocks base method
+func (m *MockRemote) SetStageState(arg0 shared.JobID, arg1 shared.StageID, arg2 shared.StageState) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetStageState", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SetStageState indicates an expected call of SetStageState
+func (mr *MockRemoteMockRecorder) SetStageState(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetStageState", reflect.TypeOf((*MockRemote)(nil).SetStageState), arg0, arg1, arg2)
 }

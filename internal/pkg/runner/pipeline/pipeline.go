@@ -149,20 +149,16 @@ func (pipeline *Pipeline) executeStage(context context.Context, jobID shared.Job
 			}
 
 			// We want our container to be running or stopped (stopped is ok if the command execs really quickly)
-			if err = pipeline.Runtime.WaitForContainer(
+			if e := pipeline.Runtime.WaitForContainer(
 				context,
 				containerID,
 				shared.ContainerWaitCondition{State: shared.ContainerWaitStopped | shared.ContainerWaitRunning},
-			); err != nil {
-				return containerIDs, errors.Wrap(err, "error waiting for step container to be ready")
-			}
-
-			if err = pipeline.Recorder.RecordContainerState(containerID, shared.ContainerStateRunning); err != nil {
-				return containerIDs, errors.Wrap(err, "error recording step container state")
+			); e != nil {
+				err = errors.Wrap(e, "error waiting for container to be ready")
 			}
 
 			// FindAllByJobID the logs from the container, THIS WILL BLOCK until the container stops, i.e it runs to completion
-			err = pipeline.Runtime.CopyLogsForContainer(
+			if e := pipeline.Runtime.CopyLogsForContainer(
 				context,
 				containerID,
 				&util.LoggerWriter{
@@ -175,21 +171,29 @@ func (pipeline *Pipeline) executeStage(context context.Context, jobID shared.Job
 						return pipeline.Recorder.RecordContainerLog(containerID, log, shared.LogTypeStdErr)
 					},
 				},
-			)
-			if err != nil {
-				return containerIDs, errors.Wrap(err, "error copying step container logs")
+			); e != nil {
+				err = util.ErrorAppend(errors.Wrap(e, "error copying container logs"), err)
 			}
 
 			// If we made it this far, lets terminate the container as we are done with this step
-			if err = pipeline.Runtime.TerminateContainer(context, containerID); err != nil {
-				return containerIDs, errors.Wrap(err, "error terminating step container")
+			if e := pipeline.Runtime.TerminateContainer(context, containerID); e != nil {
+				err = util.ErrorAppend(errors.Wrap(e, "error terminating step container"), err)
 			}
 
 			// Remove the container id we just terminated from our slice of container ids
 			containerIDs = containerIDs[:len(containerIDs)-1]
 
-			if err = pipeline.Recorder.RecordContainerState(containerID, shared.ContainerStateStopped); err != nil {
-				return containerIDs, errors.Wrap(err, "error recording step container state")
+			// Now record the container state
+			containerState := shared.ContainerStateStopped
+			if err != nil {
+				containerState = shared.ContainerStateError
+			}
+			if e := pipeline.Recorder.RecordContainerState(containerID, containerState); e != nil {
+				err = util.ErrorAppend(errors.Wrap(e, "error recording step container state"), err)
+			}
+
+			if err != nil {
+				return containerIDs, util.ErrorAppend(errors.New("error executing container"), err)
 			}
 		}
 	}
@@ -201,10 +205,10 @@ func (pipeline *Pipeline) Execute(ctx context.Context, spec shared.Spec, working
 
 	for stageID, stage := range spec.Stages {
 
-		log.Println("initializing runtime")
+		log.Println("initializing stage runtime")
 		err := pipeline.Runtime.Initialize(ctx, jobID, workingDir)
 		if err != nil {
-			err = errors.Wrap(err, "error initializing container runtime")
+			err = errors.Wrap(err, "error initializing stage container runtime")
 		}
 
 		e := pipeline.Recorder.RecordStageState(jobID, stageID, shared.StageStateRunning)
