@@ -1,14 +1,16 @@
 import React, {useEffect, useState} from 'react';
 import {match, useHistory} from 'react-router';
-import {AppBar, Button, Toolbar, Typography, withStyles} from '@material-ui/core';
+import {AppBar, Button, Toolbar, Tooltip, Typography, withStyles} from '@material-ui/core';
 import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
 import {red} from '@material-ui/core/colors';
+import {FaCodeBranch, FaUser, FaRegClock} from 'react-icons/fa';
 
 import {withDependency} from '../../../container';
 import {Job, JobProgress, JobService, JobState} from '../../../services';
 import {JobProgressGraph} from './JobProgressGraph';
 import {JobContainerLogs} from './JobContainerLogs';
 import {JobStageLogs} from './JobStageLogs';
+import moment from "moment";
 
 interface Dependencies {
     jobService: JobService;
@@ -30,8 +32,17 @@ const useStyles = makeStyles((theme: Theme) =>
 		},
 		title: {
 			fontWeight: 'bold',
-			paddingLeft: theme.spacing(2)
-		}
+			paddingLeft: theme.spacing(2),
+		},
+		titleJobInfo: {
+			paddingLeft: theme.spacing(2),
+			fontSize: theme.typography.body2.fontSize,
+			'& svg' : {
+				verticalAlign: 'middle',
+				height: '1.3em',
+				marginRight: '8px'
+			}
+		},
 	}),
 );
 
@@ -108,10 +119,29 @@ export const JobComponent = withDependency<Props, Dependencies>(
 						{job.Repository.Project}/{job.Repository.Name}
 					</Typography>
 				</React.Fragment>}
+				{
+					job && <React.Fragment>
+						<Tooltip title={job.Commit.Revision}>
+							<Typography className={classes.titleJobInfo}>
+								<FaCodeBranch/>
+								{job.Commit.Branch.replace('refs/heads/', '')}
+							</Typography>
+						</Tooltip>
+
+						<Tooltip title={`Started by ${job.StartedBy}`} >
+							<Typography className={classes.titleJobInfo}>
+								<FaUser />
+								{job.StartedBy}
+							</Typography>
+						</Tooltip>
+
+						<Typography className={classes.titleJobInfo}>
+							<FaRegClock />
+							{moment(job.StartedAt).format('LLLL')}
+						</Typography>
+					</React.Fragment>
+				}
 				<span className={classes.grow}/>
-				{job && <Typography variant='caption'>
-					{job.Commit.Branch.replace('refs/heads/', '')}@{job.Commit.Revision}
-				</Typography>}
 				{jobProgress.State === JobState.Processing && <CancelButton onClick={() => onCancel()}>
 					Cancel
 				</CancelButton>}
