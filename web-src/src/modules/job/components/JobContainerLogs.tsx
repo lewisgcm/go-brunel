@@ -20,6 +20,9 @@ const useStyles = makeStyles((theme: Theme) =>
 		'hidden': {
 			visibility: 'hidden',
 		},
+		'failed': {
+			borderLeft: '10px solid red',
+		},
 	}),
 );
 
@@ -28,7 +31,7 @@ require('./JobContainerLogs.css');
 export const JobContainerLogs = React.memo<Props>(
 	withDependency<Props, Dependencies>((container) => ({
 		jobService: container.get(JobService),
-	}))(({jobService, containerId}) => {
+	}))(({jobService, containerId, containerState}) => {
 		const classes = useStyles();
 		const [content, setContent] = useState<null | HTMLDivElement>();
 		const [isLoading, setIsLoading] = useState(false);
@@ -57,7 +60,8 @@ export const JobContainerLogs = React.memo<Props>(
 
 		return <React.Fragment>
 			<LinearProgress className={isLoading ? '' : classes.hidden}/>
-			<div className={'term-container'} ref={(r) => setContent(r)} />
+			<div className={'term-container ' + (containerState === ContainerState.Error ? classes.failed : '')}
+				 ref={(r) => setContent(r)} />
 		</React.Fragment>;
 	}),
 	(prevProps, nextProps) =>

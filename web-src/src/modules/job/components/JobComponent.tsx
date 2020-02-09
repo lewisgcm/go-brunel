@@ -141,7 +141,7 @@ export const JobComponent = withDependency<Props, Dependencies>(
 							{moment(job.StartedAt).format('LLLL')}
 						</Typography>}
 
-						{job.StoppedBy && <Tooltip title={`Cancelled by ${job.StartedBy}`} >
+						{job.StoppedBy && <Tooltip title={`Cancelled by ${job.StoppedBy}`} >
 							<Typography className={classes.titleJobInfo}>
 								<FaUserTimes />
 								{job.StoppedBy}

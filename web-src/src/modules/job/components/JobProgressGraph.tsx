@@ -83,11 +83,13 @@ function calculateTime(stage: Stage) {
 		const diff = moment.duration(moment(stage.StoppedAt).diff(moment(stage.StartedAt)));
 
 		if (diff.asSeconds() <= 1) {
-			return `${Math.round(diff.asMilliseconds())}ms`;
+			return `${Math.ceil(diff.asMilliseconds())}ms`;
 		} else if (diff.asMinutes() <= 1) {
-			return `${Math.round(diff.asSeconds())}s`;
+			return `${Math.ceil(diff.asSeconds())}s`;
 		} else if (diff.asHours() <= 1) {
-			return `${Math.round(diff.asHours())}h`;
+			return `${Math.ceil(diff.asMinutes())}m`;
+		} else if (diff.asDays() <= 1) {
+			return `${Math.ceil(diff.asHours())}h`;
 		}
 	}
 	return "";
