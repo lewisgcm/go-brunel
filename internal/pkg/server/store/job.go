@@ -16,6 +16,7 @@ type Job struct {
 	Commit       shared.Commit
 	State        shared.JobState
 	StartedBy    string     `bson:"started_by"`
+	StoppedBy    *string    `bson:"stopped_by"`
 	CreatedAt    time.Time  `bson:"created_at"`
 	StartedAt    *time.Time `bson:"started_at"`
 	StoppedAt    *time.Time `bson:"stopped_at"`
@@ -43,6 +44,8 @@ type JobStore interface {
 	UpdateStoppedAtByID(id shared.JobID, t time.Time) error
 
 	UpdateStateByID(id shared.JobID, s shared.JobState) error
+
+	CancelByID(id shared.JobID, userID string) error
 
 	FilterByRepositoryID(
 		repositoryID string,

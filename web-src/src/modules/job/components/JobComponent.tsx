@@ -3,7 +3,7 @@ import {match, useHistory} from 'react-router';
 import {AppBar, Button, Toolbar, Tooltip, Typography, withStyles} from '@material-ui/core';
 import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
 import {red} from '@material-ui/core/colors';
-import {FaCodeBranch, FaUser, FaRegClock} from 'react-icons/fa';
+import {FaCodeBranch, FaUserPlus, FaUserTimes, FaRegClock} from 'react-icons/fa';
 
 import {withDependency} from '../../../container';
 import {Job, JobProgress, JobService, JobState} from '../../../services';
@@ -40,6 +40,7 @@ const useStyles = makeStyles((theme: Theme) =>
 			'& svg' : {
 				verticalAlign: 'middle',
 				height: '1.3em',
+				width: '1.3em',
 				marginRight: '8px'
 			}
 		},
@@ -128,17 +129,24 @@ export const JobComponent = withDependency<Props, Dependencies>(
 							</Typography>
 						</Tooltip>
 
-						<Tooltip title={`Started by ${job.StartedBy}`} >
+						<Tooltip title={`Created by ${job.StartedBy}`} >
 							<Typography className={classes.titleJobInfo}>
-								<FaUser />
+								<FaUserPlus />
 								{job.StartedBy}
 							</Typography>
 						</Tooltip>
 
-						<Typography className={classes.titleJobInfo}>
+						{moment(job.StartedAt).isValid() && <Typography className={classes.titleJobInfo}>
 							<FaRegClock />
 							{moment(job.StartedAt).format('LLLL')}
-						</Typography>
+						</Typography>}
+
+						{job.StoppedBy && <Tooltip title={`Cancelled by ${job.StartedBy}`} >
+							<Typography className={classes.titleJobInfo}>
+								<FaUserTimes />
+								{job.StoppedBy}
+							</Typography>
+						</Tooltip>}
 					</React.Fragment>
 				}
 				<span className={classes.grow}/>

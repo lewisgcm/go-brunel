@@ -145,7 +145,7 @@ func (handler *jobHandler) cancel(r *http.Request) (interface{}, int, error) {
 		return api.UnAuthorized()
 	}
 
-	err = handler.jobStore.UpdateStateByID(shared.JobID(id), shared.JobStateCancelled)
+	err = handler.jobStore.CancelByID(shared.JobID(id), identity.Username)
 	if err != nil {
 		return api.InternalServerError(err, "error setting job state")
 	}

@@ -8,6 +8,7 @@ package trigger
 
 import (
 	"context"
+	"github.com/pkg/errors"
 	"go-brunel/internal/pkg/runner/remote"
 	"go-brunel/internal/pkg/shared"
 	"log"
@@ -65,7 +66,7 @@ func (trigger *RemoteTrigger) Await(ctx context.Context) <-chan Event {
 					GetNextAvailableJob()
 
 				if err != nil {
-					log.Println(err)
+					log.Println(errors.Wrap(err, "error waiting for next job"))
 					break loop
 				}
 
@@ -90,23 +91,22 @@ func (trigger *RemoteTrigger) Await(ctx context.Context) <-chan Event {
 				for {
 					select {
 					case result := <-stateChannel:
-						err = trigger.
+						if err = trigger.
 							Remote.
-							SetJobState(job.ID, result)
-
-						if err != nil {
-							log.Println(err)
+							SetJobState(job.ID, result); err != nil {
+							log.Println(errors.Wrap(err, "error setting job state"))
 						}
 						cancelCancel()
 						break jobLoop
 					case isCancelled, ok := <-cancelledChan:
 						if (ok && isCancelled) || !ok {
+							<-stateChannel
 							jobCancel()
 							cancelCancel()
 							break jobLoop
 						}
 					default:
-						time.Sleep(time.Millisecond)
+						time.Sleep(time.Millisecond * 200)
 					}
 				}
 			}

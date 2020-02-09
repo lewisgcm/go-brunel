@@ -15,6 +15,7 @@ export interface Job {
 	CreatedAt: string;
 	StartedAt: string;
 	StoppedAt: string;
+	StoppedBy: string;
 	Duration: string | number;
 	State: JobState;
 	Commit: Commit;

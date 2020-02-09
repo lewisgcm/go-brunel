@@ -31,6 +31,7 @@ type mongoJob struct {
 type mongoJobUpdate struct {
 	State     *shared.JobState `bson:"state,omitempty"`
 	StoppedAt *time.Time       `bson:"stopped_at,omitempty"`
+	StoppedBy *string          `bson:"stopped_by,omitempty"`
 }
 
 func (r *JobStore) Next() (*store.Job, error) {
@@ -128,6 +129,11 @@ func (r *JobStore) UpdateStateByID(id shared.JobID, s shared.JobState) error {
 	return r.update(id, mongoJobUpdate{State: &s})
 }
 
+func (r *JobStore) CancelByID(id shared.JobID, userID string) error {
+	state := shared.JobStateCancelled
+	return r.update(id, mongoJobUpdate{StoppedBy: &userID, State: &state})
+}
+
 func (r *JobStore) FilterByRepositoryID(
 	repositoryID string,
 	filter string,
@@ -203,56 +209,3 @@ func (r *JobStore) FilterByRepositoryID(
 	}
 	return page, nil
 }
-
-//func (r *JobStore) GetDetail(id shared.JobID) (models.JobDetail, error) {
-//	objectID, err := primitive.ObjectIDFromHex(string(id))
-//	if err != nil {
-//		return models.JobDetail{}, err
-//	}
-//
-//	decoder, err := r.
-//		Database.
-//		Collection(jobCollectionName).Aggregate(
-//		context.Background(),
-//		[]bson.M{
-//			{"$match": bson.M{"_id": objectID}},
-//			{
-//				"$lookup": bson.M{
-//					"from": "job_container",
-//					"let":  bson.M{"job_id": "$_id"},
-//					"as":   "stages",
-//					"pipeline": []bson.M{
-//						{"$match": bson.M{"$expr": bson.M{"$eq": []string{"$job_id", "$$job_id"}}}},
-//						{
-//							"$lookup": bson.M{
-//								"from": "job_container_log",
-//								"let":  bson.M{"container_id": "$container_id"},
-//								"as":   "logs",
-//								"pipeline": []bson.M{
-//									{"$match": bson.M{"$expr": bson.M{"$eq": []string{"$container_id", "$$container_id"}}}},
-//									{"$sort": bson.M{"time": +1}},
-//								},
-//							},
-//						},
-//						{"$sort": bson.M{"started_at": -1}},
-//						{"$group": bson.M{"_id": "$meta.stage", "containers": bson.M{"$push": "$$ROOT"}}},
-//					},
-//				},
-//			},
-//		},
-//	)
-//	if err != nil {
-//		return models.JobDetail{}, errors.Wrap(err, "error fetching job")
-//	}
-//
-//	if decoder.Next(context.Background()) {
-//		var j mongoQueryJobDetail
-//		err = decoder.Decode(&j)
-//		if err != nil {
-//			return models.JobDetail{}, errors.Wrap(err, "error decoding job")
-//		}
-//		j.ID = shared.JobID(j.ObjectID.Hex())
-//		return j.JobDetail, nil
-//	}
-//	return models.JobDetail{}, data.ErrorNotFound
-//}

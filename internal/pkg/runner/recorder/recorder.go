@@ -14,8 +14,12 @@ import (
 // the data should be considered as read only, as some implementations (text) only write this to stdout
 type Recorder interface {
 	RecordLog(jobID shared.JobID, log string, logType shared.LogType, stage shared.StageID) error
+
 	RecordContainer(jobID shared.JobID, containerID shared.ContainerID, meta shared.ContainerMeta, container shared.Container, state shared.ContainerState) error
+
 	RecordStageState(jobID shared.JobID, id shared.StageID, state shared.StageState) error
+
 	RecordContainerState(containerID shared.ContainerID, state shared.ContainerState) error
+
 	RecordContainerLog(containerID shared.ContainerID, log string, logType shared.LogType) error
 }
