@@ -120,6 +120,7 @@ export const JobComponent = withDependency<Props, Dependencies>(
 						{job.Repository.Project}/{job.Repository.Name}
 					</Typography>
 				</React.Fragment>}
+				<span className={classes.grow}/>
 				{
 					job && <React.Fragment>
 						<Tooltip title={job.Commit.Revision}>
@@ -149,7 +150,6 @@ export const JobComponent = withDependency<Props, Dependencies>(
 						</Tooltip>}
 					</React.Fragment>
 				}
-				<span className={classes.grow}/>
 				{jobProgress.State === JobState.Processing && <CancelButton onClick={() => onCancel()}>
 					Cancel
 				</CancelButton>}

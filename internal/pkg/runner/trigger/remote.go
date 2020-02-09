@@ -100,9 +100,9 @@ func (trigger *RemoteTrigger) Await(ctx context.Context) <-chan Event {
 						break jobLoop
 					case isCancelled, ok := <-cancelledChan:
 						if (ok && isCancelled) || !ok {
-							<-stateChannel
 							jobCancel()
 							cancelCancel()
+							<-stateChannel
 							break jobLoop
 						}
 					default:
