@@ -22,10 +22,16 @@ const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
 		appBar: {
 			zIndex: theme.zIndex.drawer + 1,
+			paddingLeft: theme.spacing(2),
+			paddingRight: theme.spacing(2),
 		},
 		grow: {
 			flexGrow: 1,
 		},
+		title: {
+			fontWeight: 'bold',
+			paddingLeft: theme.spacing(2)
+		}
 	}),
 );
 
@@ -33,6 +39,7 @@ const CancelButton = withStyles((theme: Theme) => ({
 	root: {
 		'color': theme.palette.getContrastText(red[500]),
 		'backgroundColor': red[700],
+		'marginLeft': theme.spacing(2),
 		'&:hover': {
 			backgroundColor: red[900],
 		},
@@ -48,7 +55,7 @@ export const JobComponent = withDependency<Props, Dependencies>(
 	const classes = useStyles();
 	const {jobId} = match.params;
 	const [job, setJob] = useState<Job | undefined>();
-	const [jobProgress, setJobProgress] = useState<JobProgress>({Stages: []});
+	const [jobProgress, setJobProgress] = useState<JobProgress>({State: JobState.Waiting, Stages: []});
 	const [selectedStage, setSelectedStage] = useState();
 
 	const stageSelect = (newStageId: string) => {
@@ -75,26 +82,37 @@ export const JobComponent = withDependency<Props, Dependencies>(
 			.subscribe(
 				(progress) => {
 					setJobProgress(progress);
-					if (!selectedStage && progress.Stages.length) {
-						stageSelect(progress.Stages[0].ID);
-					}
 				},
 			);
 
 		return () => {
 			return subscription.unsubscribe();
 		};
-	}, [jobService, jobId, selectedStage]);
+	}, [jobService, jobId]);
+
+	useEffect(() => {
+		if (!selectedStage && jobProgress && jobProgress.Stages.length) {
+			setSelectedStage(jobProgress.Stages[0].ID)
+		}
+	}, [jobProgress, selectedStage]);
 
 	return <div>
 		<AppBar className={classes.appBar} elevation={0}>
-			<Toolbar>
-				<Button color={'inherit'}
+			<Toolbar disableGutters={true}>
+				<Button color='inherit'
 					onClick={() => history.goBack()}>
-					{'Back'}
+					Back
 				</Button>
+				{job && <React.Fragment>
+					<Typography className={classes.title}>
+						{job.Repository.Project}/{job.Repository.Name}
+					</Typography>
+				</React.Fragment>}
 				<span className={classes.grow}/>
-				{job && job.State === JobState.Processing && <CancelButton onClick={() => onCancel()}>
+				{job && <Typography variant='caption'>
+					{job.Commit.Branch.replace('refs/heads/', '')}@{job.Commit.Revision}
+				</Typography>}
+				{jobProgress.State === JobState.Processing && <CancelButton onClick={() => onCancel()}>
 					Cancel
 				</CancelButton>}
 			</Toolbar>

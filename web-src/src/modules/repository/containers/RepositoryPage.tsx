@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {match, useHistory} from 'react-router';
-import {BehaviorSubject} from 'rxjs';
-import {debounceTime, switchMap, tap} from 'rxjs/operators';
+import {BehaviorSubject, merge} from 'rxjs';
+import {debounceTime, first, skip, switchMap, tap} from 'rxjs/operators';
 
 import {Drawer} from '../../layout';
 import {RepositoryJobs} from './RepositoryJobs';
@@ -17,10 +17,10 @@ interface Dependencies {
 	repositoryService: RepositoryService;
 }
 
-function content(match: match<{repositoryId: string}>) {
+function content(selectedRepository: Repository | undefined) {
 	return () => {
-		if (match.params && match.params.repositoryId) {
-			return <RepositoryJobs match={match}/>;
+		if (selectedRepository) {
+			return <RepositoryJobs repository={selectedRepository}/>;
 		}
 		return <React.Fragment />;
 	};
@@ -37,6 +37,8 @@ export const RepositoryPage = withDependency<Props, Dependencies>(
 	const [isLoading, setLoading] = useState(false);
 	const [repositoryItems, setRepositoryItems] = useState<Repository[]>([]);
 	const [selectedRepositoryId, setSelectedRepositoryId] = useState<string | undefined>();
+	const selectedRepository = repositoryItems
+		.find(r => r.ID === selectedRepositoryId);
 
 	if (selectedRepositoryId !== match.params.repositoryId) {
 		setSelectedRepositoryId(match.params.repositoryId);
@@ -44,9 +46,14 @@ export const RepositoryPage = withDependency<Props, Dependencies>(
 
 	useEffect(
 		() => {
-			const subscription = subject
+			const subscription = merge(
+					subject.pipe(first()),
+					subject.pipe(
+						skip(1),
+						debounceTime(200)
+					)
+				)
 				.pipe(
-					debounceTime(300),
 					tap(() => setLoading(true)),
 					switchMap((term) => repositoryService.list(term)),
 					tap(() => setLoading(false)),
@@ -77,6 +84,6 @@ export const RepositoryPage = withDependency<Props, Dependencies>(
 			selectedRepositoryId={selectedRepositoryId}
 			onClick={(r) => setSelectedRepositoryId(r.ID)}
 			onSearch={setSearch}/>}
-		content={content(match)}/>;
+		content={content(selectedRepository)}/>;
 });
 

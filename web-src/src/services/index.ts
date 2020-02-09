@@ -18,6 +18,7 @@ export interface Job {
 	Duration: string | number;
 	State: JobState;
 	Commit: Commit;
+	Repository: Repository;
 }
 
 export interface Log {
@@ -28,6 +29,7 @@ export interface Log {
 }
 
 export interface JobProgress {
+	State: JobState;
 	Stages: JobStage[];
 }
 
@@ -126,6 +128,12 @@ export class RepositoryService {
 		);
 	}
 
+	get(id: string): Observable<Repository> {
+		return from(fetch(`/api/repository/${id}`)).pipe(
+			switchMap((response) => response.json()),
+		);
+	}
+
 	jobs(
 		id: string,
 		filter: string,
@@ -191,7 +199,6 @@ export class UserService {
 }
 
 const POLL_INTERVAL_MS = 2 * 1000;
-const LAST_STAGE_ID = 'clean';
 
 @injectable()
 export class JobService {
@@ -276,16 +283,13 @@ export class JobService {
 					return current;
 				},
 				{
+					State: JobState.Waiting,
 					Stages: [],
 				},
 			),
 			takeWhile(
 				(progress: JobProgress, index) => {
-					const finalStage = progress.Stages
-						.find((s) => s.ID === LAST_STAGE_ID);
-
-					return index === 0 ||
-						!(finalStage && finalStage.State > StageState.Running);
+					return progress.State === JobState.Waiting || progress.State === JobState.Processing
 				},
 				true,
 			),

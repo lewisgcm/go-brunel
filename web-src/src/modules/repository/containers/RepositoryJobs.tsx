@@ -1,14 +1,13 @@
-import React, {useState, useEffect} from 'react';
-import {match} from 'react-router';
-import {ReplaySubject} from 'rxjs';
-import {tap, debounceTime, switchMap} from 'rxjs/operators';
+import React, {useEffect, useState} from 'react';
+import {merge, ReplaySubject} from 'rxjs';
+import {debounceTime, first, skip, switchMap, tap} from 'rxjs/operators';
 
 import {withDependency} from '../../../container';
 import {RepositoryJobsComponent} from '../components/RepositoryJobsComponent';
-import {RepositoryService, RepositoryJobPage} from '../../../services';
+import {Repository, RepositoryJobPage, RepositoryService} from '../../../services';
 
 interface Props {
-	match: match<{ repositoryId: string }>;
+	repository: Repository;
 }
 
 interface Dependencies {
@@ -16,7 +15,7 @@ interface Dependencies {
 }
 
 interface QueryParams {
-	repositoryId: string;
+	selectedRepositoryId: string;
 	rowsPerPage: number;
 	currentPage: number;
 	sortOrder: 'asc' | 'desc';
@@ -29,8 +28,7 @@ export const RepositoryJobs = withDependency<Props, Dependencies>(
 		repositoryService: container.get(RepositoryService),
 	}),
 )(
-	({repositoryService, match}) => {
-		const {repositoryId} = match.params;
+	({repositoryService, repository}) => {
 		const rowsPerPageOptions = [5, 10, 15, 20];
 		const [subject] = useState(new ReplaySubject<QueryParams>(1));
 		const [isLoading, setIsLoading] = useState(false);
@@ -50,15 +48,20 @@ export const RepositoryJobs = withDependency<Props, Dependencies>(
 			() => {
 				setCurrentPage(0);
 
-				const subscription = subject
+				const subscription = merge(
+						subject.pipe(first()),
+						subject.pipe(
+							skip(1),
+							debounceTime(200)
+						)
+					)
 					.pipe(
-						debounceTime(300),
-						tap((s) => {
+						tap((_) => {
 							setIsLoading(true);
 						}),
 						switchMap((state) => repositoryService
 							.jobs(
-								state.repositoryId,
+								state.selectedRepositoryId,
 								state.search,
 								state.currentPage,
 								state.rowsPerPage,
@@ -66,7 +69,7 @@ export const RepositoryJobs = withDependency<Props, Dependencies>(
 								state.sortColumn,
 							),
 						),
-						tap((ss) => {
+						tap((_) => {
 							setIsLoading(false);
 						}),
 					).subscribe(
@@ -79,13 +82,13 @@ export const RepositoryJobs = withDependency<Props, Dependencies>(
 					subscription.unsubscribe();
 				};
 			},
-			[repositoryId, subject, repositoryService],
+			[]
 		);
 
 		useEffect(
 			() => {
 				subject.next({
-					repositoryId,
+					selectedRepositoryId: repository.ID,
 					rowsPerPage,
 					currentPage,
 					sortOrder,
@@ -95,7 +98,7 @@ export const RepositoryJobs = withDependency<Props, Dependencies>(
 			},
 			[
 				subject,
-				repositoryId,
+				repository,
 				rowsPerPage,
 				currentPage,
 				sortOrder,
@@ -106,6 +109,7 @@ export const RepositoryJobs = withDependency<Props, Dependencies>(
 
 		return <RepositoryJobsComponent
 			isLoading={isLoading}
+			repository={repository}
 			sortColumn={sortColumn}
 			sortOrder={sortOrder}
 			rowsPerPageOptions={rowsPerPageOptions}

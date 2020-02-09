@@ -2,7 +2,8 @@ import React from 'react';
 import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
 import {FaCheck, FaTimes, FaSync} from 'react-icons/fa';
 
-import {JobStage, StageState} from '../../../services';
+import {JobStage, Stage, StageState} from '../../../services';
+import moment from "moment";
 
 interface StageGraphProps {
     stages: JobStage[];
@@ -22,6 +23,9 @@ const useStyles = makeStyles((theme: Theme) =>
 			strokeWidth: 5,
 		},
 		'stageText': {
+			fill: 'black',
+		},
+		'stageDurationText': {
 			fill: 'lightslategrey',
 		},
 		'default': {
@@ -74,10 +78,25 @@ function jobStateClass(state: StageState, isSelected: boolean): string {
 	}
 }
 
+function calculateTime(stage: Stage) {
+	if (stage.StartedAt && stage.StoppedAt) {
+		const diff = moment.duration(moment(stage.StoppedAt).diff(moment(stage.StartedAt)));
+
+		if (diff.asSeconds() <= 1) {
+			return `${Math.round(diff.asMilliseconds())}ms`;
+		} else if (diff.asMinutes() <= 1) {
+			return `${Math.round(diff.asSeconds())}s`;
+		} else if (diff.asHours() <= 1) {
+			return `${Math.round(diff.asHours())}h`;
+		}
+	}
+	return "";
+}
+
 export const JobProgressGraph = (props: StageGraphProps) => {
 	const classes = useStyles();
 
-	return <svg width="100%" height="100" viewBox={`0 0 ${(props.stages.length + 1) * stageSpacing} 100`} className={classes.svg} >
+	return <svg width="100%" height="110" viewBox={`0 0 ${(props.stages.length + 1) * stageSpacing} 110`} className={classes.svg} >
 		<g>
 			{/* Render the starting point in our graph. */}
 			<g transform={`translate(0, 50) rotate(0)`} >
@@ -91,7 +110,8 @@ export const JobProgressGraph = (props: StageGraphProps) => {
 						transform={`translate(${(index + 1) * stageSpacing}, 50) rotate(0)`}
 						onClick={() => props.onStageSelect(stage)} >
 						<line x1={0} y1="0" x2={stageSpacing} y2="0" className={classes.line} />
-						<text x="0" y="35" textAnchor="middle" className={classes.stageText}>{stage.ID}</text>
+						<text x="0" y="36" textAnchor="middle" className={classes.stageText}>{stage.ID}</text>
+						<text x="0" y="55" textAnchor="middle" className={classes.stageDurationText}>{calculateTime(stage)}</text>
 						<g className={`${classes.stage} ${jobStateClass(stage.State, stage.ID === props.selectedStageId)}`}>
 							<circle cx="0" cy="0" r="20" />
 							<g>

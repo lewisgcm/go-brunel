@@ -13,11 +13,12 @@ import (
 )
 
 type jobHandler struct {
-	jobStore       store.JobStore
-	logStore       store.LogStore
-	stageStore     store.StageStore
-	containerStore store.ContainerStore
-	jwtSerializer  security.TokenSerializer
+	jobStore        store.JobStore
+	logStore        store.LogStore
+	stageStore      store.StageStore
+	containerStore  store.ContainerStore
+	repositoryStore store.RepositoryStore
+	jwtSerializer   security.TokenSerializer
 }
 
 func (handler *jobHandler) get(r *http.Request) (interface{}, int, error) {
@@ -30,7 +31,18 @@ func (handler *jobHandler) get(r *http.Request) (interface{}, int, error) {
 		return api.InternalServerError(err, "error getting job")
 	}
 
-	return job, http.StatusOK, nil
+	repository, err := handler.repositoryStore.Get(job.RepositoryID)
+	if err != nil {
+		return api.InternalServerError(err, "error getting job")
+	}
+
+	return struct {
+		store.Job
+		Repository store.Repository
+	}{
+		Job:        job,
+		Repository: repository,
+	}, http.StatusOK, nil
 }
 
 func (handler *jobHandler) progress(r *http.Request) (interface{}, int, error) {
@@ -41,7 +53,7 @@ func (handler *jobHandler) progress(r *http.Request) (interface{}, int, error) {
 	}
 
 	details := struct {
-		Job    store.Job
+		State  shared.JobState
 		Stages []struct {
 			store.Stage
 			Containers []store.Container
@@ -53,7 +65,7 @@ func (handler *jobHandler) progress(r *http.Request) (interface{}, int, error) {
 	if err != nil {
 		return api.InternalServerError(err, "error getting job")
 	}
-	details.Job = job
+	details.State = job.State
 
 	stages, err := handler.stageStore.FindAllByJobID(id)
 	if err != nil {
@@ -145,16 +157,18 @@ func (handler *jobHandler) cancel(r *http.Request) (interface{}, int, error) {
 func Routes(
 	jobStore store.JobStore,
 	logStore store.LogStore,
-	containerStore store.ContainerStore,
 	stageStore store.StageStore,
+	containerStore store.ContainerStore,
+	repositoryStore store.RepositoryStore,
 	jwtSerializer security.TokenSerializer,
 ) *chi.Mux {
 	handler := jobHandler{
-		jobStore:       jobStore,
-		logStore:       logStore,
-		stageStore:     stageStore,
-		containerStore: containerStore,
-		jwtSerializer:  jwtSerializer,
+		jobStore:        jobStore,
+		logStore:        logStore,
+		stageStore:      stageStore,
+		repositoryStore: repositoryStore,
+		containerStore:  containerStore,
+		jwtSerializer:   jwtSerializer,
 	}
 	router := chi.NewRouter()
 	router.Get("/{id}", api.Handle(handler.get))

@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from 'react';
 import {LinearProgress} from '@material-ui/core';
+import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
 import {delay} from 'rxjs/operators';
 
 import {withDependency} from '../../../container';
 import {ContainerState, JobService} from '../../../services';
-import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
 
 interface Dependencies {
     jobService: JobService;

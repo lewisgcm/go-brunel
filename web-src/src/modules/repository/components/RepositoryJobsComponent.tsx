@@ -23,12 +23,13 @@ import {
 
 import {
 	RepositoryJobPage,
-	JobState, RepositoryJob,
+	JobState, RepositoryJob, Repository,
 } from '../../../services';
 import {useHistory} from 'react-router';
 
 interface Props {
     isLoading: boolean;
+    repository: Repository;
     page: RepositoryJobPage;
     sortColumn: string;
     sortOrder: 'asc' | 'desc';
@@ -128,6 +129,7 @@ function duration(job: RepositoryJob): string {
 export function RepositoryJobsComponent(
 	{
 		isLoading,
+		repository,
 		page,
 		sortOrder,
 		sortColumn,
@@ -145,8 +147,8 @@ export function RepositoryJobsComponent(
 
 	return (
 		<div>
-			<h1>Namepsace/Name</h1>
-			<h4>https://github.com/lewisgcm/go-brunel.git</h4>
+			<h1>{repository.Project}/{repository.Name}</h1>
+			<h4>{repository.URI}</h4>
 			<TextField className={classes.search}
 				label="Search by branch, revision or user"
 				onChange={(e) => onSearch(e.target.value)} />
@@ -187,8 +189,7 @@ export function RepositoryJobsComponent(
 										hover
 										onClick={() => history.push(`/job/${job.ID}`)}
 										key={job.ID}
-										style={{cursor: 'pointer'}}
-									>
+										style={{cursor: 'pointer'}} >
 										<TableCell align="center">{jobStatus(classes, job.State)}</TableCell>
 										<TableCell align="left">
 											{job.Commit.Branch.replace('refs/heads/', '')}
