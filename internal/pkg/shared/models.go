@@ -112,7 +112,6 @@ type Stage struct {
 // Spec is used for defining the pipeline
 type Spec struct {
 	Version     string
-	Description string
 	Maintainers []string
 	Stages      map[StageID]Stage
 }
