@@ -3,7 +3,7 @@ import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
 import {FaCheck, FaTimes, FaSync} from 'react-icons/fa';
 
 import {JobStage, Stage, StageState} from '../../../services';
-import moment from "moment";
+import moment from 'moment';
 
 interface StageGraphProps {
     stages: JobStage[];
@@ -92,7 +92,7 @@ function calculateTime(stage: Stage) {
 			return `${Math.ceil(diff.asHours())}h`;
 		}
 	}
-	return "";
+	return '';
 }
 
 export const JobProgressGraph = (props: StageGraphProps) => {

@@ -10,7 +10,7 @@ import {Job, JobProgress, JobService, JobState} from '../../../services';
 import {JobProgressGraph} from './JobProgressGraph';
 import {JobContainerLogs} from './JobContainerLogs';
 import {JobStageLogs} from './JobStageLogs';
-import moment from "moment";
+import moment from 'moment';
 
 interface Dependencies {
     jobService: JobService;
@@ -35,14 +35,14 @@ const useStyles = makeStyles((theme: Theme) =>
 			paddingLeft: theme.spacing(2),
 		},
 		titleJobInfo: {
-			paddingLeft: theme.spacing(2),
-			fontSize: theme.typography.body2.fontSize,
-			'& svg' : {
+			'paddingLeft': theme.spacing(2),
+			'fontSize': theme.typography.body2.fontSize,
+			'& svg': {
 				verticalAlign: 'middle',
 				height: '1.3em',
 				width: '1.3em',
-				marginRight: '8px'
-			}
+				marginRight: '8px',
+			},
 		},
 	}),
 );
@@ -85,8 +85,8 @@ export const JobComponent = withDependency<Props, Dependencies>(
 			.get(jobId)
 			.subscribe(
 				(job) => {
-					setJob(job)
-				}
+					setJob(job);
+				},
 			);
 
 		const subscription = jobService
@@ -104,7 +104,7 @@ export const JobComponent = withDependency<Props, Dependencies>(
 
 	useEffect(() => {
 		if (!selectedStage && jobProgress && jobProgress.Stages.length) {
-			setSelectedStage(jobProgress.Stages[0].ID)
+			setSelectedStage(jobProgress.Stages[0].ID);
 		}
 	}, [jobProgress, selectedStage]);
 

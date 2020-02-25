@@ -38,7 +38,7 @@ export const RepositoryPage = withDependency<Props, Dependencies>(
 	const [repositoryItems, setRepositoryItems] = useState<Repository[]>([]);
 	const [selectedRepositoryId, setSelectedRepositoryId] = useState<string | undefined>();
 	const selectedRepository = repositoryItems
-		.find(r => r.ID === selectedRepositoryId);
+		.find((r) => r.ID === selectedRepositoryId);
 
 	if (selectedRepositoryId !== match.params.repositoryId) {
 		setSelectedRepositoryId(match.params.repositoryId);
@@ -47,24 +47,23 @@ export const RepositoryPage = withDependency<Props, Dependencies>(
 	useEffect(
 		() => {
 			const subscription = merge(
-					subject.pipe(first()),
-					subject.pipe(
-						skip(1),
-						debounceTime(200)
-					)
-				)
-				.pipe(
-					tap(() => setLoading(true)),
-					switchMap((term) => repositoryService.list(term)),
-					tap(() => setLoading(false)),
-				).subscribe(
-					(items) => {
-						setRepositoryItems(items);
-						if (items.length && (match.params && !match.params.repositoryId)) {
-							history.push(`/repository/${items[0].ID}`);
-						}
-					},
-				);
+				subject.pipe(first()),
+				subject.pipe(
+					skip(1),
+					debounceTime(200),
+				),
+			).pipe(
+				tap(() => setLoading(true)),
+				switchMap((term) => repositoryService.list(term)),
+				tap(() => setLoading(false)),
+			).subscribe(
+				(items) => {
+					setRepositoryItems(items);
+					if (items.length && (match.params && !match.params.repositoryId)) {
+						history.push(`/repository/${items[0].ID}`);
+					}
+				},
+			);
 
 			return () => {
 				subscription.unsubscribe();

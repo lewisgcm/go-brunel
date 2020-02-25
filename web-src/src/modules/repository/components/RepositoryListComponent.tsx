@@ -1,10 +1,6 @@
 import React from 'react';
-import {
-	makeStyles,
-	Theme,
-	createStyles,
-} from '@material-ui/core/styles';
-
+import {Link} from 'react-router-dom';
+import {makeStyles, Theme, createStyles} from '@material-ui/core/styles';
 import {
 	List,
 	ListItem,
@@ -13,8 +9,6 @@ import {
 	TextField,
 	LinearProgress,
 } from '@material-ui/core';
-
-import {Link} from 'react-router-dom';
 
 import {Repository} from '../../../services';
 

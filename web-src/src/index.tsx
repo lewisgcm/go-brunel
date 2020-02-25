@@ -7,7 +7,7 @@ import {Container} from 'inversify';
 import App from './App';
 import {store} from './store';
 import {DependencyProvider} from './container';
-import {AuthService, JobService, RepositoryService, UserService} from './services';
+import {AuthService, EnvironmentService, JobService, RepositoryService, UserService} from './services';
 import {setAuthenticated} from './modules/layout';
 
 const container = new Container();
@@ -17,6 +17,7 @@ container.bind(AuthService).toConstantValue(authService);
 container.bind(RepositoryService).toSelf();
 container.bind(UserService).toSelf();
 container.bind(JobService).toSelf();
+container.bind(EnvironmentService).toSelf();
 
 store.dispatch(setAuthenticated(authService.isAuthenticated()))
 

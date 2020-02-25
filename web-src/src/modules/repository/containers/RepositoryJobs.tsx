@@ -49,40 +49,39 @@ export const RepositoryJobs = withDependency<Props, Dependencies>(
 				setCurrentPage(0);
 
 				const subscription = merge(
-						subject.pipe(first()),
-						subject.pipe(
-							skip(1),
-							debounceTime(200)
-						)
-					)
-					.pipe(
-						tap((_) => {
-							setIsLoading(true);
-						}),
-						switchMap((state) => repositoryService
-							.jobs(
-								state.selectedRepositoryId,
-								state.search,
-								state.currentPage,
-								state.rowsPerPage,
-								state.sortOrder,
-								state.sortColumn,
-							),
+					subject.pipe(first()),
+					subject.pipe(
+						skip(1),
+						debounceTime(200),
+					),
+				).pipe(
+					tap((_) => {
+						setIsLoading(true);
+					}),
+					switchMap((state) => repositoryService
+						.jobs(
+							state.selectedRepositoryId,
+							state.search,
+							state.currentPage,
+							state.rowsPerPage,
+							state.sortOrder,
+							state.sortColumn,
 						),
-						tap((_) => {
-							setIsLoading(false);
-						}),
-					).subscribe(
-						(jobs) => {
-							setPage(jobs);
-						},
-					);
+					),
+					tap((_) => {
+						setIsLoading(false);
+					}),
+				).subscribe(
+					(jobs) => {
+						setPage(jobs);
+					},
+				);
 
 				return () => {
 					subscription.unsubscribe();
 				};
 			},
-			[]
+			[repositoryService, subject],
 		);
 
 		useEffect(

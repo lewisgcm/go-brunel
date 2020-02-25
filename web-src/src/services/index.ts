@@ -1,5 +1,5 @@
 import {injectable} from 'inversify';
-import {Observable, from, timer} from 'rxjs';
+import {Observable, from, timer, of} from 'rxjs';
 import {map, scan, switchMap, takeWhile} from 'rxjs/operators';
 import jwtDecode from 'jwt-decode';
 import moment from 'moment';
@@ -117,6 +117,15 @@ export interface Repository {
 	CreatedAt: string;
 }
 
+export interface EnvironmentList {
+	ID: string;
+	Name: string;
+}
+
+interface JWT {
+	exp: string;
+}
+
 @injectable()
 export class RepositoryService {
 	list(filter = ''): Observable<Repository[]> {
@@ -164,7 +173,7 @@ export class AuthService {
 		if (token) {
 			try {
 				return moment
-					.utc((jwtDecode(token) as any).exp)
+					.utc((jwtDecode(token) as JWT).exp)
 					.isBefore(moment());
 			} catch (e) {
 				return false;
@@ -199,6 +208,21 @@ export class UserService {
 	}
 }
 
+@injectable()
+export class EnvironmentService {
+	constructor(private _authService: AuthService) {
+	}
+
+	getEnvironments(): Observable<EnvironmentList[]> {
+		return of([
+			{
+				ID: 'sdsdsd',
+				Name: 'Test Environment',
+			}
+		]);
+	}
+}
+
 const POLL_INTERVAL_MS = 2 * 1000;
 
 @injectable()
@@ -215,12 +239,12 @@ export class JobService {
 		);
 	}
 
-	public cancel(id: string): Observable<void> {
+	public cancel(id: string): Observable<{}> {
 		return from(fetch(
 			`/api/job/${id}`,
 			{headers: this._authService.getAuthHeaders(), method: 'DELETE'},
 		)).pipe(
-			switchMap((response) => response.text() as Promise<any>),
+			switchMap((response) => response.text() as Promise<{}>),
 		);
 	}
 
@@ -289,9 +313,7 @@ export class JobService {
 				},
 			),
 			takeWhile(
-				(progress: JobProgress, index) => {
-					return progress.State === JobState.Waiting || progress.State === JobState.Processing
-				},
+				(progress: JobProgress, index) => progress.State === JobState.Waiting || progress.State === JobState.Processing,
 				true,
 			),
 		);

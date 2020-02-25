@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {LinearProgress} from '@material-ui/core';
-import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
+import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
 import {delay} from 'rxjs/operators';
 
 import {withDependency} from '../../../container';
@@ -61,7 +61,7 @@ export const JobContainerLogs = React.memo<Props>(
 		return <React.Fragment>
 			<LinearProgress className={isLoading ? '' : classes.hidden}/>
 			<div className={'term-container ' + (containerState === ContainerState.Error ? classes.failed : '')}
-				 ref={(r) => setContent(r)} />
+				ref={(r) => setContent(r)} />
 		</React.Fragment>;
 	}),
 	(prevProps, nextProps) =>
