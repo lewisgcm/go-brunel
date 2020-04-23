@@ -9,6 +9,38 @@ The primary focus of brunel was to create an enterprise ready open source build 
 * Sidecar service support with readyness detection
 * De-centralized and highly available
 
+## Getting Started
+
+Before running brunel you first need to run the following steps:
+
+### 1. Configuring OAuth
+* gitlab
+    1. Go to the page [https://gitlab.com/profile/applications](https://gitlab.com/profile/applications)
+    2. Add a new application called 'brunel' with the redirect url 'http://localhost:8081/api/user/callback?provider=gitlab' where 'http://localhost:8081' is the external
+URL for your brunel instance.
+
+### 2. Generating certificates
+If you are using docker compose the certs can be generated using the following command:
+```bash
+docker-compose exec server /opt/brunel/cert
+```
+
+Which will produce two certificates `cert` and `key`. Both variables should be set for both the server and each runner.
+You can do this via the environment variables `BRUNEL_REMOTE_CREDENTIALS_CERT` and `BRUNEL_REMOTE_CREDENTIALS_KEY`.
+The `docker-compose.yaml` file included in this project has a default key and cert, *this should be changed for production*.
+
+### 3. Running
+You can use the docker-compose file to quickly spin up a brunel server for local testing.
+To do this put your oauth token and secret update the 'BRUNEL_OAUTH_GITLAB_KEY' and 'BRUNEL_OAUTH_GITLAB_SECRET' variables in the 'docker-compose.yaml' file.
+You can now run brunel using the following:
+```bash
+docker-compose up -d
+```
+
+Then visit the URL http://localhost:8081.
+
+
+
 
 ## Build Syntax
 Brunel uses jsonnet as its underlying build format. See below for an example build configuration file.

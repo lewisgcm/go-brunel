@@ -15,7 +15,8 @@ COPY . /app
 
 RUN cd /app && \
     go get -d -v ./... && \
-    go build cmd/server.go
+    go build cmd/server.go && \
+    go build cmd/cert.go
 
 # All together now :)
 FROM alpine:3.9.5
@@ -26,6 +27,7 @@ RUN mkdir -p /opt/brunel/web/ && \
 WORKDIR /opt/brunel/
 
 COPY --from=build-go /app/server /opt/brunel/server
+COPY --from=build-go /app/cert /opt/brunel/cert
 COPY --from=build-node /web-src/build/ /opt/brunel/web/
 COPY ./docker-server.yaml /opt/brunel/brunel.yaml
 
