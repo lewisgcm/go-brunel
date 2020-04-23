@@ -31,7 +31,7 @@ export default connect(
 						path='/environment'
 						component={EnvironmentRoutes} />
 
-					<Route path={'/user/login'} component={Login} exact/>
+					<Route path={'/user/login'} component={Login} exact />
 					{!isAuthenticated && <Redirect to={'/user/login'} />}
 					{isAuthenticated && <Redirect to={'/repository'} />}
 				</Switch>

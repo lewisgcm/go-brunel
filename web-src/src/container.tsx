@@ -1,5 +1,5 @@
-import React, {useContext} from 'react';
-import {Container} from 'inversify';
+import React, {useContext, useMemo} from 'react';
+import {Container, interfaces} from 'inversify';
 
 const context = React.createContext<Container>({} as Container);
 
@@ -17,4 +17,12 @@ export function withDependency<P, T>(
 			return <WrappedComponent {...totalProps} />;
 		};
 	};
+}
+
+export function useDependency<T>(serviceIdentifier: interfaces.ServiceIdentifier<T>) {
+	const container: Container = useContext(context);
+	return useMemo(
+		() => container.get<T>(serviceIdentifier),
+		[container, serviceIdentifier],
+	);
 }

@@ -65,7 +65,9 @@ export const Login = connect(
 				<Typography variant={'h5'}>
 					Brunel CI
 				</Typography>
+
 				<Divider className={classes.divider}/>
+
 				<Button className={classes.gitlab} onClick={() => {
 					setProvider('gitlab');
 					setOpen(true);
@@ -73,6 +75,7 @@ export const Login = connect(
 					<FaGitlab style={{paddingRight: '10px', verticalAlign: 'middle'}} />
 					Login with GitLab
 				</Button>
+
 				<Button className={classes.github} onClick={() => {
 					setProvider('github');
 					setOpen(true);

@@ -182,6 +182,13 @@ export function RepositoryJobsComponent(
 						</TableRow>
 					</TableHead>
 					<TableBody>
+						{
+							page.Jobs.length === 0 && <TableRow>
+								<TableCell colSpan={5}>
+									No jobs match that search criteria.
+								</TableCell>
+							</TableRow>
+						}
 						{ page.Jobs
 							.map((job) => {
 								return (

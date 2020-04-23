@@ -1,5 +1,5 @@
 import {injectable} from 'inversify';
-import {Observable, from, timer, of} from 'rxjs';
+import {Observable, from, timer} from 'rxjs';
 import {map, scan, switchMap, takeWhile} from 'rxjs/operators';
 import jwtDecode from 'jwt-decode';
 import moment from 'moment';
@@ -326,7 +326,7 @@ export class JobService {
 				},
 			),
 			takeWhile(
-				(progress: JobProgress, index) => progress.State === JobState.Waiting || progress.State === JobState.Processing,
+				(progress: JobProgress) => progress.State === JobState.Waiting || progress.State === JobState.Processing,
 				true,
 			),
 		);

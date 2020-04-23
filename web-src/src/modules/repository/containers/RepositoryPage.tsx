@@ -5,7 +5,7 @@ import {debounceTime, first, skip, switchMap, tap} from 'rxjs/operators';
 
 import {Drawer} from '../../layout';
 import {RepositoryJobs} from './RepositoryJobs';
-import {withDependency} from '../../../container';
+import {useDependency} from '../../../container';
 import {Repository, RepositoryService} from '../../../services';
 import {RepositoryListComponent} from '../components/RepositoryListComponent';
 
@@ -13,36 +13,29 @@ interface Props {
 	match: match<{repositoryId: string}>;
 }
 
-interface Dependencies {
-	repositoryService: RepositoryService;
-}
-
 function content(selectedRepository: Repository | undefined) {
-	return () => {
-		if (selectedRepository) {
-			return <RepositoryJobs repository={selectedRepository}/>;
-		}
-		return <React.Fragment />;
-	};
+	return () => selectedRepository ?
+		<RepositoryJobs repository={selectedRepository}/> :
+		<React.Fragment/>;
 }
 
-export const RepositoryPage = withDependency<Props, Dependencies>(
-	(container) => ({
-		repositoryService: container.get(RepositoryService),
-	}),
-)(({match, repositoryService}) => {
+export const RepositoryPage = ({match}: Props) => {
+	const repositoryService = useDependency(RepositoryService);
 	const history = useHistory();
 	const [subject] = useState(new BehaviorSubject(''));
 	const [search, setSearch] = useState('');
 	const [isLoading, setLoading] = useState(false);
 	const [repositoryItems, setRepositoryItems] = useState<Repository[]>([]);
-	const [selectedRepositoryId, setSelectedRepositoryId] = useState<string | undefined>();
-	const selectedRepository = repositoryItems
-		.find((r) => r.ID === selectedRepositoryId);
+	const [selectedRepositoryId, setSelectedRepositoryId] = useState<string | undefined>(match.params.repositoryId);
+	const [selectedRepository, setSelectedRepository] = useState<Repository | undefined>();
 
-	if (selectedRepositoryId !== match.params.repositoryId) {
-		setSelectedRepositoryId(match.params.repositoryId);
-	}
+	useEffect(() => {
+		if (repositoryItems.length > 0 && (!selectedRepository || (selectedRepository.ID !== selectedRepositoryId))) {
+			setSelectedRepository(
+				repositoryItems.find((r) => r.ID === selectedRepositoryId),
+			);
+		}
+	}, [repositoryItems, selectedRepositoryId, selectedRepository]);
 
 	useEffect(
 		() => {
@@ -60,6 +53,7 @@ export const RepositoryPage = withDependency<Props, Dependencies>(
 				(items) => {
 					setRepositoryItems(items);
 					if (items.length && (match.params && !match.params.repositoryId)) {
+						setSelectedRepositoryId(items[0].ID);
 						history.push(`/repository/${items[0].ID}`);
 					}
 				},
@@ -84,5 +78,5 @@ export const RepositoryPage = withDependency<Props, Dependencies>(
 			onClick={(r) => setSelectedRepositoryId(r.ID)}
 			onSearch={setSearch}/>}
 		content={content(selectedRepository)}/>;
-});
+};
 

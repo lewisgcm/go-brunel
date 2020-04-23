@@ -10,7 +10,9 @@ services:
       - 0.0.0.0:8886:8885
     environment:
       BRUNEL_LISTEN: "0.0.0.0:80"
+      #
       # View the README for instructions on configuring these settings
+      #
       # BRUNEL_OAUTH_GITLAB_KEY: <oauth key>
       # BRUNEL_OAUTH_GITLAB_SECRET: <oauth secret>
       # BRUNEL_OAUTH_GITHUB_KEY: <oauth key>
