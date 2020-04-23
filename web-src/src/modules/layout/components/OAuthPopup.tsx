@@ -9,7 +9,7 @@ interface Props {
 export function OAuthPopup({isOpen, provider, onDone}: Props) {
 	useEffect(
 		() => {
-			const url = `/api/user/login?provider=${provider}`;
+			const url = `${process.env.REACT_APP_OAUTH_BASE_URL}/api/user/login?provider=${provider}`;
 
 			if (isOpen) {
 				const popup = window.open(url, 'Login');
