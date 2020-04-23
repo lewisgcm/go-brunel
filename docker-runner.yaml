@@ -1,0 +1,13 @@
+working-directory: /tmp/brunel
+
+runtime: kubernetes
+kubernetes:
+  config-file:
+  namespace: brunel
+  volume-claim-name: brunel-workspace-volume-claim
+
+remote:
+  endpoint:
+  credentials:
+    cert:
+    key:

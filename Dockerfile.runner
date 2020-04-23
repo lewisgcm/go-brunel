@@ -16,5 +16,6 @@ RUN mkdir -p /opt/brunel/ && \
 WORKDIR /opt/brunel/
 
 COPY --from=build-go /app/runner /opt/brunel/runner
+COPY ./docker-runner.yaml /opt/brunel/runner.yaml
 
 ENTRYPOINT [ "/opt/brunel/runner" ]

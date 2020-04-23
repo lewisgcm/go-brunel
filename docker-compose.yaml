@@ -9,6 +9,8 @@ services:
       - 0.0.0.0:8081:8085
       - 0.0.0.0:8886:8885
     environment:
+      BRUNEL_OAUTH_GITLAB_KEY: <oauth key>
+      BRUNEL_OAUTH_GITLAB_SECRET: <oauth secret>
       BRUNEL_MONGO_URI: mongodb://root:example@mongo:27017
       BRUNEL_MONGO_DB: brunel
       BRUNEL_JWT_SECRET: thisIsASecret
@@ -61,6 +63,64 @@ services:
         6n4wODWjt5JCZyVXLr/1HuCS6SkOXu1Q8z+0s91ygzhl4pwKZ0lB280U8VGMqmWJ
         gu+4Ur7DEZFm7zZGTMlkEK9qcA==
         -----END RSA PRIVATE KEY-----
+
+  runner:
+    build:
+       context: .
+       dockerfile: ./Dockerfile.runner
+    restart: always
+    environment:
+      BRUNEL_RUNTIME: docker
+      BRUNEL_REMOTE_ENDPOINT: server:8885
+      BRUNEL_REMOTE_CREDENTIALS_CERT: |
+        -----BEGIN CERTIFICATE-----
+        MIIC5DCCAc+gAwIBAgIQIQoySj7gJbGALd2XUeBX9jANBgkqhkiG9w0BAQsFADAR
+        MQ8wDQYDVQQDEwZicnVuZWwwHhcNMjAwMTMwMjAyMTQ3WhcNMjAxMDIxMjAyMTQ3
+        WjARMQ8wDQYDVQQDEwZicnVuZWwwggEeMA0GCSqGSIb3DQEBAQUAA4IBCwAwggEG
+        AoH+C1LBEDj5HKLP+X6G/O2qlIiPAblCJnMdQq3Kb+Wgtc+4jsZV+CUft/5V7DHb
+        GYTDBJdjxVuASvSlhrjE5GNugTUyjCEN+fZoE/SDhFnXmR5QqUXIJbF9edZCUBSN
+        IM5JquT84UOql2YIV5+1BozbSKJ9Cxkll3Un6tCcIs2C+I+wVuvg0jlTsa8kRsFf
+        mjFthOyrV9/c1xURxUf3KN4FaaKDmaERbdHa56H0frGid7Xpqn19WxjLTvhMYUNP
+        OuLzvAlFx+rKXKGTh6O8/eFbk/EA0DYHo+2bpQ1TCq2kTrLzuEWPWdFG7UViD0yf
+        vFjq1+tahqU+DI/tR2vaboUCAwEAAaM/MD0wDgYDVR0PAQH/BAQDAgWgMB0GA1Ud
+        JQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAMBgNVHRMBAf8EAjAAMA0GCSqGSIb3
+        DQEBCwUAA4H/AAIEWeMs2WnXEXgnMRvsxSDVc/QPna7vpESvbc/VCWTQkoJwdrms
+        hJ86F9kzwgGsLfkSa6GHSDinfKG/8Yq7vd6/AcbouHj4Yg/4MGSJY0oXK3L0Nv5Q
+        s3Dcd16Ymcg7hoqx6enBtR4GqmeDvgt503wTp/gwtCUtyb3vYsdDQR+6JZDWzaCM
+        0wC8vgebXxiGTbZbLZd0vXpnQ7A+15KFJzbGLlNqMiLW98wVSEZBD1W+6XZhufc8
+        EL0LI+UsWGvr60IoWccQoqCPE53O7T6zfnuIh43Fib1NZesyE0wFYTHxYOkkkWL1
+        939WV3NtjWDcfj9UG3WXXD8/JclS4WRk
+        -----END CERTIFICATE-----
+      BRUNEL_REMOTE_CREDENTIALS_KEY: |
+        -----BEGIN RSA PRIVATE KEY-----
+        MIIEjwIBAAKB/gtSwRA4+Ryiz/l+hvztqpSIjwG5QiZzHUKtym/loLXPuI7GVfgl
+        H7f+Vewx2xmEwwSXY8VbgEr0pYa4xORjboE1MowhDfn2aBP0g4RZ15keUKlFyCWx
+        fXnWQlAUjSDOSark/OFDqpdmCFeftQaM20iifQsZJZd1J+rQnCLNgviPsFbr4NI5
+        U7GvJEbBX5oxbYTsq1ff3NcVEcVH9yjeBWmig5mhEW3R2ueh9H6xone16ap9fVsY
+        y074TGFDTzri87wJRcfqylyhk4ejvP3hW5PxANA2B6Ptm6UNUwqtpE6y87hFj1nR
+        Ru1FYg9Mn7xY6tfrWoalPgyP7Udr2m6FAgMBAAECgf4I0yHsBrr++lSj2VxS2tdK
+        k3MAoOVRGf3/7XoL4yZxC8aGX0S49BXYS7ujLOfY54MlnOcA9OLzh99JM88fP+7r
+        fA4877X4zXUnuDSXfX1ttBahFeV6mu1zeuyLhLjIjH0VVwlOdnIJNFfkEm/+/uAX
+        p6tUbvDBLWlCs/o7lXcw9Lp8C+K+kpPl2l4lUJ7/FunSJR5zDrOox1xwzHmPKqNN
+        GS4K0yepOjT9/F70LovaseRDxqPJ9vGMBpUJILr/j6LjaozOV8zE9JTw91yz/svq
+        gz/zbxBffuh1MxTBWA9R47C6FweT4x+/SJrxFOrMNEXSQVbpb9cpfSByn98VMQJ/
+        Nv8Y+s3detS9AqmG+KEY3lSVprFTx+oFQmVoxh0yS/rt2mQZGnNdeLq+c8qU6dek
+        uIE5BS7KsdyIgmO3JoZjKtayQqpv3FwjanDiUexoSGVOou1bzkTqdm5JQsIdEm84
+        oMjb0PAY0NB+l3pkpLgRPqROyERSW1qIqpFmoh5KiwJ/NLU/bvcJP0aEVJELdB4e
+        QU9NENhQQJLFBE6xlrXMIG733B2jNC90PaDAVvASAqeXt7RRlAQkC8Y+AmyBWEm7
+        vP41UGZAPFN+t4ltTWpwsMzYBkUPufXvikN92ygSc5FrivypDWI7RkDkAG8GqM7I
+        UWtAgV6GiLfIXDy0LasdLwJ/A3KCElaNJ4HmRyBxQWx3rpgGuWgsJD/bDIpmwuRZ
+        nsGf3yyfFjVdCpBKF9/+7ZmCzb3r4RNJyVRVijbN6DBMTwceLWeZk2qDHcztosz6
+        zG7tOvE96/QN7laDaRfZ0qn+FrYAcVxbcdtf1AbsABc5nX+XIJ6Huwo1vttWX5se
+        eQJ/Ljs8ZIxyo/mqYLLIpRU13Hs+UaQq4DjcbqbHxjW30ksDRSMJ3+AvyU6S5q60
+        XXe67/tOAtKO+3TrNx0NZu9lqKQhB2Bov4FNCJeWM+1E4w8J/JXe8XHypggFAJHp
+        fUz0U3jCn2amLz0DwA2ifbbCpge5EMBkqM7rA1yLffM1KQJ/AhNcWcgIjowECUD3
+        TGFFZS7u2FHBeyZW88mg+v+LD/6Pd8NvLrvObfJ+et07DxEG1QxJ0pnOKbqieSA5
+        6n4wODWjt5JCZyVXLr/1HuCS6SkOXu1Q8z+0s91ygzhl4pwKZ0lB280U8VGMqmWJ
+        gu+4Ur7DEZFm7zZGTMlkEK9qcA==
+        -----END RSA PRIVATE KEY-----
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
 
   mongo:
     image: mongo:4.2.1-bionic

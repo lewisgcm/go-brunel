@@ -1,15 +1,15 @@
 import React, {useEffect, Fragment} from 'react';
 
 interface Props {
-    isOpen: boolean;
-    provider: string;
-    onDone: (token: string) => void;
+	isOpen: boolean;
+	provider: string;
+	onDone: (token: string) => void;
 }
 
-export function OAuthPopup({isOpen, provider, onDone}: Props) {
+export function OAuthPopup({ isOpen, provider, onDone }: Props) {
 	useEffect(
 		() => {
-			const url = `http://localhost:8085/api/user/login?provider=${provider}`;
+			const url = `/api/user/login?provider=${provider}`;
 
 			if (isOpen) {
 				const popup = window.open(url, 'Login');

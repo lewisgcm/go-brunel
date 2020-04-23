@@ -8,45 +8,42 @@ package main
 
 import (
 	"context"
-	"flag"
+	"fmt"
 	"go-brunel/internal/pkg/runner"
-	"go-brunel/internal/pkg/shared"
 	"log"
-	"os"
+	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
 
-func main() {
-	dir, err := os.Getwd()
+func loadRunnerConfig() (error, runner.Config) {
+	runnerConfig := runner.Config{}
+
+	conf := viper.New()
+
+	conf.AutomaticEnv()
+	conf.SetEnvPrefix("BRUNEL")
+	conf.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
+
+	conf.SetConfigName("runner")
+	conf.AddConfigPath("./")
+	err := conf.ReadInConfig()
+
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	flag.String(shared.ConfigFile, "", "configuration file path")
-	flag.String(shared.WorkingDirectory, dir+"/", "the working directory for jobs")
-	flag.String(shared.EnvironmentFile, "", "an environment file to load environment variables from")
-
-	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
-	pflag.Parse()
-	viper.AutomaticEnv()
-	err = viper.BindPFlags(pflag.CommandLine)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	configFile := viper.GetString(shared.ConfigFile)
-	if configFile != "" {
-		viper.SetConfigFile(configFile)
-		if err = viper.ReadInConfig(); err != nil {
-			log.Fatal(errors.Wrap(err, "error reading configuration"))
+		switch err.(type) {
+		default:
+			panic(fmt.Errorf("fatal error loading config file: %s \n", err))
+		case viper.ConfigFileNotFoundError:
+			log.Println("no config file found. Using defaults and environment variables")
 		}
 	}
 
-	var runnerConfig runner.Config
-	err = viper.Unmarshal(&runnerConfig)
+	return conf.Unmarshal(&runnerConfig), runnerConfig
+}
+
+func main() {
+	err, runnerConfig := loadRunnerConfig()
 	if err != nil {
 		log.Fatal(err)
 	}

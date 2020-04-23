@@ -40,7 +40,7 @@ func FileServer(router *chi.Mux) {
 	})
 }
 
-func LoadConfig() (error, server.Config) {
+func loadServerConfig() (error, server.Config) {
 	serverConfig := server.Config{}
 
 	conf := viper.New()
@@ -66,7 +66,7 @@ func LoadConfig() (error, server.Config) {
 }
 
 func main() {
-	err, serverConfig := LoadConfig()
+	err, serverConfig := loadServerConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
