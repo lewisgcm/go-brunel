@@ -213,13 +213,26 @@ export class EnvironmentService {
 	constructor(private _authService: AuthService) {
 	}
 
-	getEnvironments(): Observable<EnvironmentList[]> {
-		return of([
-			{
-				ID: 'sdsdsd',
-				Name: 'Test Environment',
-			}
-		]);
+	list(
+		filter: string,
+		pageIndex = 0,
+		pageSize = 30,
+		sortOrder: 'asc' | 'desc' = 'asc',
+		sortColumn = '',
+	): Observable<EnvironmentList> {
+		const query = new URLSearchParams({
+			sortOrder: sortOrder.toString(),
+			sortColumn: sortColumn.toString(),
+			pageIndex: pageIndex.toString(),
+			pageSize: pageSize.toString(),
+			filter: filter.toString(),
+		});
+
+		return from(fetch(
+			`/api/environment?${query}`,
+			{headers: this._authService.getAuthHeaders()})).pipe(
+			switchMap((response) => response.json()),
+		);
 	}
 }
 

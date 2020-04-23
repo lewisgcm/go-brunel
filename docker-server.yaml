@@ -1,0 +1,26 @@
+persistence: mongo
+mongo:
+  uri:
+  db:
+
+notification: gitlab
+gitlab:
+  url: https://gitlab.com/api/v4/
+  secret:
+
+jwt:
+  secret:
+  default-role: admin
+
+server-name:
+
+oauth:
+  gitlab:
+    key:
+    secret:
+
+remote:
+  listen: 0.0.0.0:8885
+  credentials:
+    cert:
+    key:

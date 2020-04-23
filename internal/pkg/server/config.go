@@ -175,6 +175,24 @@ func (config *Config) GetRepositoryStore() (store.RepositoryStore, error) {
 	}
 }
 
+func (config *Config) GetEnvironmentStore() (store.EnvironmentStore, error) {
+	switch config.Persistence {
+	case shared.PersistenceTypeMongo:
+		if config.Mongo == nil {
+			return nil, errors.New("no mongo configuration detected")
+		}
+		database, err := config.Mongo.GetMongoDatabase()
+		if err != nil {
+			return nil, err
+		}
+		return &mongo.EnvironmentStore{
+			Database: database,
+		}, nil
+	default:
+		return nil, errors.New("no persistence configuration detected")
+	}
+}
+
 func (config *Config) GetLogStore() (store.LogStore, error) {
 	switch config.Persistence {
 	case shared.PersistenceTypeMongo:

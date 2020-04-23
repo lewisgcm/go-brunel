@@ -7,24 +7,23 @@
 package main
 
 import (
-	"flag"
+	"fmt"
 	"go-brunel/internal/pkg/server"
 	"go-brunel/internal/pkg/server/endpoint/api/container"
+	"go-brunel/internal/pkg/server/endpoint/api/environment"
 	"go-brunel/internal/pkg/server/endpoint/api/hook"
 	"go-brunel/internal/pkg/server/endpoint/api/job"
 	"go-brunel/internal/pkg/server/endpoint/api/repository"
 	"go-brunel/internal/pkg/server/endpoint/api/user"
 	"go-brunel/internal/pkg/server/endpoint/remote"
-	"go-brunel/internal/pkg/shared"
 	"net/http"
 	"os"
+	"strings"
 
 	log "github.com/Sirupsen/logrus"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/pkg/errors"
-	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
 
@@ -41,28 +40,33 @@ func FileServer(router *chi.Mux) {
 	})
 }
 
-func main() {
-	flag.String(shared.ConfigFile, "", "configuration file for the server")
-	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
-	pflag.Parse()
-	viper.AutomaticEnv()
-	err := viper.BindPFlags(pflag.CommandLine)
+func LoadConfig() (error, server.Config) {
+	serverConfig := server.Config{}
+
+	conf := viper.New()
+
+	conf.AutomaticEnv()
+	conf.SetEnvPrefix("BRUNEL")
+	conf.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
+
+	conf.SetConfigName("brunel")
+	conf.AddConfigPath("./")
+	err := conf.ReadInConfig()
+
 	if err != nil {
-		log.Fatal(err)
-	}
-
-	configFile := viper.GetString(shared.ConfigFile)
-	if configFile != "" {
-		viper.SetConfigFile(configFile)
-		if err = viper.ReadInConfig(); err != nil {
-			log.Fatal(errors.Wrap(err, "error reading configuration"))
+		switch err.(type) {
+		default:
+			panic(fmt.Errorf("fatal error loading config file: %s \n", err))
+		case viper.ConfigFileNotFoundError:
+			log.Warning("no config file found. Using defaults and environment variables")
 		}
-	} else {
-		log.Fatal("no configuration file has been provided")
 	}
 
-	var serverConfig server.Config
-	err = viper.Unmarshal(&serverConfig)
+	return conf.Unmarshal(&serverConfig), serverConfig
+}
+
+func main() {
+	err, serverConfig := LoadConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -83,6 +87,11 @@ func main() {
 	}
 
 	repositoryStore, err := serverConfig.GetRepositoryStore()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	environmentStore, err := serverConfig.GetEnvironmentStore()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -136,6 +145,7 @@ func main() {
 		middleware.Recoverer,
 	)
 	router.Mount("/api/hook", hook.Routes(jobStore, repositoryStore, notifier))
+	router.Mount("/api/environment", environment.Routes(environmentStore))
 	router.Mount("/api/repository", repository.Routes(repositoryStore, jobStore))
 	router.Mount("/api/job", job.Routes(jobStore, logStore, stageStore, containerStore, repositoryStore, jwtSerializer))
 	router.Mount("/api/container", container.Routes(logStore, containerStore, jwtSerializer))

@@ -6,6 +6,10 @@
 
 package shared
 
+type EnvironmentID string
+
+type EnvironmentVariableType int8
+
 // ContainerID is a type for a containers id, for example a docker container id (string)
 type ContainerID string
 
@@ -57,6 +61,9 @@ const (
 	// EmptyContainerID denotes an empty container ID, used in error returns
 	EmptyContainerID ContainerID = ""
 	EmptyStageID     StageID     = ""
+
+	EnvironmentVariableTypeText     EnvironmentVariableType = 0
+	EnvironmentVariableTypePassword EnvironmentVariableType = 1
 )
 
 // ContainerWaitCondition are used as conditions when waiting for a container

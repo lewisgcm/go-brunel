@@ -26,6 +26,7 @@ RUN mkdir -p /opt/brunel/web/ && \
 WORKDIR /opt/brunel/
 
 COPY --from=build-go /app/server /opt/brunel/server
-COPY --from=build-node /web-src/build/* /opt/brunel/web/
+COPY --from=build-node /web-src/build/ /opt/brunel/web/
+COPY ./docker-server.yaml /opt/brunel/brunel.yaml
 
 ENTRYPOINT [ "/opt/brunel/server" ]

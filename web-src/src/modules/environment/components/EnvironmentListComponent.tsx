@@ -1,8 +1,8 @@
-import React from "react";
-import {LinearProgress, List, ListItem, ListItemText, TextField, Typography} from "@material-ui/core";
-import {Link} from "react-router-dom";
-import {createStyles, makeStyles, Theme} from "@material-ui/core/styles";
-import {Repository} from "../../../services";
+import React from 'react';
+import {LinearProgress, List, ListItem, ListItemText, TextField, Typography} from '@material-ui/core';
+import {Link} from 'react-router-dom';
+import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
+import {EnvironmentList} from '../../../services';
 
 const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
@@ -30,7 +30,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 interface Props {
 	isLoading: boolean;
-	environments: string[];
+	environments: EnvironmentList[];
 	onClick: (repository: string) => void;
 	onSearch: (term: string) => void;
 	selectedEnvironmentId?: string;
@@ -47,22 +47,22 @@ export function EnvironmentListComponent({
 
 	return <List className={classes.list}>
 		<TextField className={classes.input}
-				   label="Search for an environment"
-				   onChange={(e) => onSearch(e.target.value)} />
+			label="Search for an environment"
+			onChange={(e) => onSearch(e.target.value)} />
 		<LinearProgress className={isLoading ? '' : classes.hidden} />
-		{/*{environments.map(*/}
-		{/*	(r) => {*/}
-		{/*		return <ListItem*/}
-		{/*			className={`${classes.listItem}`}*/}
-		{/*			button*/}
-		{/*			component={Link}*/}
-		{/*			key={r.ID}*/}
-		{/*			to={`/repository/${r.ID}`}*/}
-		{/*			onClick={() => onClick(r)} >*/}
-		{/*			<ListItemText>{r.Project}/{r.Name}</ListItemText>*/}
-		{/*		</ListItem>;*/}
-		{/*	},*/}
-		{/*)}*/}
+		{environments.map(
+			(r) => {
+				return <ListItem
+					className={`${classes.listItem}`}
+					button
+					component={Link}
+					key={r.ID}
+					to={`/repository/${r.ID}`}
+					onClick={() => onClick(r.ID)} >
+					<ListItemText>{r.Name}/{r.Name}</ListItemText>
+				</ListItem>;
+			},
+		)}
 		{environments.length === 0 && <Typography className={classes.empty}>
 			No environments found.
 		</Typography>}
