@@ -53,6 +53,8 @@ func loadServerConfig() (error, server.Config) {
 	conf.AddConfigPath("./")
 	err := conf.ReadInConfig()
 
+	conf.SetDefault("listen", ":8085")
+
 	if err != nil {
 		switch err.(type) {
 		default:
@@ -160,5 +162,6 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	log.Fatal(http.ListenAndServe(":8085", router))
+	log.Infof("listening for http connections on: '%s'", serverConfig.Listen)
+	log.Fatal(http.ListenAndServe(serverConfig.Listen, router))
 }

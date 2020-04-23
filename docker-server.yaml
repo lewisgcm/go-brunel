@@ -18,6 +18,9 @@ oauth:
   gitlab:
     key:
     secret:
+  github:
+    key:
+    secret:
 
 remote:
   listen: 0.0.0.0:8885

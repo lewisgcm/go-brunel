@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"github.com/markbates/goth"
+	"github.com/markbates/goth/providers/github"
 	"github.com/markbates/goth/providers/gitlab"
 	"github.com/pkg/errors"
 	"go-brunel/internal/pkg/server/notify"
@@ -29,6 +30,7 @@ type OAuthConfiguration struct {
 }
 
 type Config struct {
+	Listen      string
 	Persistence shared.PersistenceType
 	Mongo       *shared.MongoConfig
 
@@ -96,6 +98,8 @@ func (config *Config) GetOAuthProviders() ([]goth.Provider, error) {
 		switch k {
 		case "gitlab":
 			providers = append(providers, gitlab.New(v.Key, v.Secret, config.ServerName+"/api/user/callback?provider=gitlab"))
+		case "github":
+			providers = append(providers, github.New(v.Key, v.Secret, config.ServerName+"/api/user/callback?provider=github"))
 		default:
 			return providers, fmt.Errorf("uknown provider '%s'", k)
 		}

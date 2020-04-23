@@ -26,5 +26,6 @@ func Routes(
 	}
 	router := chi.NewRouter()
 	router.Post("/gitlab", api.Handle(handler.gitLab))
+	router.Post("/github", api.Handle(handler.gitHub))
 	return router
 }

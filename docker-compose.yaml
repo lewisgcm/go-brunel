@@ -6,11 +6,14 @@ services:
     build: ./
     restart: always
     ports:
-      - 0.0.0.0:8081:8085
+      - 0.0.0.0:8081:80
       - 0.0.0.0:8886:8885
     environment:
+      BRUNEL_LISTEN: "0.0.0.0:80"
       BRUNEL_OAUTH_GITLAB_KEY: <oauth key>
       BRUNEL_OAUTH_GITLAB_SECRET: <oauth secret>
+      BRUNEL_OAUTH_GITHUB_KEY: <oauth key>
+      BRUNEL_OAUTH_GITHUB_SECRET: <oauth secret>
       BRUNEL_MONGO_URI: mongodb://root:example@mongo:27017
       BRUNEL_MONGO_DB: brunel
       BRUNEL_JWT_SECRET: thisIsASecret

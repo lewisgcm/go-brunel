@@ -58,6 +58,7 @@ export const Login = connect(
 		const classes = useStyles();
 		const history = useHistory();
 		const [isOpen, setOpen] = useState(false);
+		const [provider, setProvider] = useState<'github' | 'gitlab'>('github');
 
 		return <Container className={classes.container}>
 			<div className={classes.login}>
@@ -65,18 +66,24 @@ export const Login = connect(
 					Brunel CI
 				</Typography>
 				<Divider className={classes.divider}/>
-				<Button className={classes.gitlab} onClick={() => setOpen(true)}>
+				<Button className={classes.gitlab} onClick={() => {
+					setProvider('gitlab');
+					setOpen(true);
+				}}>
 					<FaGitlab style={{paddingRight: '10px', verticalAlign: 'middle'}} />
 					Login with GitLab
 				</Button>
-				<Button className={classes.github} onClick={() => setOpen(true)}>
+				<Button className={classes.github} onClick={() => {
+					setProvider('github');
+					setOpen(true);
+				}}>
 					<FaGithub style={{paddingRight: '10px', verticalAlign: 'middle'}} />
 					Login with GitHub
 				</Button>
 			</div>
 			<OAuthPopup
 				isOpen={isOpen}
-				provider={'gitlab'}
+				provider={provider}
 				onDone={(e) => {
 					authService.setAuthentication(e);
 					setLoggedIn();

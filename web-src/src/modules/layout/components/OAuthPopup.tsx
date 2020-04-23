@@ -6,7 +6,7 @@ interface Props {
 	onDone: (token: string) => void;
 }
 
-export function OAuthPopup({ isOpen, provider, onDone }: Props) {
+export function OAuthPopup({isOpen, provider, onDone}: Props) {
 	useEffect(
 		() => {
 			const url = `/api/user/login?provider=${provider}`;
