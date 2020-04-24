@@ -14,10 +14,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-const (
-	localStorageJwtKey = "jwt"
-)
-
 type authHandler struct {
 	serializer security.TokenSerializer
 	userStore  store.UserStore
@@ -32,14 +28,14 @@ func (handler *authHandler) oAuthComplete(w http.ResponseWriter, user goth.User)
 	})
 	if err != nil {
 		log.Error("error occurred updating user ", err)
-		api.HandleError(w, http.StatusInternalServerError, errors.New("error adding/updating user"))
+		api.HandleError(w, http.StatusInternalServerError, errors.New("error authenticating"))
 		return
 	}
 
 	token, err := handler.serializer.Encode(security.Identity{Username: roles.Username, Role: roles.Role})
 	if err != nil {
 		log.Error("error occurred creating jwt token ", err)
-		api.HandleError(w, http.StatusInternalServerError, errors.New("error creating jwt token"))
+		api.HandleError(w, http.StatusInternalServerError, errors.New("error authenticating"))
 		return
 	}
 
@@ -71,7 +67,7 @@ func (handler *authHandler) login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (handler *authHandler) profile(r *http.Request) (interface{}, int, error) {
+func (handler *authHandler) profile(r *http.Request) api.Response {
 	claims, err := handler.serializer.Decode(r)
 	if err != nil {
 		return api.BadRequest(err, "error getting jwt claims")
@@ -81,9 +77,9 @@ func (handler *authHandler) profile(r *http.Request) (interface{}, int, error) {
 		if err == store.ErrorNotFound {
 			return api.NotFound()
 		}
-		return api.InternalServerError(err, "error getting user")
+		return api.InternalServerError(err, "internal error")
 	}
-	return user, http.StatusOK, nil
+	return api.Ok(user)
 }
 
 func Routes(userStore store.UserStore, oauthProviders []goth.Provider, serializer security.TokenSerializer) *chi.Mux {
@@ -97,8 +93,8 @@ func Routes(userStore store.UserStore, oauthProviders []goth.Provider, serialize
 	}
 
 	router := chi.NewRouter()
-	router.Get("/login", handler.login)       // ?provider=<>
-	router.Get("/callback", handler.callback) // ?provider=<>
+	router.Get("/login", handler.login)
+	router.Get("/callback", handler.callback)
 	router.Get("/profile", api.Handle(handler.profile))
 	return router
 }

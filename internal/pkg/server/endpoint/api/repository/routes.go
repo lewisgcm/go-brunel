@@ -18,7 +18,7 @@ type repositoryHandler struct {
 	repositoryStore store.RepositoryStore
 }
 
-func (handler *repositoryHandler) jobs(r *http.Request) (interface{}, int, error) {
+func (handler *repositoryHandler) jobs(r *http.Request) api.Response {
 	id := chi.URLParam(r, "id")
 	filter := r.URL.Query().Get("filter")
 	sortColumn := r.URL.Query().Get("sortColumn")
@@ -50,25 +50,25 @@ func (handler *repositoryHandler) jobs(r *http.Request) (interface{}, int, error
 	if err != nil {
 		return api.InternalServerError(err, "error getting repository jobs")
 	}
-	return jobs, http.StatusOK, nil
+	return api.Ok(jobs)
 }
 
-func (handler *repositoryHandler) list(r *http.Request) (interface{}, int, error) {
+func (handler *repositoryHandler) list(r *http.Request) api.Response {
 	filter := r.URL.Query().Get("filter")
 	repositories, err := handler.repositoryStore.Filter(filter)
 	if err != nil {
 		return api.InternalServerError(err, "error getting repository details")
 	}
-	return repositories, http.StatusOK, nil
+	return api.Ok(repositories)
 }
 
-func (handler *repositoryHandler) get(r *http.Request) (interface{}, int, error) {
+func (handler *repositoryHandler) get(r *http.Request) api.Response {
 	id := chi.URLParam(r, "id")
 	repositories, err := handler.repositoryStore.Get(id)
 	if err != nil {
 		return api.InternalServerError(err, "error getting repository")
 	}
-	return repositories, http.StatusOK, nil
+	return api.Ok(repositories)
 }
 
 func Routes(repositoryStore store.RepositoryStore, jobStore store.JobStore) *chi.Mux {

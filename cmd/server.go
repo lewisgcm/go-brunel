@@ -146,7 +146,7 @@ func main() {
 		// security.Middleware("keymatch_model.conf", "routes.csv", jwtSerializer),
 		middleware.Recoverer,
 	)
-	router.Mount("/api/hook", hook.Routes(jobStore, repositoryStore, notifier))
+	router.Mount("/api/hook", hook.Routes(serverConfig.WebHook, jobStore, repositoryStore, notifier))
 	router.Mount("/api/environment", environment.Routes(environmentStore))
 	router.Mount("/api/repository", repository.Routes(repositoryStore, jobStore))
 	router.Mount("/api/job", job.Routes(jobStore, logStore, stageStore, containerStore, repositoryStore, jwtSerializer))

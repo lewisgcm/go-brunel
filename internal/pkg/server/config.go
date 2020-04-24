@@ -29,6 +29,11 @@ type OAuthConfiguration struct {
 	Secret string
 }
 
+type WebHookConfiguration struct {
+	GitLabSecret string `mapstructure:"gitlab-secret"`
+	GitHubSecret string `mapstructure:"github-secret"`
+}
+
 type Config struct {
 	Listen      string
 	Persistence shared.PersistenceType
@@ -45,6 +50,8 @@ type Config struct {
 	Remote RemoteConfiguration
 
 	Jwt JwtConfiguration
+
+	WebHook WebHookConfiguration
 
 	OAuth map[string]OAuthConfiguration
 }

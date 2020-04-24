@@ -21,7 +21,7 @@ type jobHandler struct {
 	jwtSerializer   security.TokenSerializer
 }
 
-func (handler *jobHandler) get(r *http.Request) (interface{}, int, error) {
+func (handler *jobHandler) get(r *http.Request) api.Response {
 	id := chi.URLParam(r, "id")
 	job, err := handler.jobStore.Get(shared.JobID(id))
 	if err != nil {
@@ -36,16 +36,16 @@ func (handler *jobHandler) get(r *http.Request) (interface{}, int, error) {
 		return api.InternalServerError(err, "error getting job")
 	}
 
-	return struct {
+	return api.Ok(struct {
 		store.Job
 		Repository store.Repository
 	}{
 		Job:        job,
 		Repository: repository,
-	}, http.StatusOK, nil
+	})
 }
 
-func (handler *jobHandler) progress(r *http.Request) (interface{}, int, error) {
+func (handler *jobHandler) progress(r *http.Request) api.Response {
 	id := shared.JobID(chi.URLParam(r, "id"))
 	since, err := api.ParseQueryTime(r, "since", false, time.Time{})
 	if err != nil {
@@ -123,10 +123,10 @@ func (handler *jobHandler) progress(r *http.Request) (interface{}, int, error) {
 		details.Stages = append(details.Stages, mappedStage)
 	}
 
-	return details, http.StatusOK, nil
+	return api.Ok(details)
 }
 
-func (handler *jobHandler) cancel(r *http.Request) (interface{}, int, error) {
+func (handler *jobHandler) cancel(r *http.Request) api.Response {
 	id := chi.URLParam(r, "id")
 	identity, err := handler.jwtSerializer.Decode(r)
 	if err != nil {
@@ -151,7 +151,7 @@ func (handler *jobHandler) cancel(r *http.Request) (interface{}, int, error) {
 	}
 
 	log.Info("job with id ", id, " has been cancelled")
-	return nil, http.StatusNoContent, nil
+	return api.NoContent()
 }
 
 func Routes(

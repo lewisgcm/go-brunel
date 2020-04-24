@@ -12,6 +12,10 @@ jwt:
   secret:
   default-role: admin
 
+webhook:
+  gitlab-secret:
+  github-secret:
+
 server-name:
 
 oauth:

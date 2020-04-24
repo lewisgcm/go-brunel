@@ -11,8 +11,8 @@ import (
 	"gopkg.in/go-playground/webhooks.v5/gitlab"
 )
 
-func (handler *webHookHandler) gitLab(r *http.Request) (interface{}, int, error) {
-	hook, _ := gitlab.New()
+func (handler *webHookHandler) gitLab(r *http.Request) api.Response {
+	hook, _ := gitlab.New(gitlab.Options.Secret(handler.configuration.GitLabSecret))
 
 	payload, err := hook.Parse(r, gitlab.PushEvents, gitlab.TagEvents)
 	if err != nil && err != gitlab.ErrEventNotFound {
@@ -85,5 +85,5 @@ func (handler *webHookHandler) gitLab(r *http.Request) (interface{}, int, error)
 	}
 
 	log.Info("received build notification from gitlab hook for project ", repo.Project, "/", repo.Name)
-	return nil, http.StatusOK, nil
+	return api.NoContent()
 }
