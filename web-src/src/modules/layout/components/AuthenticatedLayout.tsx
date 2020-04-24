@@ -14,8 +14,6 @@ import {
 
 import {CurrentUser} from '../containers/CurrentUser';
 
-const drawerWidth = '100%';
-
 const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
 		root: {
@@ -29,7 +27,7 @@ const useStyles = makeStyles((theme: Theme) =>
 			marginRight: theme.spacing(2),
 		},
 		drawerPaper: {
-			width: drawerWidth,
+			width: '100%',
 		},
 		drawerHeader: {
 			display: 'flex',
