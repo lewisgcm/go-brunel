@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {match, useHistory} from 'react-router';
 import {BehaviorSubject, merge} from 'rxjs';
-import {debounceTime, first, skip, switchMap, tap} from 'rxjs/operators';
+import {debounceTime, first, skip, switchMap, tap, distinctUntilChanged} from 'rxjs/operators';
 
 import {Drawer} from '../../layout';
 import {RepositoryJobs} from './RepositoryJobs';
@@ -23,7 +23,6 @@ export const RepositoryPage = ({match}: Props) => {
 	const repositoryService = useDependency(RepositoryService);
 	const history = useHistory();
 	const [subject] = useState(new BehaviorSubject(''));
-	const [search, setSearch] = useState('');
 	const [isLoading, setLoading] = useState(false);
 	const [repositoryItems, setRepositoryItems] = useState<Repository[]>([]);
 	const [selectedRepositoryId, setSelectedRepositoryId] = useState<string | undefined>(match.params.repositoryId);
@@ -42,6 +41,7 @@ export const RepositoryPage = ({match}: Props) => {
 			const subscription = merge(
 				subject.pipe(first()),
 				subject.pipe(
+					distinctUntilChanged(),
 					skip(1),
 					debounceTime(200),
 				),
@@ -66,17 +66,13 @@ export const RepositoryPage = ({match}: Props) => {
 		[repositoryService, subject, history, match.params],
 	);
 
-	useEffect(() => {
-		subject.next(search);
-	}, [search, subject]);
-
 	return <Drawer
 		sidebar={() => <RepositoryListComponent
 			isLoading={isLoading}
 			repositories={repositoryItems}
 			selectedRepositoryId={selectedRepositoryId}
 			onClick={(r) => setSelectedRepositoryId(r.ID)}
-			onSearch={setSearch}/>}
+			onSearch={(term) =>subject.next(term)}/>}
 		content={content(selectedRepository)}/>;
 };
 

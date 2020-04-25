@@ -5,9 +5,6 @@ import {
 	makeStyles,
 	Theme,
 	createStyles,
-} from '@material-ui/core/styles';
-
-import {
 	Paper,
 	Table,
 	TableRow,
@@ -21,25 +18,22 @@ import {
 	TextField, Tooltip,
 } from '@material-ui/core';
 
-import {
-	RepositoryJobPage,
-	JobState, RepositoryJob, Repository,
-} from '../../../services';
+import {RepositoryJobPage, JobState, RepositoryJob, Repository} from '../../../services';
 import {useHistory} from 'react-router';
 
 interface Props {
-    isLoading: boolean;
-    repository: Repository;
-    page: RepositoryJobPage;
-    sortColumn: string;
-    sortOrder: 'asc' | 'desc';
-    rowsPerPageOptions: number[];
-    rowsPerPage: number;
-    currentPage: number;
-    onSortChange: (sortColumn: string) => void;
-    onPageChange: (page: number) => void;
-    onRowsPerPageChange: (rowsPerPage: number) => void;
-    onSearch: (term: string) => void;
+	isLoading: boolean;
+	repository: Repository;
+	page: RepositoryJobPage;
+	sortColumn: string;
+	sortOrder: 'asc' | 'desc';
+	rowsPerPageOptions: number[];
+	rowsPerPage: number;
+	currentPage: number;
+	onSortChange: (sortColumn: string) => void;
+	onPageChange: (page: number) => void;
+	onRowsPerPageChange: (rowsPerPage: number) => void;
+	onSearch: (term: string) => void;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -164,7 +158,7 @@ export function RepositoryJobsComponent(
 									className={classes.sort}
 									active={sortColumn === 'state'}
 									direction={sortOrder} >
-                                    State
+									State
 								</TableSortLabel>
 							</TableCell>
 							<TableCell>Branch</TableCell>
@@ -175,7 +169,7 @@ export function RepositoryJobsComponent(
 									hideSortIcon={false}
 									active={sortColumn === 'created_at'}
 									direction={sortOrder} >
-                                    Created
+									Created
 								</TableSortLabel>
 							</TableCell>
 							<TableCell>Started By</TableCell>

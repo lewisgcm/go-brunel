@@ -117,9 +117,24 @@ export interface Repository {
 	CreatedAt: string;
 }
 
+export enum EnvironmentVariableType {
+	Text = 0,
+	Password = 1
+}
+
+export interface EnvironmentVariable {
+	Type: EnvironmentVariableType;
+	Name: string;
+	Value: string;
+}
+
 export interface EnvironmentList {
 	ID: string;
 	Name: string;
+}
+
+export interface Environment extends EnvironmentList {
+	Variables: EnvironmentVariable[];
 }
 
 interface JWT {
@@ -213,24 +228,34 @@ export class EnvironmentService {
 	constructor(private _authService: AuthService) {
 	}
 
-	list(
-		filter: string,
-		pageIndex = 0,
-		pageSize = 30,
-		sortOrder: 'asc' | 'desc' = 'asc',
-		sortColumn = '',
-	): Observable<EnvironmentList> {
+	list(filter: string): Observable<EnvironmentList[]> {
 		const query = new URLSearchParams({
-			sortOrder: sortOrder.toString(),
-			sortColumn: sortColumn.toString(),
-			pageIndex: pageIndex.toString(),
-			pageSize: pageSize.toString(),
 			filter: filter.toString(),
 		});
 
 		return from(fetch(
 			`/api/environment?${query}`,
 			{headers: this._authService.getAuthHeaders()})).pipe(
+			switchMap((response) => response.json()),
+		);
+	}
+
+	get(id: string): Observable<Environment> {
+		return from(fetch(
+			`/api/environment/${id}`,
+			{headers: this._authService.getAuthHeaders()})).pipe(
+			switchMap((response) => response.json()),
+		);
+	}
+
+	save(environment: Environment): Observable<Environment> {
+		return from(fetch(
+			`/api/environment`,
+			{
+				method: 'POST',
+				headers: this._authService.getAuthHeaders(),
+				body: JSON.stringify(environment),
+			})).pipe(
 			switchMap((response) => response.json()),
 		);
 	}
