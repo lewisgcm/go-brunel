@@ -85,7 +85,7 @@ export const EnvironmentPage = ({match}: Props) => {
 				detail={detail}
 				onCancel={() => {
 					setIsEdit(false);
-					setSelectedEnvironmentId(environments.length ? environments[0].ID : undefined);
+					setSelectedEnvironmentId(selectedEnvironmentId ? selectedEnvironmentId : environments.length ? environments[0].ID : undefined);
 				}}
 				onSave={(environment) => {
 					environmentService

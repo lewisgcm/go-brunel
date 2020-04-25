@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import moment from 'moment';
 
 import {
@@ -15,7 +15,11 @@ import {
 	Icon,
 	TableHead,
 	TableSortLabel,
-	TextField, Tooltip,
+	TextField,
+	Tooltip,
+	AppBar,
+	Tabs,
+	Tab,
 } from '@material-ui/core';
 
 import {RepositoryJobPage, JobState, RepositoryJob, Repository} from '../../../services';
@@ -38,6 +42,9 @@ interface Props {
 
 const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
+		'tabs': {
+			marginBottom: theme.spacing(2),
+		},
 		'sort': {
 			'& .MuiTableSortLabel-icon': {
 				opacity: 0,
@@ -138,94 +145,107 @@ export function RepositoryJobsComponent(
 ) {
 	const classes = useStyles();
 	const history = useHistory();
+	const [selectedTab, setSelectedTab] = useState(0);
+
+	const handleChange = (newTab: number) => {
+		setSelectedTab(newTab);
+	};
 
 	return (
 		<div>
 			<h1>{repository.Project}/{repository.Name}</h1>
 			<h4>{repository.URI}</h4>
-			<TextField className={classes.search}
-				label="Search by branch, revision or user"
-				onChange={(e) => onSearch(e.target.value)} />
-			<Paper square>
-				<LinearProgress className={isLoading ? '' : classes.hidden}/>
-				<Table size={'medium'}>
-					<TableHead>
-						<TableRow className={classes.headerRow}>
-							<TableCell align={'center'}
-								onClick={() => onSortChange('state')}
-								style={{width: '64px'}} >
-								<TableSortLabel
-									className={classes.sort}
-									active={sortColumn === 'state'}
-									direction={sortOrder} >
-									State
-								</TableSortLabel>
-							</TableCell>
-							<TableCell>Branch</TableCell>
-							<TableCell>Duration</TableCell>
-							<TableCell onClick={() => onSortChange('created_at')} >
-								<TableSortLabel
-									className={classes.sort}
-									hideSortIcon={false}
-									active={sortColumn === 'created_at'}
-									direction={sortOrder} >
-									Created
-								</TableSortLabel>
-							</TableCell>
-							<TableCell>Started By</TableCell>
-						</TableRow>
-					</TableHead>
-					<TableBody>
-						{
-							page.Jobs.length === 0 && <TableRow>
-								<TableCell colSpan={5}>
-									No jobs match that search criteria.
+			<AppBar position="static" className={classes.tabs}>
+				<Tabs value={selectedTab} onChange={(e, t: number) => handleChange(t)} variant="fullWidth" >
+					<Tab label="Jobs" />
+					<Tab label="Triggers" />
+				</Tabs>
+			</AppBar>
+			{selectedTab === 0 && <React.Fragment>
+				<TextField className={classes.search}
+					label="Search by branch, revision or user"
+					onChange={(e) => onSearch(e.target.value)} />
+				<Paper square>
+					<LinearProgress className={isLoading ? '' : classes.hidden}/>
+					<Table size={'medium'}>
+						<TableHead>
+							<TableRow className={classes.headerRow}>
+								<TableCell align={'center'}
+									onClick={() => onSortChange('state')}
+									style={{width: '64px'}} >
+									<TableSortLabel
+										className={classes.sort}
+										active={sortColumn === 'state'}
+										direction={sortOrder} >
+										State
+									</TableSortLabel>
 								</TableCell>
+								<TableCell>Branch</TableCell>
+								<TableCell>Duration</TableCell>
+								<TableCell onClick={() => onSortChange('created_at')} >
+									<TableSortLabel
+										className={classes.sort}
+										hideSortIcon={false}
+										active={sortColumn === 'created_at'}
+										direction={sortOrder} >
+										Created
+									</TableSortLabel>
+								</TableCell>
+								<TableCell>Started By</TableCell>
 							</TableRow>
+						</TableHead>
+						<TableBody>
+							{
+								page.Jobs.length === 0 && <TableRow>
+									<TableCell colSpan={5}>
+										No jobs match that search criteria.
+									</TableCell>
+								</TableRow>
+							}
+							{ page.Jobs
+								.map((job) => {
+									return (
+										<TableRow
+											hover
+											onClick={() => history.push(`/job/${job.ID}`)}
+											key={job.ID}
+											style={{cursor: 'pointer'}} >
+											<TableCell align="center">{jobStatus(classes, job.State)}</TableCell>
+											<TableCell align="left">
+												{job.Commit.Branch.replace('refs/heads/', '')}
+											</TableCell>
+											<TableCell className={classes.duration} align="left">
+												{duration(job)}
+											</TableCell>
+											<TableCell align="left">
+												{ moment(job.CreatedAt).format('LLLL') }
+											</TableCell>
+											<TableCell align="left">{job.StartedBy}</TableCell>
+										</TableRow>
+									);
+								})}
+						</TableBody>
+					</Table>
+					<TablePagination
+						className={classes.footer}
+						rowsPerPageOptions={rowsPerPageOptions}
+						component="div"
+						count={page.Count}
+						rowsPerPage={rowsPerPage}
+						page={currentPage}
+						backIconButtonProps={{
+							'aria-label': 'previous page',
+						}}
+						nextIconButtonProps={{
+							'aria-label': 'next page',
+						}}
+						onChangePage={(e, p) => onPageChange(p)}
+						onChangeRowsPerPage={(e) =>
+							onRowsPerPageChange(Number(e.target.value))
 						}
-						{ page.Jobs
-							.map((job) => {
-								return (
-									<TableRow
-										hover
-										onClick={() => history.push(`/job/${job.ID}`)}
-										key={job.ID}
-										style={{cursor: 'pointer'}} >
-										<TableCell align="center">{jobStatus(classes, job.State)}</TableCell>
-										<TableCell align="left">
-											{job.Commit.Branch.replace('refs/heads/', '')}
-										</TableCell>
-										<TableCell className={classes.duration} align="left">
-											{duration(job)}
-										</TableCell>
-										<TableCell align="left">
-											{ moment(job.CreatedAt).format('LLLL') }
-										</TableCell>
-										<TableCell align="left">{job.StartedBy}</TableCell>
-									</TableRow>
-								);
-							})}
-					</TableBody>
-				</Table>
-				<TablePagination
-					className={classes.footer}
-					rowsPerPageOptions={rowsPerPageOptions}
-					component="div"
-					count={page.Count}
-					rowsPerPage={rowsPerPage}
-					page={currentPage}
-					backIconButtonProps={{
-						'aria-label': 'previous page',
-					}}
-					nextIconButtonProps={{
-						'aria-label': 'next page',
-					}}
-					onChangePage={(e, p) => onPageChange(p)}
-					onChangeRowsPerPage={(e) =>
-						onRowsPerPageChange(Number(e.target.value))
-					}
-				/>
-			</Paper>
+					/>
+				</Paper>
+			</React.Fragment>}
 		</div>
 	);
 }

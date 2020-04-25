@@ -10,10 +10,6 @@ interface Props {
 	repository: Repository;
 }
 
-interface Dependencies {
-	repositoryService: RepositoryService;
-}
-
 interface QueryParams {
 	selectedRepositoryId: string;
 	rowsPerPage: number;
