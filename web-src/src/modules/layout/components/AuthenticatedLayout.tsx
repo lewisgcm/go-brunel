@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link} from 'react-router-dom';
+import {NavLink} from 'react-router-dom';
 import AppBar from '@material-ui/core/AppBar';
 import {Button, IconButton, Toolbar, Drawer, Hidden} from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
@@ -22,6 +22,11 @@ const useStyles = makeStyles((theme: Theme) =>
 		appBar: {
 			width: `100%`,
 			zIndex: theme.zIndex.drawer + 1,
+		},
+		buttonActive: {
+			'&.is-active': {
+				backgroundColor: theme.palette.primary.light,
+			},
 		},
 		menuButton: {
 			marginRight: theme.spacing(2),
@@ -81,8 +86,8 @@ export function AuthenticatedLayout(props: ResponsiveDrawerProps) {
 					</Typography>
 
 					<Hidden xsDown>
-						<Button component={Link} to={'/repository'} color="inherit">Repositories</Button>
-						<Button component={Link} to={'/environment'} color="inherit">Environments</Button>
+						<Button className={classes.buttonActive} component={NavLink} activeClassName='is-active' to={'/repository'} color="inherit">Repositories</Button>
+						<Button className={classes.buttonActive} component={NavLink} activeClassName='is-active' to={'/environment'} color="inherit">Environments</Button>
 						<div className={classes.grow} />
 						<CurrentUser/>
 					</Hidden>

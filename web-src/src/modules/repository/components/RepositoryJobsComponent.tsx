@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import moment from 'moment';
-
+import {useHistory} from 'react-router';
 import {
 	makeStyles,
 	Theme,
@@ -23,7 +23,7 @@ import {
 } from '@material-ui/core';
 
 import {RepositoryJobPage, JobState, RepositoryJob, Repository} from '../../../services';
-import {useHistory} from 'react-router';
+import {RepositoryTriggers} from './RepositoryTriggers';
 
 interface Props {
 	isLoading: boolean;
@@ -246,6 +246,7 @@ export function RepositoryJobsComponent(
 					/>
 				</Paper>
 			</React.Fragment>}
+			{selectedTab === 1 && <RepositoryTriggers />}
 		</div>
 	);
 }

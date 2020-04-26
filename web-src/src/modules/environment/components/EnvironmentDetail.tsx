@@ -224,6 +224,7 @@ export function EnvironmentDetail({detail, onSave, onCancel, isEdit, onEdit}: Pr
 							Name: name,
 							Variables: variables,
 						});
+						setNameIsDirty(false);
 					}}>Save</Button>
 				</Grid>
 			</React.Fragment>}
