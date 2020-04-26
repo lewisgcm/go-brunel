@@ -51,7 +51,7 @@ export function RepositoryListComponent({
 	onClick,
 	onSearch,
 }: Props) {
-	const classes = useStyles();
+	const classes = useStyles({});
 
 	return <List className={classes.list}>
 		<TextField className={classes.input}

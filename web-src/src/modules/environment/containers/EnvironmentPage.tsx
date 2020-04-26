@@ -1,13 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import {BehaviorSubject, merge} from 'rxjs';
+import {first, debounceTime, skip, tap, switchMap, distinctUntilChanged} from 'rxjs/operators';
+import {match} from 'react-router';
 
 import {Drawer} from '../../layout';
 import {EnvironmentListComponent} from '../components/EnvironmentListComponent';
 import {useDependency} from '../../../container';
 import {EnvironmentService, Environment, EnvironmentList} from '../../../services';
-import {first, debounceTime, skip, tap, switchMap, distinctUntilChanged} from 'rxjs/operators';
 import {EnvironmentDetail} from '../components/EnvironmentDetail';
-import {match} from 'react-router';
 
 interface Props {
 	match: match<{environmentId: string}>;
@@ -82,7 +82,7 @@ export const EnvironmentPage = ({match}: Props) => {
 			<EnvironmentDetail
 				isEdit={isEdit}
 				onEdit={() => setIsEdit(true)}
-				detail={detail}
+				detail={Object.assign({}, detail)}
 				onCancel={() => {
 					setIsEdit(false);
 					setSelectedEnvironmentId(selectedEnvironmentId ? selectedEnvironmentId : environments.length ? environments[0].ID : undefined);
@@ -97,6 +97,7 @@ export const EnvironmentPage = ({match}: Props) => {
 								]),
 							);
 							setIsEdit(false);
+							setDetail(newEnvironment);
 						});
 				}} /> :
 			<React.Fragment/>;
