@@ -22,7 +22,7 @@ type RepositoryTrigger struct {
 }
 
 type Repository struct {
-	ID        string `bson:"-"`
+	ID        RepositoryID `bson:"-"`
 	Project   string
 	Name      string
 	URI       string
@@ -48,7 +48,7 @@ type RepositoryStore interface {
 
 	SetTriggers(id RepositoryID, triggers []RepositoryTrigger) error
 
-	Get(id string) (Repository, error)
+	Get(id RepositoryID) (Repository, error)
 
 	Filter(filter string) ([]Repository, error)
 }

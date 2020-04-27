@@ -23,9 +23,10 @@ type JobStore struct {
 }
 
 type mongoJob struct {
-	ObjectID     primitive.ObjectID `bson:"_id,omitempty"`
-	RepositoryID primitive.ObjectID `bson:"repository_id"`
-	store.Job    `bson:",inline"`
+	ObjectID      primitive.ObjectID  `bson:"_id,omitempty"`
+	RepositoryID  primitive.ObjectID  `bson:"repository_id"`
+	EnvironmentID *primitive.ObjectID `bson:"environment_id"`
+	store.Job     `bson:",inline"`
 }
 
 type mongoJobUpdate struct {
@@ -53,7 +54,11 @@ func (r *JobStore) Next() (*store.Job, error) {
 		return nil, nil
 	}
 	job.Job.ID = shared.JobID(job.ObjectID.Hex())
-	job.Job.RepositoryID = job.RepositoryID.Hex()
+	job.Job.RepositoryID = store.RepositoryID(job.RepositoryID.Hex())
+	if job.EnvironmentID != nil {
+		hex := store.EnvironmentID(job.EnvironmentID.Hex())
+		job.Job.EnvironmentID = &hex
+	}
 
 	return &job.Job, nil
 }
@@ -80,7 +85,11 @@ func (r *JobStore) Get(id shared.JobID) (store.Job, error) {
 	}
 
 	mJob.Job.ID = shared.JobID(mJob.ObjectID.Hex())
-	mJob.Job.RepositoryID = mJob.RepositoryID.Hex()
+	mJob.Job.RepositoryID = store.RepositoryID(mJob.RepositoryID.Hex())
+	if mJob.EnvironmentID != nil {
+		hex := store.EnvironmentID(mJob.EnvironmentID.Hex())
+		mJob.Job.EnvironmentID = &hex
+	}
 	return mJob.Job, nil
 }
 
@@ -91,6 +100,14 @@ func (r *JobStore) Add(j store.Job) (shared.JobID, error) {
 		return shared.JobID(""), errors.Wrap(err, "error parsing id")
 	}
 	mJob.RepositoryID = repoID
+
+	if j.EnvironmentID != nil {
+		envID, err := primitive.ObjectIDFromHex(string(*j.EnvironmentID))
+		if err != nil {
+			return shared.JobID(""), errors.Wrap(err, "error parsing id")
+		}
+		mJob.EnvironmentID = &envID
+	}
 
 	result, err := r.
 		Database.
@@ -184,7 +201,12 @@ func (r *JobStore) FilterByRepositoryID(
 			return page, errors.Wrap(err, "error decoding job")
 		}
 		r.Job.ID = shared.JobID(r.ObjectID.Hex())
-		r.Job.RepositoryID = r.RepositoryID.Hex()
+		r.Job.RepositoryID = store.RepositoryID(r.RepositoryID.Hex())
+		if r.Job.EnvironmentID != nil {
+			hex := store.EnvironmentID(r.EnvironmentID.Hex())
+			r.Job.EnvironmentID = &hex
+		}
+
 		page.Jobs = append(page.Jobs, r.Job)
 	}
 

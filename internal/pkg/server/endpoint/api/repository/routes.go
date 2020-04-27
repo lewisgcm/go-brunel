@@ -66,7 +66,7 @@ func (handler *repositoryHandler) list(r *http.Request) api.Response {
 
 func (handler *repositoryHandler) get(r *http.Request) api.Response {
 	id := chi.URLParam(r, "id")
-	repositories, err := handler.repositoryStore.Get(id)
+	repositories, err := handler.repositoryStore.Get(store.RepositoryID(id))
 	if err != nil {
 		return api.InternalServerError(err, "error getting repository")
 	}

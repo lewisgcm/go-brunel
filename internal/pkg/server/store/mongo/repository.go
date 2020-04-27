@@ -44,7 +44,7 @@ func (r *RepositoryStore) AddOrUpdate(repository store.Repository) (store.Reposi
 		return store.Repository{}, errors.Wrap(err, "error adding or updating repository")
 	}
 
-	repo.Repository.ID = repo.ObjectID.Hex()
+	repo.Repository.ID = store.RepositoryID(repo.ObjectID.Hex())
 	return repo.Repository, nil
 }
 
@@ -73,8 +73,8 @@ func (r *RepositoryStore) SetTriggers(id store.RepositoryID, triggers []store.Re
 	return nil
 }
 
-func (r *RepositoryStore) Get(id string) (store.Repository, error) {
-	objectID, err := primitive.ObjectIDFromHex(id)
+func (r *RepositoryStore) Get(id store.RepositoryID) (store.Repository, error) {
+	objectID, err := primitive.ObjectIDFromHex(string(id))
 	if err != nil {
 		return store.Repository{}, err
 	}
@@ -94,7 +94,7 @@ func (r *RepositoryStore) Get(id string) (store.Repository, error) {
 		return store.Repository{}, errors.Wrap(err, "error getting repository")
 	}
 
-	d.Repository.ID = d.ObjectID.Hex()
+	d.Repository.ID = store.RepositoryID(d.ObjectID.Hex())
 	return d.Repository, nil
 }
 
@@ -122,7 +122,7 @@ func (r *RepositoryStore) Filter(filter string) ([]store.Repository, error) {
 		if err != nil {
 			return nil, errors.Wrap(err, "error decoding repository list")
 		}
-		repo.ID = repo.ObjectID.Hex()
+		repo.ID = store.RepositoryID(repo.ObjectID.Hex())
 		repos = append(repos, repo.Repository)
 	}
 	return repos, nil

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
 	Grid,
 	Select,
@@ -27,10 +27,16 @@ export function TriggerEntry({trigger, onRemove, onChange}: CreateTriggerProps) 
 	const [reference, setReference] = useState(trigger.Pattern);
 	const [referenceIsDirty, setReferenceIsDirty] = useState(false);
 	const [referenceType, setReferenceType] = useState(trigger.Type);
-
 	const [environmentId, setEnvironmentId] = useState<string | undefined>(
 		trigger.EnvironmentID,
 	);
+
+	useEffect(() => {
+		setReference(trigger.Pattern);
+		setReferenceType(trigger.Type);
+		setEnvironmentId(trigger.EnvironmentID);
+		setReferenceIsDirty(false);
+	}, [trigger]);
 
 	const isReferenceValid = (reference: string) => {
 		return reference && reference.trim().length > 0 && reference.trim().length < 100;

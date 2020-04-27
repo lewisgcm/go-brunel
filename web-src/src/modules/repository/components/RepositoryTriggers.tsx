@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
 	Theme,
 	makeStyles,
@@ -27,13 +27,17 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 
 interface Props {
 	id: string;
-	triggers: RepositoryTrigger[];
+	triggers?: RepositoryTrigger[];
 }
 
 export function RepositoryTriggers(props: Props) {
 	const classes = useStyles({});
 	const repositoryService = useDependency(RepositoryService);
-	const [triggers, setTriggers] = useState<RepositoryTrigger[]>(props.triggers);
+	const [triggers, setTriggers] = useState<RepositoryTrigger[]>(props.triggers || []);
+
+	useEffect(() => {
+		setTriggers(props.triggers || []);
+	}, [props]);
 
 	const onSave = (triggers: RepositoryTrigger[]) => {
 		repositoryService
@@ -68,7 +72,7 @@ export function RepositoryTriggers(props: Props) {
 								trigger={trigger}
 								onRemove={() => {
 									const copy = triggers.slice();
-									delete copy[index];
+									copy.splice(index, 1);
 									setTriggers(copy);
 								}}
 								onChange={(newTrigger) => {

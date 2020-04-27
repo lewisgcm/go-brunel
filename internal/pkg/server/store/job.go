@@ -11,15 +11,16 @@ type JobListPage struct {
 }
 
 type Job struct {
-	ID           shared.JobID `bson:"-"`
-	RepositoryID string       `bson:"-"`
-	Commit       shared.Commit
-	State        shared.JobState
-	StartedBy    string     `bson:"started_by"`
-	StoppedBy    *string    `bson:"stopped_by"`
-	CreatedAt    time.Time  `bson:"created_at"`
-	StartedAt    *time.Time `bson:"started_at"`
-	StoppedAt    *time.Time `bson:"stopped_at"`
+	ID            shared.JobID   `bson:"-"`
+	RepositoryID  RepositoryID   `bson:"-"`
+	EnvironmentID *EnvironmentID `bson:"-"`
+	Commit        shared.Commit
+	State         shared.JobState
+	StartedBy     string     `bson:"started_by"`
+	StoppedBy     *string    `bson:"stopped_by"`
+	CreatedAt     time.Time  `bson:"created_at"`
+	StartedAt     *time.Time `bson:"started_at"`
+	StoppedAt     *time.Time `bson:"stopped_at"`
 }
 
 func (job *Job) IsValid() bool {
