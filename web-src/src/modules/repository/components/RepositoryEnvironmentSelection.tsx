@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import {TextField, CircularProgress} from '@material-ui/core';
 import {Autocomplete} from '@material-ui/lab';
 
-import {EnvironmentList, EnvironmentService, Environment} from '../../../services';
+import {EnvironmentList, EnvironmentService} from '../../../services';
 import {useDependency} from '../../../container';
 
 interface RepositoryEnvironmentSelectionProps {

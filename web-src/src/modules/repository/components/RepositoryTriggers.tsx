@@ -15,8 +15,12 @@ import {
 import AddIcon from '@material-ui/icons/Add';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
-import {TriggerEntry} from './TriggerEntry';
-import {RepositoryTrigger, RepositoryTriggerType, RepositoryService} from '../../../services';
+import {Trigger} from './Trigger';
+import {
+	RepositoryTrigger,
+	RepositoryTriggerType,
+	RepositoryService,
+} from '../../../services';
 import {useDependency} from '../../../container';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
@@ -30,14 +34,22 @@ interface Props {
 	triggers?: RepositoryTrigger[];
 }
 
+interface RepositoryTriggerItem extends RepositoryTrigger {
+	isValid?: boolean;
+}
+
 export function RepositoryTriggers(props: Props) {
 	const classes = useStyles({});
 	const repositoryService = useDependency(RepositoryService);
-	const [triggers, setTriggers] = useState<RepositoryTrigger[]>(props.triggers || []);
+	const [triggers, setTriggers] = useState<RepositoryTriggerItem[]>(props.triggers || []);
 
 	useEffect(() => {
 		setTriggers(props.triggers || []);
 	}, [props]);
+
+	const isTriggerValid = (trigger: RepositoryTrigger) => {
+		return trigger && trigger.Pattern.trim().length > 0 && trigger.Pattern.trim().length < 100;
+	};
 
 	const onSave = (triggers: RepositoryTrigger[]) => {
 		repositoryService
@@ -58,6 +70,7 @@ export function RepositoryTriggers(props: Props) {
 								triggers.concat([{
 									Type: RepositoryTriggerType.Branch,
 									Pattern: '',
+									isValid: false,
 								}]),
 							);
 						}}>
@@ -67,7 +80,7 @@ export function RepositoryTriggers(props: Props) {
 				<Grid container item xs={11} spacing={3}>
 					{
 						triggers.map((trigger, index) => {
-							return <TriggerEntry
+							return <Trigger
 								key={index}
 								trigger={trigger}
 								onRemove={() => {
@@ -75,7 +88,9 @@ export function RepositoryTriggers(props: Props) {
 									copy.splice(index, 1);
 									setTriggers(copy);
 								}}
-								onChange={(newTrigger) => {
+								isValid={trigger.isValid === undefined ? true : trigger.isValid}
+								onChange={(newTrigger: RepositoryTriggerItem) => {
+									newTrigger.isValid = isTriggerValid(newTrigger);
 									const copy = triggers.slice();
 									copy[index] = newTrigger;
 									setTriggers(copy);
@@ -87,7 +102,7 @@ export function RepositoryTriggers(props: Props) {
 		</ExpansionPanelDetails>
 		<Divider />
 		<ExpansionPanelActions>
-			<Button size="small" color="primary" onClick={() => onSave(triggers)}>
+			<Button disabled={triggers.some((t) => t.isValid === false)} size="small" color="primary" onClick={() => onSave(triggers)}>
 				Save
 			</Button>
 		</ExpansionPanelActions>

@@ -2,6 +2,7 @@ package store
 
 import (
 	"github.com/pkg/errors"
+	"regexp"
 	"time"
 )
 
@@ -33,14 +34,19 @@ type Repository struct {
 }
 
 func (repository *Repository) IsValid() bool {
-	return repository.Name != "" && repository.Project != ""
+	return repository.Name != "" && repository.Project != "" && repository.URI != ""
 }
 
 func (trigger *RepositoryTrigger) IsValid() bool {
 	if trigger.Type != RepositoryTriggerTypeTag && trigger.Type != RepositoryTriggerTypeBranch {
 		return false
 	}
-	return trigger.Pattern != ""
+
+	if _, e := regexp.Compile(trigger.Pattern); e != nil {
+		return false
+	}
+
+	return true
 }
 
 type RepositoryStore interface {

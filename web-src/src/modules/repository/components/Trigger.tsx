@@ -17,15 +17,15 @@ import {
 	RepositoryTriggerType,
 } from '../../../services';
 
-interface CreateTriggerProps {
+interface TriggerProps {
 	trigger: RepositoryTrigger;
 	onRemove: () => void;
 	onChange: (trigger: RepositoryTrigger) => void;
+	isValid: boolean;
 }
 
-export function TriggerEntry({trigger, onRemove, onChange}: CreateTriggerProps) {
+export function Trigger({trigger, onRemove, onChange, isValid}: TriggerProps) {
 	const [reference, setReference] = useState(trigger.Pattern);
-	const [referenceIsDirty, setReferenceIsDirty] = useState(false);
 	const [referenceType, setReferenceType] = useState(trigger.Type);
 	const [environmentId, setEnvironmentId] = useState<string | undefined>(
 		trigger.EnvironmentID,
@@ -35,12 +35,7 @@ export function TriggerEntry({trigger, onRemove, onChange}: CreateTriggerProps) 
 		setReference(trigger.Pattern);
 		setReferenceType(trigger.Type);
 		setEnvironmentId(trigger.EnvironmentID);
-		setReferenceIsDirty(false);
 	}, [trigger]);
-
-	const isReferenceValid = (reference: string) => {
-		return reference && reference.trim().length > 0 && reference.trim().length < 100;
-	};
 
 	return <React.Fragment>
 		<Grid item xs={3}>
@@ -76,11 +71,10 @@ export function TriggerEntry({trigger, onRemove, onChange}: CreateTriggerProps) 
 				required
 				value={reference}
 				fullWidth
-				error={!isReferenceValid(reference) && referenceIsDirty}
-				helperText={(!isReferenceValid(reference) && referenceIsDirty) ? 'You must enter a pattern for matching branches or tags' : undefined}
+				error={!isValid}
+				helperText={(!isValid) ? 'You must enter a pattern for matching branches or tags' : undefined}
 				onChange={(e) => {
 					setReference(e.target.value);
-					setReferenceIsDirty(true);
 					onChange({
 						Type: referenceType,
 						Pattern: e.target.value,

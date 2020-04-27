@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"gopkg.in/go-playground/webhooks.v5/gitlab"
 )
 
@@ -61,29 +60,5 @@ func (handler *webHookHandler) gitLab(r *http.Request) api.Response {
 		return api.NotFound()
 	}
 
-	if !repository.IsValid() {
-		return api.BadRequest(nil, "invalid project name or namespace supplied")
-	}
-
-	if !job.IsValid() {
-		return api.BadRequest(nil, "invalid branch or revision supplied")
-	}
-
-	repo, err := handler.repositoryStore.AddOrUpdate(repository)
-	if err != nil {
-		return api.InternalServerError(err, "error storing gitlab hook event repository")
-	}
-
-	job.RepositoryID = repo.ID
-	id, err := handler.jobStore.Add(job)
-	if err != nil {
-		return api.InternalServerError(err, "error storing gitlab hook event job")
-	}
-
-	if err := handler.notifier.Notify(id); err != nil {
-		return api.InternalServerError(err, "error notifying job status from hook event")
-	}
-
-	log.Info("received build notification from gitlab hook for project ", repo.Project, "/", repo.Name)
-	return api.NoContent()
+	return handler.finishHandling(repository, job)
 }
