@@ -114,7 +114,19 @@ export interface Repository {
 	Project: string;
 	Name: string;
 	URI: string;
+	Triggers: RepositoryTrigger[];
 	CreatedAt: string;
+}
+
+export interface RepositoryTrigger {
+	Type: RepositoryTriggerType;
+	Pattern: string;
+	EnvironmentID?: string;
+}
+
+export enum RepositoryTriggerType {
+	Tag = 0,
+	Branch = 1
 }
 
 export enum EnvironmentVariableType {
@@ -142,7 +154,48 @@ interface JWT {
 }
 
 @injectable()
+export class AuthService {
+	isAuthenticated(): boolean {
+		const token = window.localStorage.getItem('jwt');
+		if (token) {
+			try {
+				return moment
+					.utc((jwtDecode(token) as JWT).exp)
+					.isBefore(moment());
+			} catch (e) {
+				return false;
+			}
+		}
+		return false;
+	}
+
+	setAuthentication(token: string) {
+		window.localStorage.setItem('jwt', token);
+	}
+
+	getAuthHeaders(): HeadersInit {
+		return {
+			Authorization: `Bearer ${window.localStorage.getItem('jwt')}`,
+		} as HeadersInit;
+	}
+}
+
+@injectable()
 export class RepositoryService {
+	constructor(private _authService: AuthService) {
+	}
+
+	setTriggers(id: string, triggers: RepositoryTrigger[]): Observable<{}> {
+		return from(fetch(
+			`/api/repository/${id}/triggers`,
+			{
+				method: 'PUT',
+				headers: this._authService.getAuthHeaders(),
+				body: JSON.stringify(triggers),
+			},
+		));
+	}
+
 	list(filter = ''): Observable<Repository[]> {
 		const query = new URLSearchParams({
 			filter: filter.toString(),
@@ -178,33 +231,6 @@ export class RepositoryService {
 		return from(fetch(`/api/repository/${id}/jobs?${query}`)).pipe(
 			switchMap((response) => response.json()),
 		);
-	}
-}
-
-@injectable()
-export class AuthService {
-	isAuthenticated(): boolean {
-		const token = window.localStorage.getItem('jwt');
-		if (token) {
-			try {
-				return moment
-					.utc((jwtDecode(token) as JWT).exp)
-					.isBefore(moment());
-			} catch (e) {
-				return false;
-			}
-		}
-		return false;
-	}
-
-	setAuthentication(token: string) {
-		window.localStorage.setItem('jwt', token);
-	}
-
-	getAuthHeaders(): HeadersInit {
-		return {
-			Authorization: `Bearer ${window.localStorage.getItem('jwt')}`,
-		} as HeadersInit;
 	}
 }
 

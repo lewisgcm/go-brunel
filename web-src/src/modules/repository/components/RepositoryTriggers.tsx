@@ -1,30 +1,91 @@
-import React, { useState } from 'react';
-import {Grid, Select, MenuItem, TextField, FormControl, InputLabel} from '@material-ui/core';
-import RepositoryEnvironmentSelection from './RepositoryEnvironmentSelection';
+import React, {useState} from 'react';
+import {
+	Theme,
+	makeStyles,
+	createStyles,
+	Grid,
+	IconButton,
+	Button,
+	Divider,
+	ExpansionPanel,
+	ExpansionPanelActions,
+	ExpansionPanelDetails,
+	ExpansionPanelSummary,
+} from '@material-ui/core';
+import AddIcon from '@material-ui/icons/Add';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
-export function RepositoryTriggers() {
-	const [referenceType, setReferenceType] = useState(0);
+import {TriggerEntry} from './TriggerEntry';
+import {RepositoryTrigger, RepositoryTriggerType, RepositoryService} from '../../../services';
+import {useDependency} from '../../../container';
 
-	return <Grid container justify="space-between" spacing={3}>
-		<Grid item xs={4}>
-			<FormControl fullWidth>
-				<InputLabel id="demo-simple-select-label">Reference Type</InputLabel>
-				<Select
-					labelId="demo-simple-select-label"
-					id="demo-simple-select"
-					value={referenceType}
-					onChange={(e) => setReferenceType(e.target.value as number)}
-				>
-					<MenuItem value={0}>Branch</MenuItem>
-					<MenuItem value={1}>Tag</MenuItem>
-				</Select>
-			</FormControl>
-		</Grid>
-		<Grid item xs={4}>
-			<TextField label="Reference" fullWidth></TextField>
-		</Grid>
-		<Grid item xs={4}>
-			<RepositoryEnvironmentSelection />
-		</Grid>
-	</Grid>;
+const useStyles = makeStyles((theme: Theme) => createStyles({
+	'triggers': {
+		marginBottom: theme.spacing(2),
+	},
+}));
+
+interface Props {
+	id: string;
+	triggers: RepositoryTrigger[];
+}
+
+export function RepositoryTriggers(props: Props) {
+	const classes = useStyles({});
+	const repositoryService = useDependency(RepositoryService);
+	const [triggers, setTriggers] = useState<RepositoryTrigger[]>(props.triggers);
+
+	const onSave = (triggers: RepositoryTrigger[]) => {
+		repositoryService
+			.setTriggers(props.id, triggers)
+			.subscribe(() => { });
+	};
+
+	return <ExpansionPanel className={classes.triggers}>
+		<ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+			<p style={{margin: 0}}>Build Triggers</p>
+		</ExpansionPanelSummary>
+		<ExpansionPanelDetails>
+			<Grid container justify="space-between" spacing={3}>
+				<Grid item xs={1}>
+					<IconButton
+						onClick={() => {
+							setTriggers(
+								triggers.concat([{
+									Type: RepositoryTriggerType.Branch,
+									Pattern: '',
+								}]),
+							);
+						}}>
+						<AddIcon/>
+					</IconButton>
+				</Grid>
+				<Grid container item xs={11} spacing={3}>
+					{
+						triggers.map((trigger, index) => {
+							return <TriggerEntry
+								key={index}
+								trigger={trigger}
+								onRemove={() => {
+									const copy = triggers.slice();
+									delete copy[index];
+									setTriggers(copy);
+								}}
+								onChange={(newTrigger) => {
+									const copy = triggers.slice();
+									copy[index] = newTrigger;
+									setTriggers(copy);
+								}}/>;
+						})
+					}
+				</Grid>
+			</Grid>
+		</ExpansionPanelDetails>
+		<Divider />
+		<ExpansionPanelActions>
+			<Button size="small" color="primary" onClick={() => onSave(triggers)}>
+				Save
+			</Button>
+		</ExpansionPanelActions>
+	</ExpansionPanel>;
 }

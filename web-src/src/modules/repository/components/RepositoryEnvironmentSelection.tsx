@@ -1,15 +1,30 @@
 import React, {useState, useEffect} from 'react';
-import TextField from '@material-ui/core/TextField';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import {EnvironmentList, EnvironmentService} from '../../../services';
+import {TextField, CircularProgress} from '@material-ui/core';
+import {Autocomplete} from '@material-ui/lab';
+
+import {EnvironmentList, EnvironmentService, Environment} from '../../../services';
 import {useDependency} from '../../../container';
 
-export default function RepositoryEnvironmentSelection() {
+interface RepositoryEnvironmentSelectionProps {
+	value: string | undefined;
+	onChange: (value: string | undefined) => void;
+	required?: boolean;
+	error?: boolean;
+	helperText?: string;
+}
+
+export default function RepositoryEnvironmentSelection({
+	value,
+	onChange,
+	required,
+	error,
+	helperText,
+}: RepositoryEnvironmentSelectionProps) {
 	const environmentService = useDependency(EnvironmentService);
 	const [open, setOpen] = useState(false);
 	const [options, setOptions] = useState<EnvironmentList[]>([]);
-	const loading = open && options.length === 0;
+	const [selectedEnvironment, setSelectedEnvironment] = useState<EnvironmentList | null>(null);
+	const loading = (open && options.length === 0) || (!!value && selectedEnvironment === null);
 
 	useEffect(() => {
 		let active = true;
@@ -24,12 +39,18 @@ export default function RepositoryEnvironmentSelection() {
 				if (active) {
 					setOptions(items);
 				}
+				if (value) {
+					const item = items.find((i) => i.ID === value);
+					if (item) {
+						setSelectedEnvironment(item);
+					}
+				}
 			});
 
 		return () => {
 			active = false;
 		};
-	}, [environmentService, loading]);
+	}, [environmentService, value, selectedEnvironment, loading]);
 
 	useEffect(() => {
 		if (!open) {
@@ -46,13 +67,22 @@ export default function RepositoryEnvironmentSelection() {
 			onClose={() => {
 				setOpen(false);
 			}}
-			getOptionSelected={(option, value) => option.Name === value.Name}
+			autoHighlight
+			value={selectedEnvironment}
+			onChange={(event: any, newValue: EnvironmentList | null) => {
+				setSelectedEnvironment(newValue);
+				onChange(newValue ? newValue.ID : undefined);
+			}}
+			getOptionSelected={(option, value) => option.ID === value.ID}
 			getOptionLabel={(option) => option.Name}
 			options={options}
 			loading={loading}
 			renderInput={(params) => (
 				<TextField
 					{...params}
+					error={error}
+					helperText={helperText}
+					required={required}
 					label="Environment"
 					InputProps={{
 						...params.InputProps,

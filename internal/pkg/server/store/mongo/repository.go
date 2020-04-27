@@ -10,6 +10,7 @@ import (
 	"github.com/mongodb/mongo-go-driver/x/bsonx"
 	"github.com/pkg/errors"
 	"go-brunel/internal/pkg/server/store"
+	"time"
 )
 
 const (
@@ -27,6 +28,7 @@ type mongoRepository struct {
 
 func (r *RepositoryStore) AddOrUpdate(repository store.Repository) (store.Repository, error) {
 	var repo mongoRepository
+	repo.UpdatedAt = time.Now()
 	upsert := true
 	after := options.After
 	err := r.
@@ -44,6 +46,31 @@ func (r *RepositoryStore) AddOrUpdate(repository store.Repository) (store.Reposi
 
 	repo.Repository.ID = repo.ObjectID.Hex()
 	return repo.Repository, nil
+}
+
+func (r *RepositoryStore) SetTriggers(id store.RepositoryID, triggers []store.RepositoryTrigger) error {
+	objectID, err := primitive.ObjectIDFromHex(string(id))
+	if err != nil {
+		return errors.Wrap(err, "error parsing object id")
+	}
+
+	if e := r.
+		Database.
+		Collection(repositoryCollectionName).
+		FindOneAndUpdate(
+			context.Background(),
+			bson.M{"_id": objectID},
+			bson.M{"$set": bson.M{
+				"triggers":   triggers,
+				"updated_at": time.Now(),
+			}},
+			&options.FindOneAndUpdateOptions{},
+		).Err();
+		e != nil {
+		return errors.Wrap(err, "error adding or updating repository")
+	}
+
+	return nil
 }
 
 func (r *RepositoryStore) Get(id string) (store.Repository, error) {

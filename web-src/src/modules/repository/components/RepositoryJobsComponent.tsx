@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import moment from 'moment';
 import {useHistory} from 'react-router';
 import {
@@ -17,17 +17,10 @@ import {
 	TableSortLabel,
 	TextField,
 	Tooltip,
-	AppBar,
-	Tabs,
-	Tab,
-	ExpansionPanel,
-	ExpansionPanelSummary,
-	ExpansionPanelDetails,
 } from '@material-ui/core';
 
 import {RepositoryJobPage, JobState, RepositoryJob, Repository} from '../../../services';
 import {RepositoryTriggers} from './RepositoryTriggers';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 interface Props {
 	isLoading: boolean;
@@ -149,31 +142,13 @@ export function RepositoryJobsComponent(
 ) {
 	const classes = useStyles({});
 	const history = useHistory();
-	const [selectedTab, setSelectedTab] = useState(0);
-
-	const handleChange = (newTab: number) => {
-		setSelectedTab(newTab);
-	};
 
 	return (
 		<React.Fragment>
-			<AppBar position="static" className={classes.tabs}>
-				<Tabs value={selectedTab} onChange={(e, t: number) => handleChange(t)} variant="fullWidth" >
-					<Tab label="Jobs" />
-					<Tab label="Triggers" />
-				</Tabs>
-			</AppBar>
-			<ExpansionPanel>
-				<ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-					<p style={{margin: 0}}>Build Triggers</p>
-				</ExpansionPanelSummary>
-				<ExpansionPanelDetails>
-					<p>Some content in here</p>
-				</ExpansionPanelDetails>
-			</ExpansionPanel>
 			<h1>{repository.Project}/{repository.Name}</h1>
 			<h4>{repository.URI}</h4>
-			{selectedTab === 0 && <React.Fragment>
+			<RepositoryTriggers id={repository.ID} triggers={repository.Triggers || []}/>
+			<React.Fragment>
 				<TextField className={classes.search}
 					label="Search by branch, revision or user"
 					onChange={(e) => onSearch(e.target.value)} />
@@ -257,8 +232,7 @@ export function RepositoryJobsComponent(
 						}
 					/>
 				</Paper>
-			</React.Fragment>}
-			{selectedTab === 1 && <RepositoryTriggers />}
+			</React.Fragment>
 		</React.Fragment>
 	);
 }
