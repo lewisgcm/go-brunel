@@ -2,10 +2,12 @@ import * as Actions from './actions';
 
 export interface State {
 	authenticated: boolean;
+	sideBarOpen: boolean;
 }
 
 const initialState: State = {
 	authenticated: false,
+	sideBarOpen: false,
 };
 
 export function reducer(state = initialState, action: Actions.ActionTypes) {
@@ -14,6 +16,11 @@ export function reducer(state = initialState, action: Actions.ActionTypes) {
 		return {
 			...state,
 			authenticated: action.payload.authenticated,
+		};
+	case Actions.Type.TOGGLE_SIDEBAR:
+		return {
+			...state,
+			sideBarOpen: !state.sideBarOpen,
 		};
 	default:
 		return state;

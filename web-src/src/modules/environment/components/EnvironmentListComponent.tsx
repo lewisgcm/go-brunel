@@ -50,7 +50,7 @@ export function EnvironmentListComponent({
 	onSearch,
 	onAdd,
 }: Props) {
-	const classes = useStyles();
+	const classes = useStyles({});
 
 	return <List className={classes.list}>
 		<Button

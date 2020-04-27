@@ -1,9 +1,8 @@
 import React from 'react';
 import {NavLink} from 'react-router-dom';
 import AppBar from '@material-ui/core/AppBar';
-import {Button, IconButton, Toolbar, Drawer, Hidden} from '@material-ui/core';
+import {Button, IconButton, Toolbar, Hidden} from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
-import CloseIcon from '@material-ui/icons/Close';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Typography from '@material-ui/core/Typography';
 import {
@@ -57,17 +56,16 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 interface ResponsiveDrawerProps {
-	container?: Element;
 	children: React.ReactNode;
+	onSidebarToggle: () => void;
 }
 
 export function AuthenticatedLayout(props: ResponsiveDrawerProps) {
 	const {children} = props;
-	const classes = useStyles();
-	const [mobileOpen, setMobileOpen] = React.useState(false);
+	const classes = useStyles({});
 
 	const handleDrawerToggle = () => {
-		setMobileOpen(!mobileOpen);
+		props.onSidebarToggle();
 	};
 
 	return (
@@ -75,48 +73,28 @@ export function AuthenticatedLayout(props: ResponsiveDrawerProps) {
 			<CssBaseline />
 			<AppBar position="fixed" className={classes.appBar}>
 				<Toolbar>
-					<Hidden smUp>
+					<Hidden mdUp>
 						<IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu" onClick={handleDrawerToggle}>
 							<MenuIcon />
 						</IconButton>
 					</Hidden>
 
-					<Typography className={classes.title} variant="h6" noWrap>
-						Brunel CI
-					</Typography>
+					<Hidden smDown>
+						<Typography className={classes.title} variant="h6" noWrap>
+							Brunel CI
+						</Typography>
+					</Hidden>
 
 					<Hidden xsDown>
 						<Button className={classes.buttonActive} component={NavLink} activeClassName='is-active' to={'/repository'} color="inherit">Repositories</Button>
 						<Button className={classes.buttonActive} component={NavLink} activeClassName='is-active' to={'/environment'} color="inherit">Environments</Button>
-						<div className={classes.grow} />
-						<CurrentUser/>
 					</Hidden>
+					<div className={classes.grow} />
+					<CurrentUser/>
 				</Toolbar>
 			</AppBar>
 			<div style={{width: '100%'}}>
 				<div className={classes.toolbar} />
-				<nav>
-					<Hidden smUp implementation="css">
-						<Drawer
-							variant="temporary"
-							open={mobileOpen}
-							onClose={handleDrawerToggle}
-							classes={{
-								paper: classes.drawerPaper,
-							}}
-							ModalProps={{
-								keepMounted: true,
-							}}>
-							{<React.Fragment>
-								<div className={classes.drawerHeader}>
-									<IconButton onClick={handleDrawerToggle}>
-										<CloseIcon />
-									</IconButton>
-								</div>
-							</React.Fragment>}
-						</Drawer>
-					</Hidden>
-				</nav>
 				<main className={classes.content}>
 					{children}
 				</main>
