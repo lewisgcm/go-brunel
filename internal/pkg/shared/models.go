@@ -6,8 +6,6 @@
 
 package shared
 
-import "go-brunel/internal/pkg/server/store"
-
 // ContainerID is a type for a containers id, for example a docker container id (string)
 type ContainerID string
 
@@ -128,7 +126,6 @@ type Commit struct {
 type Job struct {
 	ID            JobID
 	Repository    Repository
-	EnvironmentID store.EnvironmentID
 	Commit        Commit
 	State         JobState
 }
