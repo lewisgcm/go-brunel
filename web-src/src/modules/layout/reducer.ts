@@ -20,7 +20,7 @@ export function reducer(state = initialState, action: Actions.ActionTypes) {
 	case Actions.Type.TOGGLE_SIDEBAR:
 		return {
 			...state,
-			sideBarOpen: !state.sideBarOpen,
+			sideBarOpen: action.payload.isOpen !== undefined ? action.payload.isOpen : !state.sideBarOpen,
 		};
 	default:
 		return state;

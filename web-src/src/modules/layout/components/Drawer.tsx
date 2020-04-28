@@ -1,6 +1,16 @@
 import React, {Dispatch} from 'react';
+import {NavLink} from 'react-router-dom';
 import {connect} from 'react-redux';
-import {Hidden, Drawer as MaterialDrawer, IconButton} from '@material-ui/core';
+import {
+	Hidden,
+	Drawer as MaterialDrawer,
+	IconButton,
+	List,
+	ListItem,
+	Typography,
+	ListItemText,
+	Divider,
+} from '@material-ui/core';
 import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
 import CloseIcon from '@material-ui/icons/Close';
 
@@ -24,6 +34,12 @@ const useStyles = makeStyles((theme: Theme) =>
 		toolbar: theme.mixins.toolbar,
 		drawerPaper: {
 			width: drawerWidth,
+		},
+		grow: {
+			flexGrow: 1,
+		},
+		headerTitle: {
+			marginLeft: theme.spacing(1),
 		},
 		drawerHeader: {
 			display: 'flex',
@@ -78,12 +94,36 @@ export const Drawer = connect(
 				>
 					<div>
 						<div className={classes.drawerHeader}>
+							<Typography variant="h6" className={classes.headerTitle} noWrap>
+								Brunel CI
+							</Typography>
+							<div className={classes.grow} />
 							<IconButton onClick={() => {
 								onToggleSideBar();
 							}}>
 								<CloseIcon/>
 							</IconButton>
 						</div>
+						<Divider />
+						<List>
+							<ListItem
+								button
+								component={NavLink}
+								to={'/repository'}
+								activeClassName='Mui-selected'
+								onClick={() => onToggleSideBar()} >
+								<ListItemText primary={'Repositories'} />
+							</ListItem>
+							<ListItem
+								button
+								component={NavLink}
+								to={'/environment'}
+								activeClassName='Mui-selected'
+								onClick={() => onToggleSideBar()} >
+								<ListItemText primary={'Environments'} />
+							</ListItem>
+						</List>
+						<Divider />
 						{sidebar()}
 					</div>
 				</MaterialDrawer>

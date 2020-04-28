@@ -1,27 +1,30 @@
 package environment
 
-import "go-brunel/internal/pkg/runner/remote"
+import (
+	"go-brunel/internal/pkg/runner/remote"
+	"go-brunel/internal/pkg/shared"
+)
 
 type remoteEnvironment struct {
-	remote     remote.Remote
-	searchPath []string
+	remote remote.Remote
+	id     shared.JobID
 }
 
 type RemoteEnvironmentFactory struct {
 	Remote remote.Remote
 }
 
-func (envFactory *RemoteEnvironmentFactory) Create(searchPath []string) Provider {
+func (envFactory *RemoteEnvironmentFactory) Create(id shared.JobID) Provider {
 	return &remoteEnvironment{
-		searchPath: searchPath,
-		remote:     envFactory.Remote,
+		id:     id,
+		remote: envFactory.Remote,
 	}
 }
 
 func (env *remoteEnvironment) GetSecret(name string) (string, error) {
-	return env.remote.SearchForSecret(env.searchPath, name)
+	return env.remote.SearchForSecret(env.id, name)
 }
 
 func (env *remoteEnvironment) GetValue(name string) (string, error) {
-	return env.remote.SearchForValue(env.searchPath, name)
+	return env.remote.SearchForValue(env.id, name)
 }

@@ -12,10 +12,12 @@ export function setAuthenticated(authenticated: boolean) {
 	};
 }
 
-export function toggleSidebar() {
+export function toggleSidebar(isOpen?: boolean) {
 	return {
 		type: Type.TOGGLE_SIDEBAR,
-		payload: {},
+		payload: {
+			isOpen,
+		},
 	};
 }
 

@@ -40,8 +40,8 @@ type ContainerLogRequest struct {
 }
 
 type SearchForXRequest struct {
-	SearchPath []string
-	Name       string
+	Id   shared.JobID
+	Name string
 }
 
 type GetNextAvailableJobResponse struct {

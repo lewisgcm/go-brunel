@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/pkg/errors"
+	"go-brunel/internal/pkg/shared"
 	"go-brunel/internal/pkg/shared/util"
 	"os"
 	"regexp"
@@ -19,7 +20,7 @@ type LocalEnvironmentFactory struct {
 
 var envRegex = regexp.MustCompile(`^([^=]+)=(.+)$`)
 
-func (envFactory *LocalEnvironmentFactory) Create(searchPath []string) Provider {
+func (envFactory *LocalEnvironmentFactory) Create(id shared.JobID) Provider {
 	return &localEnvironment{
 		DotEnvPath: envFactory.DotEnvPath,
 	}

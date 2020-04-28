@@ -72,6 +72,7 @@ export function EnvironmentDetail({detail, onSave, onCancel, isEdit, onEdit}: Pr
 					label="Environment Name"
 					fullWidth/>}
 			</Grid>
+
 			{variables.length > 0 && <Grid item xs={12}>
 				<h3 className={classes.subheader}>Variables</h3>
 				<Divider />

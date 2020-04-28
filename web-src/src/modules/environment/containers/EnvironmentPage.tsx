@@ -1,9 +1,10 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, Dispatch} from 'react';
 import {BehaviorSubject, merge} from 'rxjs';
 import {first, debounceTime, skip, tap, switchMap, distinctUntilChanged} from 'rxjs/operators';
 import {match} from 'react-router';
+import {connect} from 'react-redux';
 
-import {Drawer} from '../../layout';
+import {Drawer, ActionTypes, toggleSidebar} from '../../layout';
 import {EnvironmentListComponent} from '../components/EnvironmentListComponent';
 import {useDependency} from '../../../container';
 import {EnvironmentService, Environment, EnvironmentList} from '../../../services';
@@ -13,7 +14,18 @@ interface Props {
 	match: match<{environmentId: string}>;
 }
 
-export const EnvironmentPage = ({match}: Props) => {
+function mapDispatchToProps(dispatch: Dispatch<ActionTypes>) {
+	return {
+		hideMobileSidebar: () => {
+			dispatch(toggleSidebar(false));
+		},
+	};
+}
+
+export const EnvironmentPage = connect(
+	null,
+	mapDispatchToProps,
+)(({match, hideMobileSidebar}: Props & ReturnType<typeof mapDispatchToProps>) => {
 	const environmentService = useDependency(EnvironmentService);
 	const [environments, setEnvironments] = useState<EnvironmentList[]>([]);
 	const [subject] = useState(new BehaviorSubject(''));
@@ -62,12 +74,14 @@ export const EnvironmentPage = ({match}: Props) => {
 		isLoading={isLoading}
 		environments={environments}
 		onClick={(id) => {
+			hideMobileSidebar();
 			setIsEdit(false);
 			setSelectedEnvironmentId(id);
 		}}
 		onSearch={(term) => subject.next(term)}
 		selectedEnvironmentId={selectedEnvironmentId}
 		onAdd={() => {
+			hideMobileSidebar();
 			setSelectedEnvironmentId(undefined);
 			setIsEdit(true);
 			setDetail({
@@ -102,4 +116,4 @@ export const EnvironmentPage = ({match}: Props) => {
 				}} /> :
 			<React.Fragment/>;
 	}} />;
-};
+});
