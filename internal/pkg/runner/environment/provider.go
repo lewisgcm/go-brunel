@@ -8,5 +8,5 @@ type Provider interface {
 }
 
 type Factory interface {
-	Create(id shared.JobID) Provider
+	Create(id *shared.EnvironmentID) Provider
 }

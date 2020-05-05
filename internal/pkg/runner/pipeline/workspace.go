@@ -70,7 +70,7 @@ func (w *LocalWorkSpace) Prepare(event trigger.Event) (*shared.Spec, error) {
 		WorkingDirectory: event.WorkDir,
 		VCS:              w.VCS,
 		EnvironmentProvider: w.EnvironmentFactory.Create(
-			event.Job.ID,
+			event.Job.EnvironmentID,
 		),
 	}
 

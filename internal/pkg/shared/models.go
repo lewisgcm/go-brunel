@@ -15,6 +15,9 @@ type ContainerState uint8
 // ContainerWaitState are the states that we can wait for a container to be in
 type ContainerWaitState uint8
 
+// EnvironmentID is the ID of an environment
+type EnvironmentID string
+
 // JobID is the ID of a job, it should be a string an be friendly for both kube and docker
 type JobID string
 
@@ -125,6 +128,7 @@ type Commit struct {
 // Job is used to denote a job that should be processed
 type Job struct {
 	ID            JobID
+	EnvironmentID *EnvironmentID
 	Repository    Repository
 	Commit        Commit
 	State         JobState

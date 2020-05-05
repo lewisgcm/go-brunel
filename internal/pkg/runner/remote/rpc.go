@@ -92,14 +92,14 @@ func (c *rpcClient) ContainerLog(id shared.ContainerID, message string, logType 
 	)
 }
 
-func (c *rpcClient) SearchForValue(searchPath []string, name string) (string, error) {
+func (c *rpcClient) GetEnvironmentValue(id shared.EnvironmentID, name string) (string, error) {
 	var reply string
-	e := c.client.Call("RPC.SearchForValue", remote.SearchForXRequest{SearchPath: searchPath, Name: name}, &reply)
+	e := c.client.Call("RPC.GetEnvironmentValue", remote.GetEnvironmentRequest{Id: id, Name: name}, &reply)
 	return reply, rpcError(e)
 }
 
-func (c *rpcClient) SearchForSecret(searchPath []string, name string) (string, error) {
+func (c *rpcClient) GetEnvironmentSecret(id shared.EnvironmentID, name string) (string, error) {
 	var reply string
-	e := c.client.Call("RPC.SearchForSecret", remote.SearchForXRequest{SearchPath: searchPath, Name: name}, &reply)
+	e := c.client.Call("RPC.GetEnvironmentSecret", remote.GetEnvironmentRequest{Id: id, Name: name}, &reply)
 	return reply, rpcError(e)
 }

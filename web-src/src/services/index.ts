@@ -160,8 +160,8 @@ export class AuthService {
 		if (token) {
 			try {
 				return moment
-					.utc((jwtDecode(token) as JWT).exp)
-					.isBefore(moment());
+					.unix(Number((jwtDecode(token) as JWT).exp))
+					.isAfter(moment());
 			} catch (e) {
 				return false;
 			}

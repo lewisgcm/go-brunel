@@ -11,9 +11,9 @@ type JobListPage struct {
 }
 
 type Job struct {
-	ID            shared.JobID   `bson:"-"`
-	RepositoryID  RepositoryID   `bson:"-"`
-	EnvironmentID *EnvironmentID `bson:"-"`
+	ID            shared.JobID          `bson:"-"`
+	RepositoryID  RepositoryID          `bson:"-"`
+	EnvironmentID *shared.EnvironmentID `bson:"-"`
 	Commit        shared.Commit
 	State         shared.JobState
 	StartedBy     string     `bson:"started_by"`

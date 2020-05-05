@@ -12,12 +12,13 @@ import (
 )
 
 type RPC struct {
-	Notify          notify.Notify
-	JobStore        store.JobStore
-	LogStore        store.LogStore
-	ContainerStore  store.ContainerStore
-	RepositoryStore store.RepositoryStore
-	StageStore      store.StageStore
+	Notify           notify.Notify
+	JobStore         store.JobStore
+	LogStore         store.LogStore
+	ContainerStore   store.ContainerStore
+	RepositoryStore  store.RepositoryStore
+	EnvironmentStore store.EnvironmentStore
+	StageStore       store.StageStore
 }
 
 func (t *RPC) GetNextAvailableJob(args *remote.Empty, reply *remote.GetNextAvailableJobResponse) error {
@@ -34,9 +35,10 @@ func (t *RPC) GetNextAvailableJob(args *remote.Empty, reply *remote.GetNextAvail
 		log.Info("job with id ", job.ID, " has started")
 
 		reply.Job = &shared.Job{
-			ID:     job.ID,
-			State:  job.State,
-			Commit: job.Commit,
+			ID:            job.ID,
+			State:         job.State,
+			Commit:        job.Commit,
+			EnvironmentID: job.EnvironmentID,
 			Repository: shared.Repository{
 				URI:     r.URI,
 				Name:    r.Name,
@@ -148,12 +150,20 @@ func (t *RPC) ContainerLog(args *remote.ContainerLogRequest, reply *remote.Empty
 	)
 }
 
-func (t *RPC) SearchForSecret(args *remote.SearchForXRequest, reply *string) error {
-	*reply = ""
+func (t *RPC) GetEnvironmentValue(args *remote.GetEnvironmentRequest, reply *string) error {
+	v, e := t.EnvironmentStore.GetVariable(args.Id, args.Name)
+	if e != nil {
+		return errors.Wrap(e, "error getting environment variable value")
+	}
+	*reply = *v
 	return nil
 }
 
-func (t *RPC) SearchForValue(args *remote.SearchForXRequest, reply *string) error {
-	*reply = ""
+func (t *RPC) GetEnvironmentSecret(args *remote.GetEnvironmentRequest, reply *string) error {
+	v, e := t.EnvironmentStore.GetVariable(args.Id, args.Name)
+	if e != nil {
+		return errors.Wrap(e, "error getting environment variable value")
+	}
+	*reply = *v
 	return nil
 }

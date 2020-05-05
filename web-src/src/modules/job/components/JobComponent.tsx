@@ -64,11 +64,11 @@ export const JobComponent = withDependency<Props, Dependencies>(
 	}),
 )(({jobService, match}) => {
 	const history = useHistory();
-	const classes = useStyles();
+	const classes = useStyles({});
 	const {jobId} = match.params;
 	const [job, setJob] = useState<Job | undefined>();
 	const [jobProgress, setJobProgress] = useState<JobProgress>({State: JobState.Waiting, Stages: []});
-	const [selectedStage, setSelectedStage] = useState();
+	const [selectedStage, setSelectedStage] = useState<string | undefined>();
 
 	const stageSelect = (newStageId: string) => {
 		setSelectedStage(newStageId);

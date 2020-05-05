@@ -2,6 +2,7 @@ package store
 
 import (
 	"github.com/pkg/errors"
+	"go-brunel/internal/pkg/shared"
 	"regexp"
 	"time"
 )
@@ -19,7 +20,7 @@ const (
 type RepositoryTrigger struct {
 	Type          RepositoryTriggerType
 	Pattern       string
-	EnvironmentID *EnvironmentID `bson:"environment_id"`
+	EnvironmentID *shared.EnvironmentID `bson:"environment_id"`
 }
 
 type Repository struct {

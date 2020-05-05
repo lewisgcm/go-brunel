@@ -20,7 +20,7 @@ type LocalEnvironmentFactory struct {
 
 var envRegex = regexp.MustCompile(`^([^=]+)=(.+)$`)
 
-func (envFactory *LocalEnvironmentFactory) Create(id shared.JobID) Provider {
+func (envFactory *LocalEnvironmentFactory) Create(id *shared.EnvironmentID) Provider {
 	return &localEnvironment{
 		DotEnvPath: envFactory.DotEnvPath,
 	}

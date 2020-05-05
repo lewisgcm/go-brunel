@@ -1,6 +1,8 @@
 package remote
 
-import "go-brunel/internal/pkg/shared"
+import (
+	"go-brunel/internal/pkg/shared"
+)
 
 type SetJobStateRequest struct {
 	Id    shared.JobID
@@ -39,8 +41,8 @@ type ContainerLogRequest struct {
 	LogType shared.LogType
 }
 
-type SearchForXRequest struct {
-	Id   shared.JobID
+type GetEnvironmentRequest struct {
+	Id   shared.EnvironmentID
 	Name string
 }
 

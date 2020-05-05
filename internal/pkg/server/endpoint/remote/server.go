@@ -16,18 +16,20 @@ func Server(
 	lr store.LogStore,
 	cr store.ContainerStore,
 	rr store.RepositoryStore,
+	er store.EnvironmentStore,
 	sr store.StageStore,
 	notify notify.Notify,
 	credentials remote.Credentials,
 	listen string,
 ) error {
 	service := &RPC{
-		JobStore:        jr,
-		LogStore:        lr,
-		ContainerStore:  cr,
-		RepositoryStore: rr,
-		StageStore:      sr,
-		Notify:          notify,
+		JobStore:         jr,
+		LogStore:         lr,
+		ContainerStore:   cr,
+		RepositoryStore:  rr,
+		EnvironmentStore: er,
+		StageStore:       sr,
+		Notify:           notify,
 	}
 	err := rpc.Register(service)
 	if err != nil {

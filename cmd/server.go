@@ -128,6 +128,7 @@ func main() {
 		logStore,
 		containerStore,
 		repositoryStore,
+		environmentStore,
 		stageStore,
 		notifier,
 		*serverConfig.Remote.Credentials,

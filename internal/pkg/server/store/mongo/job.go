@@ -56,7 +56,11 @@ func (r *JobStore) Next() (*store.Job, error) {
 	job.Job.ID = shared.JobID(job.ObjectID.Hex())
 	job.Job.RepositoryID = store.RepositoryID(job.RepositoryID.Hex())
 	if job.EnvironmentID != nil {
-		hex := store.EnvironmentID(job.EnvironmentID.Hex())
+		e := shared.EnvironmentID(job.EnvironmentID.Hex())
+		job.Job.EnvironmentID = &e
+	}
+	if job.EnvironmentID != nil {
+		hex := shared.EnvironmentID(job.EnvironmentID.Hex())
 		job.Job.EnvironmentID = &hex
 	}
 
@@ -87,7 +91,7 @@ func (r *JobStore) Get(id shared.JobID) (store.Job, error) {
 	mJob.Job.ID = shared.JobID(mJob.ObjectID.Hex())
 	mJob.Job.RepositoryID = store.RepositoryID(mJob.RepositoryID.Hex())
 	if mJob.EnvironmentID != nil {
-		hex := store.EnvironmentID(mJob.EnvironmentID.Hex())
+		hex := shared.EnvironmentID(mJob.EnvironmentID.Hex())
 		mJob.Job.EnvironmentID = &hex
 	}
 	return mJob.Job, nil
@@ -203,7 +207,7 @@ func (r *JobStore) FilterByRepositoryID(
 		r.Job.ID = shared.JobID(r.ObjectID.Hex())
 		r.Job.RepositoryID = store.RepositoryID(r.RepositoryID.Hex())
 		if r.Job.EnvironmentID != nil {
-			hex := store.EnvironmentID(r.EnvironmentID.Hex())
+			hex := shared.EnvironmentID(r.EnvironmentID.Hex())
 			r.Job.EnvironmentID = &hex
 		}
 
