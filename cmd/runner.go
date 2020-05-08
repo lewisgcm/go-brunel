@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"go-brunel/internal/pkg/runner"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -19,16 +20,21 @@ import (
 
 func loadRunnerConfig() (error, runner.Config) {
 	runnerConfig := runner.Config{}
+	dir, err := os.Getwd()
+	if err != nil {
+		return errors.Wrap(err, "error getting current directory"), runnerConfig
+	}
 
 	conf := viper.New()
 
 	conf.AutomaticEnv()
+	conf.SetDefault("working-directory", dir + "/")
 	conf.SetEnvPrefix("BRUNEL")
 	conf.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
 
 	conf.SetConfigName("runner")
 	conf.AddConfigPath("./")
-	err := conf.ReadInConfig()
+	err = conf.ReadInConfig()
 
 	if err != nil {
 		switch err.(type) {

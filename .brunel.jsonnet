@@ -2,18 +2,33 @@
     version: "v1",
     description: "Brunel CI/CD Build Pipeline",
     stages: {
-        runner_build: {
+        "Build Runner": {
+            services: [
+                {
+                    image: "docker:dind",
+                    privileged: true,
+                    wait: {
+                        output: "Daemon has completed initialization",
+                        timeout: 30
+                    },
+                    environment: {
+                        "DOCKER_TLS_CERTDIR": "",
+                    },
+                    hostname: "docker"
+                },
+            ],
             steps: [
                 {
-                    image: "gcr.io/kaniko-project/executor:latest",
-                    working_dir: "/workspace",
+                    image: "docker:dind-rootless",
+                    workingDir: "/workspace/",
+                    entryPoint: "sh",
+                    environment: {
+                        "DOCKER_HOST": "tcp://docker:2375",
+                    },
                     args: [
-                        "--dockerfile",
-                        "./Dockerfile.runner",
-                        "--context",
-                        "dir://workspace",
-                        "--destination",
-                        "lewisgcm/go-brunel:runner"
+                        "-c",
+                        "--",
+                        "docker build -f ./Dockerfile.runner .",
                     ]
                 }
             ]
