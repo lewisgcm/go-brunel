@@ -12,6 +12,8 @@ import {
 } from '@material-ui/core/styles';
 
 import {CurrentUser} from '../containers/CurrentUser';
+import {useHasRole} from '../hooks';
+import {UserRole} from '../../../services';
 
 const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
@@ -63,6 +65,7 @@ interface ResponsiveDrawerProps {
 export function AuthenticatedLayout(props: ResponsiveDrawerProps) {
 	const {children} = props;
 	const classes = useStyles({});
+	const isAdmin = useHasRole(UserRole.Admin);
 
 	const handleDrawerToggle = () => {
 		props.onSidebarToggle();
@@ -87,7 +90,10 @@ export function AuthenticatedLayout(props: ResponsiveDrawerProps) {
 
 					<Hidden xsDown>
 						<Button className={classes.buttonActive} component={NavLink} activeClassName='is-active' to={'/repository'} color="inherit">Repositories</Button>
-						<Button className={classes.buttonActive} component={NavLink} activeClassName='is-active' to={'/environment'} color="inherit">Environments</Button>
+						{
+							isAdmin &&
+							<Button className={classes.buttonActive} component={NavLink} activeClassName='is-active' to={'/environment'} color="inherit">Environments</Button>
+						}
 					</Hidden>
 					<div className={classes.grow} />
 					<CurrentUser/>

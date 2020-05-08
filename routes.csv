@@ -3,9 +3,14 @@ p, anonymous, /api/user/login, (POST|GET)
 p, anonymous, /api/user/callback, GET
 
 p, reader, /api/user/profile, GET
-p, reader, /api/repositories*, GET
-p, reader, /api/jobs/*, GET
-p, reader, /api/jobs/*, DELETE
+p, reader, /api/repository*, GET
+p, reader, /api/job/*, GET
+p, reader, /api/container/*, GET
+
+p, admin, /api/job/*, DELETE
+p, admin, /api/environment*, POST
+p, admin, /api/repository*, PUT
+p, admin, /api/environment*, GET
 
 g, , anonymous
 g, owner, reader

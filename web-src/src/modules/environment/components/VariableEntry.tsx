@@ -6,6 +6,8 @@ import {
 	InputAdornment,
 	IconButton,
 	Switch,
+	Hidden,
+	Divider,
 } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Visibility from '@material-ui/icons/Visibility';
@@ -34,7 +36,7 @@ export function VariableEntry({isEdit, variable, onSave, onRemove}: VariableProp
 	};
 
 	return <React.Fragment>
-		<Grid item xs={!isEdit ? 6 : 5}>
+		<Grid item xs={12} md={!isEdit ? 6 : 5}>
 			<TextField
 				InputLabelProps={{shrink: true, required: false}}
 				variant="outlined"
@@ -46,7 +48,7 @@ export function VariableEntry({isEdit, variable, onSave, onRemove}: VariableProp
 		</Grid>
 		{
 			isEdit &&
-			<Grid item xs={1}>
+			<Grid item xs={12} md={2} xl={1}>
 				<FormControlLabel
 					control={<Switch color="primary" checked={sensitive} onChange={(e) => {
 						setSensitive(e.target.checked);
@@ -57,7 +59,7 @@ export function VariableEntry({isEdit, variable, onSave, onRemove}: VariableProp
 				/>
 			</Grid>
 		}
-		<Grid item xs={!isEdit ? 6 : 5}>
+		<Grid item xs={12} md={!isEdit ? 6 : 4} xl={!isEdit ? 6 : 5}>
 			<TextField
 				InputLabelProps={{shrink: true}}
 				InputProps={{
@@ -86,7 +88,7 @@ export function VariableEntry({isEdit, variable, onSave, onRemove}: VariableProp
 		</Grid>
 		{
 			isEdit &&
-			<Grid item xs={1}>
+			<Grid item xs={12} md={1}>
 				{
 					<IconButton onClick={() => onRemove(variable.Name)}>
 						<DeleteIcon />
@@ -94,5 +96,10 @@ export function VariableEntry({isEdit, variable, onSave, onRemove}: VariableProp
 				}
 			</Grid>
 		}
+		<Hidden mdUp>
+			<Grid item xs={12} >
+				<Divider/>
+			</Grid>
+		</Hidden>
 	</React.Fragment>;
 }

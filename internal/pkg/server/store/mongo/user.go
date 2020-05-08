@@ -7,6 +7,7 @@ import (
 	"github.com/mongodb/mongo-go-driver/mongo"
 	"github.com/mongodb/mongo-go-driver/mongo/options"
 	"github.com/pkg/errors"
+	"go-brunel/internal/pkg/server/security"
 	"go-brunel/internal/pkg/server/store"
 )
 
@@ -33,7 +34,10 @@ func (r *UserStore) AddOrUpdate(user store.User) (store.User, error) {
 		FindOneAndUpdate(
 			context.Background(),
 			bson.M{"username": user.Username},
-			bson.M{"$set": bson.M{"username": user.Username, "avatar_url": user.AvatarURL, "name": user.Name, "email": user.Email}},
+			bson.M{
+				"$set":         bson.M{"username": user.Username, "avatar_url": user.AvatarURL, "name": user.Name, "email": user.Email},
+				"$setOnInsert": bson.M{"role": security.UserRoleReader},
+			},
 			&options.FindOneAndUpdateOptions{Upsert: &upsert, ReturnDocument: &after},
 		).Decode(&f)
 	if err != nil {

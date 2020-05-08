@@ -15,8 +15,9 @@ import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
 import CloseIcon from '@material-ui/icons/Close';
 
 import {State} from '../reducer';
-import {getSideBarOpen} from '../selectors';
+import {getSideBarOpen, getRole} from '../selectors';
 import {ActionTypes, toggleSidebar} from '../actions';
+import {UserRole} from '../../../services';
 
 interface Props {
 	sidebar: () => React.ReactNode;
@@ -61,6 +62,7 @@ function mapStateToProps(state: { layout: State }, ownProps: Props) {
 	return {
 		...ownProps,
 		isSideBarOpen: getSideBarOpen(state.layout),
+		isAdmin: getRole(state.layout) === UserRole.Admin,
 	};
 }
 
@@ -75,7 +77,7 @@ function mapDispatchToProps(dispatch: Dispatch<ActionTypes>) {
 export const Drawer = connect(
 	mapStateToProps,
 	mapDispatchToProps,
-)(({sidebar, content, isSideBarOpen, onToggleSideBar}: ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>) => {
+)(({sidebar, content, isSideBarOpen, onToggleSideBar, isAdmin}: ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>) => {
 	const classes = useStyles({});
 
 	return <React.Fragment>
@@ -114,14 +116,17 @@ export const Drawer = connect(
 								onClick={() => onToggleSideBar()} >
 								<ListItemText primary={'Repositories'} />
 							</ListItem>
-							<ListItem
-								button
-								component={NavLink}
-								to={'/environment'}
-								activeClassName='Mui-selected'
-								onClick={() => onToggleSideBar()} >
-								<ListItemText primary={'Environments'} />
-							</ListItem>
+							{
+								isAdmin &&
+								<ListItem
+									button
+									component={NavLink}
+									to={'/environment'}
+									activeClassName='Mui-selected'
+									onClick={() => onToggleSideBar()} >
+									<ListItemText primary={'Environments'} />
+								</ListItem>
+							}
 						</List>
 						<Divider />
 						{sidebar()}

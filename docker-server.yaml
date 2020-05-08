@@ -17,6 +17,7 @@ webhook:
   github-secret:
 
 server-name:
+secret:
 
 oauth:
   gitlab:

@@ -32,7 +32,7 @@ export function VariableEntryCreate({allVariables, onSave}: Props) {
 	};
 
 	return <React.Fragment>
-		<Grid item xs={5}>
+		<Grid item xs={12} md={5}>
 			<TextField
 				InputLabelProps={{shrink: true}}
 				onChange={(e) => {
@@ -48,7 +48,7 @@ export function VariableEntryCreate({allVariables, onSave}: Props) {
 				required
 				fullWidth/>
 		</Grid>
-		<Grid item xs={5}>
+		<Grid item xs={12} md={4} xl={5}>
 			<TextField
 				InputLabelProps={{shrink: true}}
 				onChange={(e) => setValue(e.target.value)}
@@ -59,7 +59,7 @@ export function VariableEntryCreate({allVariables, onSave}: Props) {
 				fullWidth
 				multiline/>
 		</Grid>
-		<Grid item xs={1}>
+		<Grid item md={2} xl={1}>
 			<FormControlLabel
 				control={<Switch color="primary" checked={sensitive} onChange={(e) => setSensitive(e.target.checked)} />}
 				label="Secret"

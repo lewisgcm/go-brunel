@@ -149,8 +149,14 @@ export interface Environment extends EnvironmentList {
 	Variables: EnvironmentVariable[];
 }
 
+export enum UserRole {
+	Admin = 'admin',
+	Reader = 'reader',
+}
+
 interface JWT {
 	exp: string;
+	role: UserRole;
 }
 
 @injectable()
@@ -167,6 +173,14 @@ export class AuthService {
 			}
 		}
 		return false;
+	}
+
+	getRole(): UserRole | undefined {
+		const token = window.localStorage.getItem('jwt');
+		if (token) {
+			return (jwtDecode(token) as JWT).role;
+		}
+		return undefined;
 	}
 
 	setAuthentication(token: string) {
@@ -201,13 +215,25 @@ export class RepositoryService {
 			filter: filter.toString(),
 		});
 
-		return from(fetch(`/api/repository?${query}`)).pipe(
+		return from(fetch(
+			`/api/repository?${query}`,
+			{
+				method: 'GET',
+				headers: this._authService.getAuthHeaders(),
+			},
+		)).pipe(
 			switchMap((response) => response.json()),
 		);
 	}
 
 	get(id: string): Observable<Repository> {
-		return from(fetch(`/api/repository/${id}`)).pipe(
+		return from(fetch(
+			`/api/repository/${id}`,
+			{
+				method: 'GET',
+				headers: this._authService.getAuthHeaders(),
+			},
+		)).pipe(
 			switchMap((response) => response.json()),
 		);
 	}
@@ -228,7 +254,13 @@ export class RepositoryService {
 			filter: filter.toString(),
 		});
 
-		return from(fetch(`/api/repository/${id}/jobs?${query}`)).pipe(
+		return from(fetch(
+			`/api/repository/${id}/jobs?${query}`,
+			{
+				method: 'GET',
+				headers: this._authService.getAuthHeaders(),
+			},
+		)).pipe(
 			switchMap((response) => response.json()),
 		);
 	}

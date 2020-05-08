@@ -6,11 +6,12 @@ import {red} from '@material-ui/core/colors';
 import {FaCodeBranch, FaUserPlus, FaUserTimes, FaRegClock} from 'react-icons/fa';
 
 import {withDependency} from '../../../container';
-import {Job, JobProgress, JobService, JobState} from '../../../services';
+import {Job, JobProgress, JobService, JobState, UserRole} from '../../../services';
 import {JobProgressGraph} from './JobProgressGraph';
 import {JobContainerLogs} from './JobContainerLogs';
 import {JobStageLogs} from './JobStageLogs';
 import moment from 'moment';
+import {useHasRole} from '../../layout/hooks';
 
 interface Dependencies {
     jobService: JobService;
@@ -69,6 +70,7 @@ export const JobComponent = withDependency<Props, Dependencies>(
 	const [job, setJob] = useState<Job | undefined>();
 	const [jobProgress, setJobProgress] = useState<JobProgress>({State: JobState.Waiting, Stages: []});
 	const [selectedStage, setSelectedStage] = useState<string | undefined>();
+	const isAdmin = useHasRole(UserRole.Admin);
 
 	const stageSelect = (newStageId: string) => {
 		setSelectedStage(newStageId);
@@ -150,7 +152,7 @@ export const JobComponent = withDependency<Props, Dependencies>(
 						</Tooltip>}
 					</React.Fragment>
 				}
-				{jobProgress.State === JobState.Processing && <CancelButton onClick={() => onCancel()}>
+				{jobProgress.State === JobState.Processing && isAdmin && <CancelButton onClick={() => onCancel()}>
 					Cancel
 				</CancelButton>}
 			</Toolbar>

@@ -6,11 +6,12 @@ import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
 import {FaGitlab, FaGithub} from 'react-icons/fa';
 
 import {withDependency} from '../../container';
-import {AuthService} from '../../services';
-import {setAuthenticated, OAuthPopup} from '../layout';
+import {AuthService, UserRole} from '../../services';
+import {setAuthenticated, OAuthPopup, setRole} from '../layout';
 
 interface Props {
 	setLoggedIn: () => void;
+	setUserRole: (role?: UserRole) => void;
 }
 
 interface Dependencies {
@@ -47,6 +48,7 @@ const useStyles = makeStyles((theme: Theme) =>
 export const Login = connect(
 	null,
 	(dispatch) => ({
+		setUserRole: (role?: UserRole) => dispatch(setRole(role)),
 		setLoggedIn: () => dispatch(setAuthenticated(true)),
 	}),
 )(withDependency<Props, Dependencies>(
@@ -54,7 +56,7 @@ export const Login = connect(
 		authService: container.get(AuthService),
 	}),
 )(
-	({authService, setLoggedIn}) => {
+	({authService, setLoggedIn, setUserRole}) => {
 		const classes = useStyles();
 		const history = useHistory();
 		const [isOpen, setOpen] = useState(false);
@@ -89,6 +91,7 @@ export const Login = connect(
 				provider={provider}
 				onDone={(e) => {
 					authService.setAuthentication(e);
+					setUserRole(authService.getRole());
 					setLoggedIn();
 					history.push('/repository/');
 				}}

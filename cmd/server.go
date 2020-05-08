@@ -16,6 +16,7 @@ import (
 	"go-brunel/internal/pkg/server/endpoint/api/repository"
 	"go-brunel/internal/pkg/server/endpoint/api/user"
 	"go-brunel/internal/pkg/server/endpoint/remote"
+	"go-brunel/internal/pkg/server/security"
 	"net/http"
 	"os"
 	"strings"
@@ -144,7 +145,7 @@ func main() {
 	router.Use(
 		middleware.DefaultCompress,
 		middleware.RedirectSlashes,
-		// security.Middleware("keymatch_model.conf", "routes.csv", jwtSerializer),
+		security.Middleware("keymatch_model.conf", "routes.csv", jwtSerializer),
 		middleware.Recoverer,
 	)
 	router.Mount("/api/hook", hook.Routes(serverConfig.WebHook, jobStore, repositoryStore, notifier))
@@ -152,7 +153,7 @@ func main() {
 	router.Mount("/api/repository", repository.Routes(repositoryStore, jobStore))
 	router.Mount("/api/job", job.Routes(jobStore, logStore, stageStore, containerStore, repositoryStore, jwtSerializer))
 	router.Mount("/api/container", container.Routes(logStore, containerStore, jwtSerializer))
-	router.Mount("/api/user", user.Routes(userStore, oauths, jwtSerializer))
+	router.Mount("/api/user", user.Routes(serverConfig.DefaultAdminUser, userStore, oauths, jwtSerializer))
 	FileServer(router)
 
 	walkFunc := func(method string, route string, handler http.Handler, middleware ...func(http.Handler) http.Handler) error {

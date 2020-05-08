@@ -100,6 +100,9 @@ func (handler *jobHandler) progress(r *http.Request) api.Response {
 				continue
 			}
 
+			// Overwrite the environment, we dont want to leak any sensitive information
+			c.Spec.Environment = nil
+
 			stageContainers = append(stageContainers, c)
 		}
 

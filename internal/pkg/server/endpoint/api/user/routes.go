@@ -15,8 +15,9 @@ import (
 )
 
 type authHandler struct {
-	serializer security.TokenSerializer
-	userStore  store.UserStore
+	defaultAdminUser string
+	serializer       security.TokenSerializer
+	userStore        store.UserStore
 }
 
 func (handler *authHandler) oAuthComplete(w http.ResponseWriter, user goth.User) {
@@ -30,6 +31,10 @@ func (handler *authHandler) oAuthComplete(w http.ResponseWriter, user goth.User)
 		log.Error("error occurred updating user ", err)
 		api.HandleError(w, http.StatusInternalServerError, errors.New("error authenticating"))
 		return
+	}
+
+	if roles.Username == handler.defaultAdminUser {
+		roles.Role = security.UserRoleAdmin
 	}
 
 	token, err := handler.serializer.Encode(security.Identity{Username: roles.Username, Role: roles.Role})
@@ -82,14 +87,20 @@ func (handler *authHandler) profile(r *http.Request) api.Response {
 	return api.Ok(user)
 }
 
-func Routes(userStore store.UserStore, oauthProviders []goth.Provider, serializer security.TokenSerializer) *chi.Mux {
+func Routes(
+	defaultAdminUser string,
+	userStore store.UserStore,
+	oauthProviders []goth.Provider,
+	serializer security.TokenSerializer,
+) *chi.Mux {
 	for _, p := range oauthProviders {
 		log.Info("registering oauth provider ", p.Name())
 		goth.UseProviders(p)
 	}
 	handler := authHandler{
-		userStore:  userStore,
-		serializer: serializer,
+		userStore:        userStore,
+		serializer:       serializer,
+		defaultAdminUser: defaultAdminUser,
 	}
 
 	router := chi.NewRouter()

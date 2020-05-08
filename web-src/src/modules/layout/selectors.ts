@@ -8,4 +8,6 @@ export function getSideBarOpen(state: State) {
 	return state.sideBarOpen;
 }
 
-
+export function getRole(state: State) {
+	return state.role;
+}

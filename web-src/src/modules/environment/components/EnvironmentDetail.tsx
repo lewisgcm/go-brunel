@@ -7,6 +7,7 @@ import {
 	Button,
 	Grid,
 	Divider,
+	Hidden,
 } from '@material-ui/core';
 
 import {VariableEntry} from './VariableEntry';
@@ -110,15 +111,17 @@ export function EnvironmentDetail({detail, onSave, onCancel, isEdit, onEdit}: Pr
 			}
 
 			{isEdit && <React.Fragment>
-				<Grid item xs={8}></Grid>
+				<Hidden xsDown>
+					<Grid item md={8}></Grid>
+				</Hidden>
 
-				<Grid item xs={2}>
+				<Grid item md={2} xs={12}>
 					<Button variant="contained" fullWidth onClick={() => onCancel()}>
 						Cancel
 					</Button>
 				</Grid>
 
-				<Grid item xs={2}>
+				<Grid item md={2} xs={12}>
 					<Button variant="contained" color="primary" disabled={!isNameValid(name)} fullWidth onClick={() => {
 						onSave({
 							ID: detail ? detail.ID : '',
@@ -131,8 +134,10 @@ export function EnvironmentDetail({detail, onSave, onCancel, isEdit, onEdit}: Pr
 			</React.Fragment>}
 
 			{!isEdit && <React.Fragment>
-				<Grid item xs={10}></Grid>
-				<Grid item xs={2}>
+				<Hidden xsDown>
+					<Grid item md={10}></Grid>
+				</Hidden>
+				<Grid item md={2} xs={12}>
 					<Button color="primary" variant="contained" fullWidth onClick={() => onEdit()}>
 						Edit
 					</Button>

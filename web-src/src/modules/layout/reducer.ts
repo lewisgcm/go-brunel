@@ -1,8 +1,10 @@
 import * as Actions from './actions';
+import {UserRole} from '../../services';
 
 export interface State {
 	authenticated: boolean;
 	sideBarOpen: boolean;
+	role?: UserRole;
 }
 
 const initialState: State = {
@@ -16,6 +18,11 @@ export function reducer(state = initialState, action: Actions.ActionTypes) {
 		return {
 			...state,
 			authenticated: action.payload.authenticated,
+		};
+	case Actions.Type.SET_ROLE:
+		return {
+			...state,
+			role: action.payload.role,
 		};
 	case Actions.Type.TOGGLE_SIDEBAR:
 		return {

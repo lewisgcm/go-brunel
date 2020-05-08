@@ -19,8 +19,9 @@ import {
 	Tooltip,
 } from '@material-ui/core';
 
-import {RepositoryJobPage, JobState, RepositoryJob, Repository} from '../../../services';
+import {RepositoryJobPage, JobState, RepositoryJob, Repository, UserRole} from '../../../services';
 import {RepositoryTriggers} from './RepositoryTriggers';
+import {useHasRole} from '../../layout/hooks';
 
 interface Props {
 	isLoading: boolean;
@@ -142,12 +143,13 @@ export function RepositoryJobsComponent(
 ) {
 	const classes = useStyles({});
 	const history = useHistory();
+	const isAdmin = useHasRole(UserRole.Admin);
 
 	return (
 		<React.Fragment>
 			<h1>{repository.Project}/{repository.Name}</h1>
 			<h4>{repository.URI}</h4>
-			<RepositoryTriggers id={repository.ID} triggers={repository.Triggers}/>
+			{isAdmin && <RepositoryTriggers id={repository.ID} triggers={repository.Triggers}/>}
 			<React.Fragment>
 				<TextField className={classes.search}
 					label="Search by branch, revision or user"

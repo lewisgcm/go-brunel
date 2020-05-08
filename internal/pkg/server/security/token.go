@@ -37,7 +37,7 @@ type jwtSerializer struct {
 
 type roleClaims struct {
 	jwt.StandardClaims
-	Role UserRole
+	Role UserRole `json:"role,omitempty"`
 }
 
 func (p *jwtSerializer) Encode(identity Identity) (string, error) {

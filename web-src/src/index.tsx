@@ -7,7 +7,7 @@ import {Container} from 'inversify';
 import App from './App';
 import {store} from './store';
 import {DependencyProvider} from './container';
-import {setAuthenticated} from './modules/layout';
+import {setAuthenticated, setRole} from './modules/layout';
 import {
 	AuthService,
 	EnvironmentService,
@@ -25,6 +25,7 @@ container.bind(UserService).toSelf();
 container.bind(JobService).toSelf();
 container.bind(EnvironmentService).toSelf();
 
+store.dispatch(setRole(authService.getRole()));
 store.dispatch(setAuthenticated(authService.isAuthenticated()));
 
 ReactDOM.render(
