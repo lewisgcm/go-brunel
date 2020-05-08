@@ -7,7 +7,6 @@
                 {
                     image: "gcr.io/kaniko-project/executor:latest",
                     working_dir: "/workspace",
-                    entrypoint: "sh",
                     args: [
                         "--dockerfile",
                         "./Dockerfile.runner",
