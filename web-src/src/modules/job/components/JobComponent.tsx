@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {match, useHistory} from 'react-router';
-import {AppBar, Button, Toolbar, Tooltip, Typography, withStyles} from '@material-ui/core';
+import {AppBar, Button, Toolbar, Tooltip, Typography, withStyles, Hidden} from '@material-ui/core';
 import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
 import {red} from '@material-ui/core/colors';
 import {FaCodeBranch, FaUserPlus, FaUserTimes, FaRegClock} from 'react-icons/fa';
@@ -118,9 +118,11 @@ export const JobComponent = withDependency<Props, Dependencies>(
 					Back
 				</Button>
 				{job && <React.Fragment>
-					<Typography className={classes.title}>
-						{job.Repository.Project}/{job.Repository.Name}
-					</Typography>
+					<Hidden xsDown>
+						<Typography className={classes.title}>
+							{job.Repository.Project}/{job.Repository.Name}
+						</Typography>
+					</Hidden>
 				</React.Fragment>}
 				<span className={classes.grow}/>
 				{
@@ -128,26 +130,34 @@ export const JobComponent = withDependency<Props, Dependencies>(
 						<Tooltip title={job.Commit.Revision}>
 							<Typography className={classes.titleJobInfo}>
 								<FaCodeBranch/>
-								{job.Commit.Branch.replace('refs/heads/', '')}
+								<Hidden mdDown>
+									{job.Commit.Branch.replace('refs/heads/', '')}
+								</Hidden>
 							</Typography>
 						</Tooltip>
 
 						<Tooltip title={`Created by ${job.StartedBy}`} >
 							<Typography className={classes.titleJobInfo}>
 								<FaUserPlus />
-								{job.StartedBy}
+								<Hidden mdDown>
+									{job.StartedBy}
+								</Hidden>
 							</Typography>
 						</Tooltip>
 
 						{moment(job.StartedAt).isValid() && <Typography className={classes.titleJobInfo}>
 							<FaRegClock />
-							{moment(job.StartedAt).format('LLLL')}
+							<Hidden mdDown>
+								{moment(job.StartedAt).format('LLLL')}
+							</Hidden>
 						</Typography>}
 
 						{job.StoppedBy && <Tooltip title={`Cancelled by ${job.StoppedBy}`} >
 							<Typography className={classes.titleJobInfo}>
 								<FaUserTimes />
-								{job.StoppedBy}
+								<Hidden mdDown>
+									{job.StoppedBy}
+								</Hidden>
 							</Typography>
 						</Tooltip>}
 					</React.Fragment>

@@ -98,7 +98,7 @@ function calculateTime(stage: Stage) {
 export const JobProgressGraph = (props: StageGraphProps) => {
 	const classes = useStyles();
 
-	return <svg width="100%" height="110" viewBox={`0 0 ${(props.stages.length + 1) * stageSpacing} 110`} className={classes.svg} >
+	return <svg width="100%" height="110" viewBox={`-20 0 ${((props.stages.length + 1) * stageSpacing)+40} 110`} className={classes.svg} >
 		<g>
 			{/* Render the starting point in our graph. */}
 			<g transform={`translate(0, 50) rotate(0)`} >
