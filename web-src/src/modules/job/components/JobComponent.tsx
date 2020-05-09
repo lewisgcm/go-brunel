@@ -2,8 +2,13 @@ import React, {useEffect, useState} from 'react';
 import {match, useHistory} from 'react-router';
 import {AppBar, Button, Toolbar, Tooltip, Typography, withStyles, Hidden} from '@material-ui/core';
 import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
-import {red} from '@material-ui/core/colors';
-import {FaCodeBranch, FaUserPlus, FaUserTimes, FaRegClock} from 'react-icons/fa';
+import {red, blue} from '@material-ui/core/colors';
+import {
+	FaCodeBranch,
+	FaUserPlus,
+	FaUserTimes,
+	FaRegClock,
+} from 'react-icons/fa';
 
 import {withDependency} from '../../../container';
 import {Job, JobProgress, JobService, JobState, UserRole} from '../../../services';
@@ -59,6 +64,17 @@ const CancelButton = withStyles((theme: Theme) => ({
 	},
 }))(Button);
 
+const TriggerButton = withStyles((theme: Theme) => ({
+	root: {
+		'color': theme.palette.getContrastText(blue[500]),
+		'backgroundColor': blue[700],
+		'marginLeft': theme.spacing(2),
+		'&:hover': {
+			backgroundColor: blue[900],
+		},
+	},
+}))(Button);
+
 export const JobComponent = withDependency<Props, Dependencies>(
 	(container) => ({
 		jobService: container.get(JobService),
@@ -80,6 +96,14 @@ export const JobComponent = withDependency<Props, Dependencies>(
 		jobService.cancel(jobId).subscribe(
 			() => {},
 		);
+	};
+
+	const onReSchedule = (id: string) => {
+		jobService
+			.reSchedule(id)
+			.subscribe((newJob) => {
+				history.push(`/job/${newJob.ID}`);
+			});
 	};
 
 	useEffect(() => {
@@ -165,6 +189,9 @@ export const JobComponent = withDependency<Props, Dependencies>(
 				{jobProgress.State === JobState.Processing && isAdmin && <CancelButton onClick={() => onCancel()}>
 					Cancel
 				</CancelButton>}
+				{jobProgress.State > JobState.Processing && isAdmin && <TriggerButton onClick={() => onReSchedule(jobId)}>
+					Retry
+				</TriggerButton>}
 			</Toolbar>
 		</AppBar>
 		<JobProgressGraph stages={jobProgress.Stages}

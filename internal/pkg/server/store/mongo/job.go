@@ -123,7 +123,7 @@ func (r *JobStore) Add(j store.Job) (shared.JobID, error) {
 	if err != nil {
 		return shared.JobID(""), errors.Wrap(err, "error adding job")
 	}
-	return shared.JobID(result.InsertedID.(primitive.ObjectID).String()), nil
+	return shared.JobID(result.InsertedID.(primitive.ObjectID).Hex()), nil
 }
 
 func (r *JobStore) update(id shared.JobID, update mongoJobUpdate) error {

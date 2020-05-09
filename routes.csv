@@ -8,6 +8,7 @@ p, reader, /api/job/*, GET
 p, reader, /api/container/*, GET
 
 p, admin, /api/job/*, DELETE
+p, admin, /api/job/*/reschedule, POST
 p, admin, /api/environment*, POST
 p, admin, /api/repository*, PUT
 p, admin, /api/environment*, GET

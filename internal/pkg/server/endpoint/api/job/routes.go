@@ -136,6 +136,22 @@ func (handler *jobHandler) cancel(r *http.Request) api.Response {
 		return api.InternalServerError(err, "error decoding token")
 	}
 
+	err = handler.jobStore.CancelByID(shared.JobID(id), identity.Username)
+	if err != nil {
+		return api.InternalServerError(err, "error setting job state")
+	}
+
+	log.Info("job with id ", id, " has been cancelled")
+	return api.NoContent()
+}
+
+func (handler *jobHandler) reschedule(r *http.Request) api.Response {
+	id := chi.URLParam(r, "id")
+	identity, err := handler.jwtSerializer.Decode(r)
+	if err != nil {
+		return api.InternalServerError(err, "error decoding token")
+	}
+
 	job, err := handler.jobStore.Get(shared.JobID(id))
 	if err != nil {
 		if err == store.ErrorNotFound {
@@ -144,17 +160,18 @@ func (handler *jobHandler) cancel(r *http.Request) api.Response {
 		return api.InternalServerError(err, "error getting job")
 	}
 
-	if !(identity.Username != job.StartedBy || identity.Role != security.UserRoleAdmin) {
-		return api.UnAuthorized()
+	newJob := store.Job{
+		RepositoryID:  job.RepositoryID,
+		EnvironmentID: job.EnvironmentID,
+		Commit:        job.Commit,
+		State:         shared.JobStateWaiting,
+		StartedBy:     identity.Username,
+		CreatedAt:     time.Now(),
 	}
+	newJobId, err := handler.jobStore.Add(newJob)
+	newJob.ID = newJobId
 
-	err = handler.jobStore.CancelByID(shared.JobID(id), identity.Username)
-	if err != nil {
-		return api.InternalServerError(err, "error setting job state")
-	}
-
-	log.Info("job with id ", id, " has been cancelled")
-	return api.NoContent()
+	return api.Ok(newJob)
 }
 
 func Routes(
@@ -175,6 +192,7 @@ func Routes(
 	}
 	router := chi.NewRouter()
 	router.Get("/{id}", api.Handle(handler.get))
+	router.Post("/{id}/reschedule", api.Handle(handler.reschedule))
 	router.Get("/{id}/progress", api.Handle(handler.progress))
 	router.Delete("/{id}", api.Handle(handler.cancel))
 	return router

@@ -344,6 +344,15 @@ export class JobService {
 		);
 	}
 
+	public reSchedule(id: string): Observable<Job> {
+		return from(fetch(
+			`/api/job/${id}/reschedule`,
+			{headers: this._authService.getAuthHeaders(), method: 'POST'},
+		)).pipe(
+			switchMap((response) => response.json()),
+		);
+	}
+
 	public containerLogs(containerId: string): Observable<string> {
 		return from(fetch(
 			`/api/container/${containerId}/logs`,
