@@ -8,6 +8,8 @@ gitlab:
   url: https://gitlab.com/api/v4/
   secret:
 
+default-admin-user:
+
 jwt:
   secret:
   default-role: admin
