@@ -9,7 +9,7 @@ RUN cd /web-src && \
 	npm run build
 
 # Golang build
-FROM golang:1.13.7-buster as build-go
+FROM golang:1.13.6-buster as build-go
 
 COPY . /app
 
