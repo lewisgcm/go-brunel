@@ -30,6 +30,19 @@
                         "--",
                         "docker build -f ./Dockerfile.runner .",
                     ]
+                },
+                {
+                    image: "docker:dind",
+                    workingDir: "/workspace/",
+                    entryPoint: "sh",
+                    environment: {
+                        "DOCKER_HOST": "tcp://docker:2375",
+                    },
+                    args: [
+                        "-c",
+                        "--",
+                        "docker build -f ./Dockerfile .",
+                    ]
                 }
             ]
         },
