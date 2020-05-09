@@ -30,5 +30,7 @@ COPY --from=build-go /app/server /opt/brunel/server
 COPY --from=build-go /app/cert /opt/brunel/cert
 COPY --from=build-node /web-src/build/ /opt/brunel/web/
 COPY ./docker-server.yaml /opt/brunel/brunel.yaml
+COPY ./keymatch_model.conf /opt/brunel
+COPY ./routes.csv /opt/brunel
 
 ENTRYPOINT [ "/opt/brunel/server" ]

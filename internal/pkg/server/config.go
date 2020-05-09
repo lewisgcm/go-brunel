@@ -44,7 +44,7 @@ type Config struct {
 
 	ServerName string `mapstructure:"server-name"`
 
-	DefaultAdminUser string
+	DefaultAdminUser string `mapstructure:"default-admin-user"`
 
 	Notification shared.NotificationType
 	GitLab       *shared.GitLabConfig

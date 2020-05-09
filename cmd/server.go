@@ -145,15 +145,25 @@ func main() {
 	router.Use(
 		middleware.DefaultCompress,
 		middleware.RedirectSlashes,
-		security.Middleware("keymatch_model.conf", "routes.csv", jwtSerializer),
 		middleware.Recoverer,
 	)
-	router.Mount("/api/hook", hook.Routes(serverConfig.WebHook, jobStore, repositoryStore, notifier))
-	router.Mount("/api/environment", environment.Routes(environmentStore))
-	router.Mount("/api/repository", repository.Routes(repositoryStore, jobStore))
-	router.Mount("/api/job", job.Routes(jobStore, logStore, stageStore, containerStore, repositoryStore, jwtSerializer))
-	router.Mount("/api/container", container.Routes(logStore, containerStore, jwtSerializer))
-	router.Mount("/api/user", user.Routes(serverConfig.DefaultAdminUser, userStore, oauths, jwtSerializer))
+	router.Route(
+		"/api",
+		func(r chi.Router) {
+			r.Use(
+				middleware.DefaultCompress,
+				middleware.RedirectSlashes,
+				security.Middleware("keymatch_model.conf", "routes.csv", jwtSerializer),
+				middleware.Recoverer,
+			)
+			r.Mount("/hook", hook.Routes(serverConfig.WebHook, jobStore, repositoryStore, notifier))
+			r.Mount("/environment", environment.Routes(environmentStore))
+			r.Mount("/repository", repository.Routes(repositoryStore, jobStore))
+			r.Mount("/job", job.Routes(jobStore, logStore, stageStore, containerStore, repositoryStore, jwtSerializer))
+			r.Mount("/container", container.Routes(logStore, containerStore, jwtSerializer))
+			r.Mount("/user", user.Routes(serverConfig.DefaultAdminUser, userStore, oauths, jwtSerializer))
+		})
+
 	FileServer(router)
 
 	walkFunc := func(method string, route string, handler http.Handler, middleware ...func(http.Handler) http.Handler) error {
