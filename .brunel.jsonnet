@@ -19,7 +19,7 @@
             ],
             steps: [
                 {
-                    image: "docker:dind-rootless",
+                    image: "docker:dind",
                     workingDir: "/workspace/",
                     entryPoint: "sh",
                     environment: {
