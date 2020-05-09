@@ -175,6 +175,15 @@ func (pipeline *Pipeline) executeStage(context context.Context, jobID shared.Job
 				err = util.ErrorAppend(errors.Wrap(e, "error copying container logs"), err)
 			}
 
+			// We want our container to be running or stopped (stopped is ok if the command execs really quickly)
+			if e := pipeline.Runtime.WaitForContainer(
+				context,
+				containerID,
+				shared.ContainerWaitCondition{State: shared.ContainerWaitStopped},
+			); e != nil {
+				err = errors.Wrap(e, "error waiting for container to finish")
+			}
+
 			// If we made it this far, lets terminate the container as we are done with this step
 			if e := pipeline.Runtime.TerminateContainer(context, containerID); e != nil {
 				err = util.ErrorAppend(errors.Wrap(e, "error terminating step container"), err)
