@@ -183,7 +183,9 @@ func (pipeline *DockerRuntime) TerminateContainer(ctx context.Context, container
 				ctx,
 				string(containerID),
 				types.ContainerRemoveOptions{
-					Force: true,
+					Force:         true,
+					RemoveVolumes: true,
+					RemoveLinks:   true,
 				},
 			),
 		"error terminating container",
