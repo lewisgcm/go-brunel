@@ -4,6 +4,7 @@ package store
 
 import (
 	"context"
+	"flag"
 	"github.com/mongodb/mongo-go-driver/mongo"
 	"go-brunel/internal/pkg/server/store"
 	mongo2 "go-brunel/internal/pkg/server/store/mongo"
@@ -14,8 +15,14 @@ type testSuite struct {
 	environmentStores []store.EnvironmentStore
 }
 
+var mongoUri = ""
+
+func init() {
+	flag.StringVar(&mongoUri, "mongo-db-uri", "mongodb://root:example@localhost:27017", "Mongo Database URI")
+}
+
 func getMongo(t *testing.T) *mongo.Database {
-	mongoClient, err := mongo.NewClient("mongodb://root:example@localhost:27017")
+	mongoClient, err := mongo.NewClient(mongoUri)
 	if err != nil {
 		t.Fatal(err)
 	}

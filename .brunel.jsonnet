@@ -18,6 +18,36 @@
             ]
         },
         {
+            name: "data store integration test",
+            services: [
+                {
+                    image: "mongo:4.2.1-bionic",
+                    wait: {
+                        output: "Listening on",
+                        timeout: 30
+                    },
+                    environment: {
+                        "MONGO_INITDB_DATABASE": "brunel",
+                        "MONGO_INITDB_ROOT_USERNAME": "root",
+                        "MONGO_INITDB_ROOT_PASSWORD": "example",
+                    },
+                    hostname: "mongo"
+                },
+            ],
+            steps: [
+                {
+                    image: "golang:1.13.6-buster",
+                    entryPoint: "sh",
+                    workingDir: "/workspace/",
+                    args: [
+                        "-c",
+                        "--",
+                        'go test go-brunel/test/store... -mongo-db-uri="mongodb://root:example@mongo:27017"',
+                    ]
+                }
+            ]
+        },
+        {
             name: "build",
             when: brunel.environment.variable("RELEASE") == "1",
             services: [
