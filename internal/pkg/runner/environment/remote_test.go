@@ -16,7 +16,7 @@ func TestRemoteEnvironment_GetValue(t *testing.T) {
 	mockRemote := remote.NewMockRemote(controller)
 
 	mockRemote.EXPECT().
-		GetEnvironmentValue(gomock.Eq(id), gomock.Eq(envName)).
+		GetEnvironmentVariable(gomock.Eq(id), gomock.Eq(envName)).
 		Times(1)
 
 	factory := environment.RemoteEnvironmentFactory{
