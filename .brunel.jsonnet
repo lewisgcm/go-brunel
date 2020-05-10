@@ -24,20 +24,6 @@
                     entryPoint: "sh",
                     environment: {
                         "DOCKER_HOST": "tcp://docker:2375",
-                        "DOCKER_HUB_ACCESS_TOKEN": brunel.secret('DOCKER_HUB_ACCESS_TOKEN')
-                    },
-                    args: [
-                        "-c",
-                        "--",
-                        "docker login -u lewisgcm -p $DOCKER_HUB_ACCESS_TOKEN",
-                    ]
-                },
-                {
-                    image: "docker:dind",
-                    workingDir: "/workspace/",
-                    entryPoint: "sh",
-                    environment: {
-                        "DOCKER_HOST": "tcp://docker:2375",
                     },
                     args: [
                         "-c",
@@ -69,7 +55,7 @@
                     args: [
                         "-c",
                         "--",
-                        "docker push lewisgcm/go-brunel:runner && docker push lewisgcm/go-brunel:latest",
+                        "docker login -u lewisgcm -p $DOCKER_HUB_ACCESS_TOKEN && docker push lewisgcm/go-brunel:runner && docker push lewisgcm/go-brunel:latest",
                     ]
                 },
             ]
