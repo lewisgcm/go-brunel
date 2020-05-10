@@ -108,6 +108,7 @@ type ContainerMeta struct {
 // sidecar services and steps
 type Stage struct {
 	ID           StageID `json:"name"`
+	When         *bool
 	Environments []string
 	Services     []Container
 	Steps        []Container

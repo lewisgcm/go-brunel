@@ -67,8 +67,8 @@ func (w *LocalWorkSpace) Prepare(event trigger.Event) (*shared.Spec, error) {
 	_ = w.Recorder.RecordLog(event.Job.ID, "parsing specification", shared.LogTypeStdOut, preparingStageID)
 
 	p := parser.JsonnetParser{
-		WorkingDirectory: event.WorkDir,
-		VCS:              w.VCS,
+		Event: event,
+		VCS:   w.VCS,
 		EnvironmentProvider: w.EnvironmentFactory.Create(
 			event.Job.EnvironmentID,
 		),

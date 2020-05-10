@@ -26,11 +26,7 @@ func (envFactory *LocalEnvironmentFactory) Create(id *shared.EnvironmentID) Prov
 	}
 }
 
-func (e *localEnvironment) GetSecret(name string) (string, error) {
-	return e.resolve(name)
-}
-
-func (e *localEnvironment) GetValue(name string) (string, error) {
+func (e *localEnvironment) GetVariable(name string) (string, error) {
 	return e.resolve(name)
 }
 

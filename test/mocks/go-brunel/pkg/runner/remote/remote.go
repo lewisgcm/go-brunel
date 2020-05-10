@@ -61,34 +61,19 @@ func (mr *MockRemoteMockRecorder) ContainerLog(arg0, arg1, arg2 interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ContainerLog", reflect.TypeOf((*MockRemote)(nil).ContainerLog), arg0, arg1, arg2)
 }
 
-// GetEnvironmentSecret mocks base method
-func (m *MockRemote) GetEnvironmentSecret(arg0 shared.EnvironmentID, arg1 string) (string, error) {
+// GetEnvironmentVariable mocks base method
+func (m *MockRemote) GetEnvironmentVariable(arg0 shared.EnvironmentID, arg1 string) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetEnvironmentSecret", arg0, arg1)
+	ret := m.ctrl.Call(m, "GetEnvironmentVariable", arg0, arg1)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetEnvironmentSecret indicates an expected call of GetEnvironmentSecret
-func (mr *MockRemoteMockRecorder) GetEnvironmentSecret(arg0, arg1 interface{}) *gomock.Call {
+// GetEnvironmentVariable indicates an expected call of GetEnvironmentVariable
+func (mr *MockRemoteMockRecorder) GetEnvironmentVariable(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEnvironmentSecret", reflect.TypeOf((*MockRemote)(nil).GetEnvironmentSecret), arg0, arg1)
-}
-
-// GetEnvironmentValue mocks base method
-func (m *MockRemote) GetEnvironmentValue(arg0 shared.EnvironmentID, arg1 string) (string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetEnvironmentValue", arg0, arg1)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetEnvironmentValue indicates an expected call of GetEnvironmentValue
-func (mr *MockRemoteMockRecorder) GetEnvironmentValue(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEnvironmentValue", reflect.TypeOf((*MockRemote)(nil).GetEnvironmentValue), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEnvironmentVariable", reflect.TypeOf((*MockRemote)(nil).GetEnvironmentVariable), arg0, arg1)
 }
 
 // GetNextAvailableJob mocks base method

@@ -8,12 +8,14 @@ import (
 	"github.com/google/go-jsonnet/ast"
 	"github.com/pkg/errors"
 	"go-brunel/internal/pkg/runner/environment"
+	"go-brunel/internal/pkg/runner/trigger"
 	"go-brunel/internal/pkg/runner/vcs"
 	"go-brunel/internal/pkg/shared"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -28,24 +30,16 @@ type sharedLibrary struct {
 }
 
 type JsonnetParser struct {
-	WorkingDirectory    string
+	Event               trigger.Event
 	EnvironmentProvider environment.Provider
 	VCS                 vcs.VCS
 }
 
-var library = `
-local brunel = {
-    shared(config):: std.parseJson(std.native('shared')(std.toString(config))),
-    secret(name):: std.native('secret')(name),
-    environment(name):: std.native('environment')(name)
-};
-`
-
 // Parse will load and parse the supplied jsonnet file, progress io.Writer is used to write the progress of any vcs output.
 // Function calls i.e brunel.shared etc are resolved at time of parsing
 func (parser *JsonnetParser) Parse(file string, progress io.Writer) (*shared.Spec, error) {
-	s, err := parser.parseToJSON(parser.WorkingDirectory, sharedLibrary{File: file}, []sharedLibrary{}, progress)
-	_ = os.RemoveAll(parser.WorkingDirectory + tempDirectory) // Clean up our temp directory used for fetching shared libraries etc
+	s, err := parser.parseToJSON(parser.Event.WorkDir, sharedLibrary{File: file}, []sharedLibrary{}, progress)
+	_ = os.RemoveAll(parser.Event.WorkDir + tempDirectory) // Clean up our temp directory used for fetching shared libraries etc
 	if err != nil {
 		return nil, errors.Wrap(err, "error parsing jsonnet file")
 	}
@@ -113,7 +107,7 @@ func (parser *JsonnetParser) loadSharedLibraries(workingDir string, stack []shar
 
 		// If we are still in the working directory, then we need to switch to our temp directory.
 		// This is where we store any external libraries, this simplifies cleanup when we are done
-		if workingDir == parser.WorkingDirectory {
+		if workingDir == parser.Event.WorkDir {
 			workingDir = workingDir + tempDirectory
 			if err := os.MkdirAll(workingDir, os.ModePerm); err != nil {
 				return nil, errors.Wrap(err, "error creating temp working directory")
@@ -150,13 +144,13 @@ func (parser *JsonnetParser) loadSharedLibraries(workingDir string, stack []shar
 }
 
 func (parser *JsonnetParser) parseToJSON(workingDir string, lib sharedLibrary, stack []sharedLibrary, progress io.Writer) (string, error) {
-	rel, err := filepath.Rel(parser.WorkingDirectory, workingDir+lib.File)
+	rel, err := filepath.Rel(parser.Event.WorkDir, workingDir+lib.File)
 	if err != nil {
 		return "", errors.Wrap(err, "error getting relative file path")
 	}
 
 	if strings.Contains(rel, "../") {
-		return "", errors.New(fmt.Sprintf("request path %s is outside of working directory %s", workingDir+lib.File, parser.WorkingDirectory))
+		return "", errors.New(fmt.Sprintf("request path %s is outside of working directory %s", workingDir+lib.File, parser.Event.WorkDir))
 	}
 
 	snippet, err := ioutil.ReadFile(filepath.Clean(workingDir + lib.File))
@@ -180,19 +174,34 @@ func (parser *JsonnetParser) parseToJSON(workingDir string, lib sharedLibrary, s
 
 	vm.NativeFunction(&jsonnet.NativeFunction{
 		Func: func(args []interface{}) (interface{}, error) {
-			return parser.EnvironmentProvider.GetValue(args[0].(string))
+			return parser.EnvironmentProvider.GetVariable(args[0].(string))
 		},
-		Name:   "environment",
+		Name:   "environment_variable",
 		Params: ast.Identifiers{"string"},
 	})
 
 	vm.NativeFunction(&jsonnet.NativeFunction{
 		Func: func(args []interface{}) (interface{}, error) {
-			return parser.EnvironmentProvider.GetSecret(args[0].(string))
+			dd, ee := regexp.Match(args[0].(string), []byte(args[1].(string)))
+			return dd, ee
 		},
-		Name:   "secret",
-		Params: ast.Identifiers{"string"},
+		Name:   "match",
+		Params: ast.Identifiers{"string", "string"},
 	})
+
+	library := fmt.Sprintf(`
+local brunel = {
+    shared(config):: std.parseJson(std.native('shared')(std.toString(config))),
+    match(regex, string):: std.native('match')(regex, string),
+	environment: {
+    	variable(name):: std.native('environment_variable')(name)
+	},
+	build: {
+		branch: '%s',
+		revision: '%s'
+	}
+};
+`, parser.Event.Job.Commit.Branch, parser.Event.Job.Commit.Revision)
 
 	js, err := vm.EvaluateSnippet(lib.File, library+string(snippet))
 	if err != nil {

@@ -30,7 +30,5 @@ type Remote interface {
 	// ContainerLog should log a message for the given containerID
 	ContainerLog(id shared.ContainerID, message string, logType shared.LogType) error
 
-	GetEnvironmentValue(id shared.EnvironmentID, name string) (string, error)
-
-	GetEnvironmentSecret(id shared.EnvironmentID, name string) (string, error)
+	GetEnvironmentVariable(id shared.EnvironmentID, name string) (string, error)
 }

@@ -92,14 +92,8 @@ func (c *rpcClient) ContainerLog(id shared.ContainerID, message string, logType 
 	)
 }
 
-func (c *rpcClient) GetEnvironmentValue(id shared.EnvironmentID, name string) (string, error) {
+func (c *rpcClient) GetEnvironmentVariable(id shared.EnvironmentID, name string) (string, error) {
 	var reply string
-	e := c.client.Call("RPC.GetEnvironmentValue", remote.GetEnvironmentRequest{Id: id, Name: name}, &reply)
-	return reply, rpcError(e)
-}
-
-func (c *rpcClient) GetEnvironmentSecret(id shared.EnvironmentID, name string) (string, error) {
-	var reply string
-	e := c.client.Call("RPC.GetEnvironmentSecret", remote.GetEnvironmentRequest{Id: id, Name: name}, &reply)
+	e := c.client.Call("RPC.GetEnvironmentVariable", remote.GetEnvironmentRequest{Id: id, Name: name}, &reply)
 	return reply, rpcError(e)
 }

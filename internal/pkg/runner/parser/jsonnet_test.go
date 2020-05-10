@@ -5,6 +5,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/pkg/errors"
 	"go-brunel/internal/pkg/runner/environment"
+	"go-brunel/internal/pkg/runner/trigger"
 	vcs2 "go-brunel/internal/pkg/runner/vcs"
 	"go-brunel/internal/pkg/shared"
 	"go-brunel/test"
@@ -69,6 +70,35 @@ func TestJsonnetParser_Parse(t *testing.T) {
 			},
 		},
 
+		// Tests that build information is available
+		{
+			files: map[string]string{
+				".brunel.jsonnet": `
+{
+    stages: [
+		{
+			name: brunel.build.revision,
+			when: brunel.match('^revision$', brunel.build.revision)
+		},
+		{
+			name: brunel.build.branch
+		},
+    ]
+}`,
+			},
+			expect: func(t *testing.T, spec *shared.Spec, err error) {
+				if err != nil {
+					t.Fatal(err)
+				}
+				if spec.Stages[0].When == nil || *spec.Stages[0].When != true {
+					t.Fail()
+					t.Log("when not correctly calculated")
+				}
+				test.ExpectString(t, "revision", string(spec.Stages[0].ID))
+				test.ExpectString(t, "branch", string(spec.Stages[1].ID))
+			},
+		},
+
 		// Tests that we can read a file, load local shared library and read values from our environment in both the library and local file
 		{
 			env: map[string]string{
@@ -89,13 +119,13 @@ local shared = brunel.shared({
             services: [
                 {
                     image: "nginx:latest",
-                    hostname: brunel.environment("MY_ENV")
+                    hostname: brunel.environment.variable("MY_ENV")
                 }
             ],
             steps: [
                 {
                     image: "byrnedo/alpine-curl",
-                    entrypoint: brunel.secret("MY_ENV"),
+                    entrypoint: brunel.environment.variable("MY_ENV"),
                     args: [ "-c", "--", "curl http://nginx" ]
                 },
 
@@ -105,7 +135,7 @@ local shared = brunel.shared({
 }`,
 				"file.jsonnet": `
 {
-	SOME_VAL: "value " + brunel.environment("MY_ENV")
+	SOME_VAL: "value " + brunel.environment.variable("MY_ENV")
 }`,
 			},
 			expect: func(t *testing.T, spec *shared.Spec, err error) {
@@ -340,7 +370,17 @@ local shared = brunel.shared({
 					})
 
 				p := JsonnetParser{
-					WorkingDirectory:    testWorkSpaceDir,
+					Event: trigger.Event{
+						Job: shared.Job{
+							Commit: shared.Commit{
+								Branch:   "branch",
+								Revision: "revision",
+							},
+						},
+						JobState: nil,
+						WorkDir:  testWorkSpaceDir,
+						Context:  nil,
+					},
 					EnvironmentProvider: factory.Create(nil),
 					VCS:                 mockVCS,
 				}

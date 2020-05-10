@@ -214,6 +214,20 @@ func (pipeline *Pipeline) Execute(ctx context.Context, spec shared.Spec, working
 
 	for _, stage := range spec.Stages {
 
+		if stage.When != nil && *stage.When == false {
+			log.Println("skipping stage")
+
+			if e := pipeline.Recorder.RecordStageState(jobID, stage.ID, shared.StageStateSuccess); e != nil {
+				return errors.Wrap(e, "error recording stage state")
+			}
+
+			if e := pipeline.Recorder.RecordLog(jobID, "stage skipped", shared.LogTypeStdOut, stage.ID); e != nil {
+				return errors.Wrap(e, "error recording stage state")
+			}
+
+			continue
+		}
+
 		log.Println("initializing stage runtime")
 		err := pipeline.Runtime.Initialize(ctx, jobID, workingDir)
 		if err != nil {

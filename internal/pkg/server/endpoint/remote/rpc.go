@@ -150,16 +150,7 @@ func (t *RPC) ContainerLog(args *remote.ContainerLogRequest, reply *remote.Empty
 	)
 }
 
-func (t *RPC) GetEnvironmentValue(args *remote.GetEnvironmentRequest, reply *string) error {
-	v, e := t.EnvironmentStore.GetVariable(args.Id, args.Name)
-	if e != nil {
-		return errors.Wrap(e, "error getting environment variable value")
-	}
-	*reply = *v
-	return nil
-}
-
-func (t *RPC) GetEnvironmentSecret(args *remote.GetEnvironmentRequest, reply *string) error {
+func (t *RPC) GetEnvironmentVariable(args *remote.GetEnvironmentRequest, reply *string) error {
 	v, e := t.EnvironmentStore.GetVariable(args.Id, args.Name)
 	if e != nil {
 		return errors.Wrap(e, "error getting environment variable value")

@@ -24,24 +24,5 @@ func TestRemoteEnvironment_GetValue(t *testing.T) {
 	}
 	provider := factory.Create(&id)
 
-	_, _ = provider.GetValue(envName)
-}
-
-func TestRemoteEnvironment_GetSecret(t *testing.T) {
-	var envName = "a"
-	id := shared.EnvironmentID("testy")
-
-	controller := gomock.NewController(t)
-	mockRemote := remote.NewMockRemote(controller)
-
-	mockRemote.EXPECT().
-		GetEnvironmentSecret(gomock.Eq(id), gomock.Eq(envName)).
-		Times(1)
-
-	factory := environment.RemoteEnvironmentFactory{
-		Remote: mockRemote,
-	}
-	provider := factory.Create(&id)
-
-	_, _ = provider.GetSecret(envName)
+	_, _ = provider.GetVariable(envName)
 }

@@ -22,16 +22,9 @@ func (envFactory *RemoteEnvironmentFactory) Create(id *shared.EnvironmentID) Pro
 	}
 }
 
-func (env *remoteEnvironment) GetSecret(name string) (string, error) {
+func (env *remoteEnvironment) GetVariable(name string) (string, error) {
 	if env.id == nil {
 		return "", errors.New("no environment has been configured")
 	}
-	return env.remote.GetEnvironmentSecret(*env.id, name)
-}
-
-func (env *remoteEnvironment) GetValue(name string) (string, error) {
-	if env.id == nil {
-		return "", errors.New("no environment has been configured")
-	}
-	return env.remote.GetEnvironmentValue(*env.id, name)
+	return env.remote.GetEnvironmentVariable(*env.id, name)
 }
