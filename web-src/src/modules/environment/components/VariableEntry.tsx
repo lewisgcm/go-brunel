@@ -23,15 +23,19 @@ interface VariableProps {
 }
 
 export function VariableEntry({isEdit, variable, onSave, onRemove}: VariableProps) {
-	const [value, setValue] = useState((variable && variable.Value) || '');
 	const [showPassword, setShowPassword] = useState(false);
-	const [sensitive, setSensitive] = useState((variable && variable.Type === EnvironmentVariableType.Password) ? true : false);
+	const isSensitive = (variable && variable.Type === EnvironmentVariableType.Password) ? true : false;
 
-	useEffect(() => {
-		setValue((variable && variable.Value) || '');
-	}, [variable]);
+	useEffect(
+		() => {
+			setShowPassword(false);
+		},
+		[
+			variable,
+		],
+	);
 
-	const save = () => {
+	const save = (value: string, sensitive: boolean) => {
 		onSave({
 			Name: variable.Name,
 			Value: value,
@@ -54,10 +58,9 @@ export function VariableEntry({isEdit, variable, onSave, onRemove}: VariableProp
 			isEdit &&
 			<Grid item xs={12} md={2} xl={1}>
 				<FormControlLabel
-					control={<Switch color="primary" checked={sensitive} onChange={(e) => {
-						setSensitive(e.target.checked);
+					control={<Switch color="primary" checked={isSensitive} onChange={(e) => {
 						setShowPassword(false);
-						save();
+						save(variable.Value, e.target.checked);
 					}}/>}
 					label="Secret"
 				/>
@@ -67,7 +70,7 @@ export function VariableEntry({isEdit, variable, onSave, onRemove}: VariableProp
 			<TextField
 				InputLabelProps={{shrink: true}}
 				InputProps={{
-					endAdornment: sensitive ?
+					endAdornment: isSensitive ?
 						(<InputAdornment position="end">
 							<IconButton
 								onClick={() => setShowPassword(!showPassword)}
@@ -78,17 +81,16 @@ export function VariableEntry({isEdit, variable, onSave, onRemove}: VariableProp
 						(<React.Fragment />),
 				}}
 				onChange={(e) => {
-					setValue(e.target.value);
-					save();
+					save(e.target.value, isSensitive);
 				}}
 				variant="outlined"
-				type={(sensitive && !showPassword) ? 'password' : 'text'}
-				value={value}
+				type={(isSensitive && !showPassword) ? 'password' : 'text'}
+				value={variable.Value}
 				disabled={!isEdit}
 				label="Value"
 				size="small"
 				fullWidth
-				multiline={!sensitive} />
+				multiline={!isSensitive} />
 		</Grid>
 		{
 			isEdit &&
