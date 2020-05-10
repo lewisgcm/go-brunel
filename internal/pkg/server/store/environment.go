@@ -2,6 +2,7 @@ package store
 
 import (
 	"go-brunel/internal/pkg/shared"
+	"strings"
 	"time"
 )
 
@@ -18,12 +19,12 @@ type EnvironmentList struct {
 }
 
 type Environment struct {
-	ID        shared.EnvironmentID  `bson:"-"`
-	Name      string                `bson:"name"`
-	Variables []EnvironmentVariable `bson:"variables"`
-	CreatedAt time.Time             `bson:"created_at"`
-	UpdatedAt time.Time             `bson:"updated_at" json:",omitempty"`
-	DeletedAt *time.Time            `bson:"deleted_at" json:",omitempty"`
+	ID        shared.EnvironmentID
+	Name      string
+	Variables []EnvironmentVariable
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time
 }
 
 type EnvironmentVariable struct {
@@ -33,6 +34,22 @@ type EnvironmentVariable struct {
 }
 
 func (environment *Environment) IsValid() bool {
+	if len(strings.TrimSpace(environment.Name)) == 0 {
+		return false
+	}
+
+	for i, variable := range environment.Variables {
+		if len(strings.TrimSpace(variable.Name)) == 0 {
+			return false
+		}
+
+		for j, other := range environment.Variables {
+			if i != j && variable.Name == other.Name {
+				return false
+			}
+		}
+	}
+
 	return true
 }
 
@@ -44,4 +61,6 @@ type EnvironmentStore interface {
 	AddOrUpdate(environment Environment) (*Environment, error)
 
 	GetVariable(id shared.EnvironmentID, name string) (*string, error)
+
+	Delete(id shared.EnvironmentID, hard bool) error
 }

@@ -23,8 +23,23 @@ type EnvironmentStore struct {
 }
 
 type mongoEnvironment struct {
-	ObjectID          primitive.ObjectID `bson:"_id,omitempty"`
-	store.Environment `bson:",inline"`
+	ObjectID  primitive.ObjectID          `bson:"_id,omitempty"`
+	Name      string                      `bson:"name"`
+	Variables []store.EnvironmentVariable `bson:"variables"`
+	CreatedAt *time.Time                  `bson:"created_at,omitempty"`
+	UpdatedAt time.Time                   `bson:"updated_at" json:",omitempty"`
+	DeletedAt *time.Time                  `bson:"deleted_at" json:",omitempty"`
+}
+
+func (e *mongoEnvironment) ToEnvironment() *store.Environment {
+	return &store.Environment{
+		ID:        shared.EnvironmentID(e.ObjectID.Hex()),
+		Name:      e.Name,
+		Variables: e.Variables,
+		CreatedAt: *e.CreatedAt,
+		UpdatedAt: e.UpdatedAt,
+		DeletedAt: e.DeletedAt,
+	}
 }
 
 func (s *EnvironmentStore) Get(id shared.EnvironmentID) (*store.Environment, error) {
@@ -48,11 +63,10 @@ func (s *EnvironmentStore) Get(id shared.EnvironmentID) (*store.Environment, err
 		return nil, errors.Wrap(err, "error getting environment")
 	}
 
-	d.Environment.ID = shared.EnvironmentID(d.ObjectID.Hex())
-	return &d.Environment, nil
+	return d.ToEnvironment(), nil
 }
 
-func (s *EnvironmentStore) nameIsUnique(id shared.EnvironmentID, name string) (bool, error) {
+func (s *EnvironmentStore) nameIsUnique(id shared.EnvironmentID, name string) error {
 	var mongoEntity mongoEnvironment
 	if e := s.
 		Database.
@@ -62,46 +76,59 @@ func (s *EnvironmentStore) nameIsUnique(id shared.EnvironmentID, name string) (b
 			bson.M{"name": name},
 		).Decode(&mongoEntity); e != nil {
 		if e == mongo.ErrNoDocuments {
-			return true, nil
+			return nil
 		}
-		return false, errors.Wrap(e, "error checking if name is unique")
+		return errors.Wrap(e, "error checking if name is unique")
 	}
 
-	return mongoEntity.ObjectID.Hex() == string(id), nil
+	if mongoEntity.ObjectID.Hex() != string(id) {
+		return errors.New("environment name must be unique")
+	}
+
+	return nil
 }
 
 func (s *EnvironmentStore) AddOrUpdate(environment store.Environment) (*store.Environment, error) {
-	unique, e := s.nameIsUnique(environment.ID, environment.Name)
-	if e != nil {
+	if e := s.nameIsUnique(environment.ID, environment.Name); e != nil {
 		return nil, e
 	}
-	if !unique {
-		return nil, errors.New("environment name must be unique")
+
+	mongoEntity := mongoEnvironment{
+		Name:      environment.Name,
+		Variables: environment.Variables,
+		UpdatedAt: time.Now(),
 	}
 
-	var mongoEntity mongoEnvironment
-	mongoEntity.UpdatedAt = time.Now()
+	criteria := bson.M{}
+
 	if environment.ID == "" {
-		mongoEntity.CreatedAt = time.Now()
+		t := time.Now()
+		mongoEntity.CreatedAt = &t
+	} else {
+		oid, err := primitive.ObjectIDFromHex(string(environment.ID))
+		if err != nil {
+			return nil, errors.Wrap(err, "error parsing object id")
+		}
+		criteria = bson.M{"_id": oid}
 	}
 
 	upsert := true
 	after := options.After
-
 	if err := s.
 		Database.
 		Collection(environmentCollectionName).
 		FindOneAndUpdate(
 			context.Background(),
-			bson.M{"name": environment.Name},
-			bson.M{"$set": environment},
+			criteria,
+			bson.M{
+				"$set": mongoEntity,
+			},
 			&options.FindOneAndUpdateOptions{Upsert: &upsert, ReturnDocument: &after},
 		).Decode(&mongoEntity); err != nil {
 		return nil, errors.Wrap(err, "error adding or updating environment")
 	}
 
-	mongoEntity.Environment.ID = shared.EnvironmentID(mongoEntity.ObjectID.Hex())
-	return &mongoEntity.Environment, nil
+	return mongoEntity.ToEnvironment(), nil
 }
 
 func (s *EnvironmentStore) Filter(filter string) ([]store.EnvironmentList, error) {
@@ -111,7 +138,7 @@ func (s *EnvironmentStore) Filter(filter string) ([]store.EnvironmentList, error
 		Collection(environmentCollectionName).Aggregate(
 		context.Background(),
 		[]bson.M{
-			{"$match": bson.M{"name": bsonx.Regex(fmt.Sprintf(".*%s.*", filter), "")}},
+			{"$match": bson.M{"name": bsonx.Regex(fmt.Sprintf(".*%s.*", filter), "i")}},
 		},
 	)
 	if err != nil {
@@ -124,9 +151,8 @@ func (s *EnvironmentStore) Filter(filter string) ([]store.EnvironmentList, error
 		if err != nil {
 			return nil, errors.Wrap(err, "error decoding environment list")
 		}
-		environment.ID = shared.EnvironmentID(environment.ObjectID.Hex())
 		environments = append(environments, store.EnvironmentList{
-			ID:   environment.ID,
+			ID:   shared.EnvironmentID(environment.ObjectID.Hex()),
 			Name: environment.Name,
 		})
 	}
@@ -146,4 +172,28 @@ func (s *EnvironmentStore) GetVariable(id shared.EnvironmentID, name string) (*s
 	}
 
 	return nil, errors.New("environment variable not found")
+}
+
+func (s *EnvironmentStore) Delete(id shared.EnvironmentID, hard bool) error {
+	objectID, err := primitive.ObjectIDFromHex(string(id))
+	if err != nil {
+		return err
+	}
+
+	if hard {
+		_, err = s.
+			Database.
+			Collection(environmentCollectionName).
+			DeleteOne(context.Background(), bson.M{"_id": objectID})
+
+		return errors.Wrap(err, "error deleting")
+	} else {
+		err = s.
+			Database.
+			Collection(environmentCollectionName).
+			FindOneAndUpdate(context.Background(), bson.M{"_id": objectID}, bson.M{"deleted_at": time.Now()}).
+			Err()
+
+		return errors.Wrap(err, "error soft deleting")
+	}
 }
