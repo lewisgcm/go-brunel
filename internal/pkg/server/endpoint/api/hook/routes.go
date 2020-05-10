@@ -30,7 +30,7 @@ func (handler *webHookHandler) finishHandling(repository store.Repository, job s
 
 	repo, err := handler.repositoryStore.AddOrUpdate(repository)
 	if err != nil {
-		return api.InternalServerError(err, "error storing github hook event repository")
+		return api.InternalServerError(errors.Wrap(err, "error storing github hook event repository"))
 	}
 
 	for _, t := range repo.Triggers {
@@ -38,7 +38,6 @@ func (handler *webHookHandler) finishHandling(repository store.Repository, job s
 		if e != nil {
 			return api.InternalServerError(
 				errors.Wrap(e, "invalid pattern"),
-				"internal error",
 			)
 		}
 
@@ -52,11 +51,11 @@ func (handler *webHookHandler) finishHandling(repository store.Repository, job s
 				CreatedAt:     job.CreatedAt,
 			})
 			if err != nil {
-				return api.InternalServerError(err, "error storing hook event job")
+				return api.InternalServerError(errors.Wrap(err, "error storing hook event job"))
 			}
 
 			if err := handler.notifier.Notify(id); err != nil {
-				return api.InternalServerError(err, "error notifying job status from hook event")
+				return api.InternalServerError(errors.Wrap(err, "error notifying job status from hook event"))
 			}
 		}
 	}

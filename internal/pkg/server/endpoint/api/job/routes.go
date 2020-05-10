@@ -1,6 +1,7 @@
 package job
 
 import (
+	"github.com/pkg/errors"
 	"go-brunel/internal/pkg/server/endpoint/api"
 	"go-brunel/internal/pkg/server/security"
 	"go-brunel/internal/pkg/server/store"
@@ -28,12 +29,12 @@ func (handler *jobHandler) get(r *http.Request) api.Response {
 		if err == store.ErrorNotFound {
 			return api.NotFound()
 		}
-		return api.InternalServerError(err, "error getting job")
+		return api.InternalServerError(errors.Wrap(err, "error getting job"))
 	}
 
 	repository, err := handler.repositoryStore.Get(job.RepositoryID)
 	if err != nil {
-		return api.InternalServerError(err, "error getting job")
+		return api.InternalServerError(errors.Wrap(err, "error getting job"))
 	}
 
 	return api.Ok(struct {
@@ -49,7 +50,7 @@ func (handler *jobHandler) progress(r *http.Request) api.Response {
 	id := shared.JobID(chi.URLParam(r, "id"))
 	since, err := api.ParseQueryTime(r, "since", false, time.Time{})
 	if err != nil {
-		return api.InternalServerError(err, "error parsing query parameter 'since'")
+		return api.InternalServerError(errors.Wrap(err, "error parsing query parameter 'since'"))
 	}
 
 	details := struct {
@@ -63,13 +64,13 @@ func (handler *jobHandler) progress(r *http.Request) api.Response {
 
 	job, err := handler.jobStore.Get(id)
 	if err != nil {
-		return api.InternalServerError(err, "error getting job")
+		return api.InternalServerError(errors.Wrap(err, "error getting job"))
 	}
 	details.State = job.State
 
 	stages, err := handler.stageStore.FindAllByJobID(id)
 	if err != nil {
-		return api.InternalServerError(err, "error getting job stages")
+		return api.InternalServerError(errors.Wrap(err, "error getting job stages"))
 	}
 
 	// Read out containers with a matching job id
@@ -78,7 +79,7 @@ func (handler *jobHandler) progress(r *http.Request) api.Response {
 		if err == store.ErrorNotFound {
 			return api.NotFound()
 		}
-		return api.InternalServerError(err, "error getting job containers")
+		return api.InternalServerError(errors.Wrap(err, "error getting job containers"))
 	}
 
 	// Read our the job level logs with the
@@ -87,7 +88,7 @@ func (handler *jobHandler) progress(r *http.Request) api.Response {
 		if err == store.ErrorNotFound {
 			return api.NotFound()
 		}
-		return api.InternalServerError(err, "error getting job logs")
+		return api.InternalServerError(errors.Wrap(err, "error getting job logs"))
 	}
 
 	// Map out out object for reading the UI
@@ -133,12 +134,12 @@ func (handler *jobHandler) cancel(r *http.Request) api.Response {
 	id := chi.URLParam(r, "id")
 	identity, err := handler.jwtSerializer.Decode(r)
 	if err != nil {
-		return api.InternalServerError(err, "error decoding token")
+		return api.InternalServerError(errors.Wrap(err, "error decoding token"))
 	}
 
 	err = handler.jobStore.CancelByID(shared.JobID(id), identity.Username)
 	if err != nil {
-		return api.InternalServerError(err, "error setting job state")
+		return api.InternalServerError(errors.Wrap(err, "error setting job state"))
 	}
 
 	log.Info("job with id ", id, " has been cancelled")
@@ -149,7 +150,7 @@ func (handler *jobHandler) reschedule(r *http.Request) api.Response {
 	id := chi.URLParam(r, "id")
 	identity, err := handler.jwtSerializer.Decode(r)
 	if err != nil {
-		return api.InternalServerError(err, "error decoding token")
+		return api.InternalServerError(errors.Wrap(err, "error decoding token"))
 	}
 
 	job, err := handler.jobStore.Get(shared.JobID(id))
@@ -157,7 +158,7 @@ func (handler *jobHandler) reschedule(r *http.Request) api.Response {
 		if err == store.ErrorNotFound {
 			return api.NotFound()
 		}
-		return api.InternalServerError(err, "error getting job")
+		return api.InternalServerError(errors.Wrap(err, "error getting job"))
 	}
 
 	newJob := store.Job{

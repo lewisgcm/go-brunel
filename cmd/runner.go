@@ -28,7 +28,7 @@ func loadRunnerConfig() (error, runner.Config) {
 	conf := viper.New()
 
 	conf.AutomaticEnv()
-	conf.SetDefault("working-directory", dir + "/")
+	conf.SetDefault("working-directory", dir+"/")
 	conf.SetEnvPrefix("BRUNEL")
 	conf.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
 

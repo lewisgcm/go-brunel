@@ -73,12 +73,12 @@ func Ok(body interface{}) Response {
 
 // InternalServerError logs a warning level message containing both the error and message.
 // A JSON error of the message with a http status internal server error is returned.
-func InternalServerError(err error, message string) Response {
-	log.Error("internal server error occurred with message '", err, ": ", message, "'")
+func InternalServerError(err error) Response {
+	log.Error("internal server error occurred with message '", err)
 	return Response{
 		body:   nil,
 		status: http.StatusInternalServerError,
-		error:  errors.New(message),
+		error:  errors.New("internal error"),
 	}
 }
 

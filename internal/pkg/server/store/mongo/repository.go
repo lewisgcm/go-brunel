@@ -65,8 +65,7 @@ func (r *RepositoryStore) SetTriggers(id store.RepositoryID, triggers []store.Re
 				"updated_at": time.Now(),
 			}},
 			&options.FindOneAndUpdateOptions{},
-		).Err();
-		e != nil {
+		).Err(); e != nil {
 		return errors.Wrap(err, "error adding or updating repository")
 	}
 

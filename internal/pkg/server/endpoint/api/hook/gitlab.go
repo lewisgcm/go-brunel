@@ -1,6 +1,7 @@
 package hook
 
 import (
+	"github.com/pkg/errors"
 	"go-brunel/internal/pkg/server/endpoint/api"
 	"go-brunel/internal/pkg/server/store"
 	"go-brunel/internal/pkg/shared"
@@ -15,7 +16,7 @@ func (handler *webHookHandler) gitLab(r *http.Request) api.Response {
 
 	payload, err := hook.Parse(r, gitlab.PushEvents, gitlab.TagEvents)
 	if err != nil && err != gitlab.ErrEventNotFound {
-		return api.InternalServerError(err, "error handling gitlab hook event")
+		return api.InternalServerError(errors.Wrap(err, "error handling gitlab hook event"))
 	}
 
 	var job store.Job

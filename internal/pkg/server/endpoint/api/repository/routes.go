@@ -50,7 +50,7 @@ func (handler *repositoryHandler) jobs(r *http.Request) api.Response {
 
 	jobs, err := handler.jobStore.FilterByRepositoryID(id, filter, pageIndex, pageSize, string(sortColumn), sortOrder)
 	if err != nil {
-		return api.InternalServerError(err, "error getting repository jobs")
+		return api.InternalServerError(errors.Wrap(err, "error getting repository jobs"))
 	}
 	return api.Ok(jobs)
 }
@@ -59,7 +59,7 @@ func (handler *repositoryHandler) list(r *http.Request) api.Response {
 	filter := r.URL.Query().Get("filter")
 	repositories, err := handler.repositoryStore.Filter(filter)
 	if err != nil {
-		return api.InternalServerError(err, "error getting repository details")
+		return api.InternalServerError(errors.Wrap(err, "error getting repository details"))
 	}
 	return api.Ok(repositories)
 }
@@ -68,7 +68,7 @@ func (handler *repositoryHandler) get(r *http.Request) api.Response {
 	id := chi.URLParam(r, "id")
 	repositories, err := handler.repositoryStore.Get(store.RepositoryID(id))
 	if err != nil {
-		return api.InternalServerError(err, "error getting repository")
+		return api.InternalServerError(errors.Wrap(err, "error getting repository"))
 	}
 	return api.Ok(repositories)
 }
@@ -80,7 +80,6 @@ func (handler *repositoryHandler) setTriggers(r *http.Request) api.Response {
 	if err != nil {
 		return api.InternalServerError(
 			errors.Wrap(err, "error decoding json"),
-			"internal error",
 		)
 	}
 
@@ -94,7 +93,6 @@ func (handler *repositoryHandler) setTriggers(r *http.Request) api.Response {
 	if err != nil {
 		return api.InternalServerError(
 			errors.Wrap(err, "error saving environment"),
-			"internal error",
 		)
 	}
 

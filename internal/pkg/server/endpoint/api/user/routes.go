@@ -82,7 +82,7 @@ func (handler *authHandler) profile(r *http.Request) api.Response {
 		if err == store.ErrorNotFound {
 			return api.NotFound()
 		}
-		return api.InternalServerError(err, "internal error")
+		return api.InternalServerError(errors.Wrap(err, "error getting user"))
 	}
 	return api.Ok(user)
 }
