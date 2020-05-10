@@ -212,7 +212,7 @@ func (pipeline *Pipeline) executeStage(context context.Context, jobID shared.Job
 
 func (pipeline *Pipeline) Execute(ctx context.Context, spec shared.Spec, workingDir string, jobID shared.JobID) error {
 
-	for stageID, stage := range spec.Stages {
+	for _, stage := range spec.Stages {
 
 		log.Println("initializing stage runtime")
 		err := pipeline.Runtime.Initialize(ctx, jobID, workingDir)
@@ -220,7 +220,7 @@ func (pipeline *Pipeline) Execute(ctx context.Context, spec shared.Spec, working
 			err = errors.Wrap(err, "error initializing stage container runtime")
 		}
 
-		e := pipeline.Recorder.RecordStageState(jobID, stageID, shared.StageStateRunning)
+		e := pipeline.Recorder.RecordStageState(jobID, stage.ID, shared.StageStateRunning)
 		if e != nil {
 			err = util.ErrorAppend(err, errors.Wrap(e, "error recording stage state"))
 		}
@@ -229,9 +229,9 @@ func (pipeline *Pipeline) Execute(ctx context.Context, spec shared.Spec, working
 		// If we get an error, dont return instead set the error and handle it at the end.
 		// This way we can pass them back up the stack
 		if err == nil {
-			containerIds, e := pipeline.executeStage(ctx, jobID, stageID, stage)
+			containerIds, e := pipeline.executeStage(ctx, jobID, stage.ID, stage)
 			if e != nil {
-				err = util.ErrorAppend(err, errors.Wrap(e, fmt.Sprintf("error running %s stage", stageID)))
+				err = util.ErrorAppend(err, errors.Wrap(e, fmt.Sprintf("error running %s stage", stage.ID)))
 			}
 
 			e = pipeline.cleanUp(context.Background(), containerIds)
@@ -244,7 +244,7 @@ func (pipeline *Pipeline) Execute(ctx context.Context, spec shared.Spec, working
 		if err != nil {
 			state = shared.StageStateError
 		}
-		e = pipeline.Recorder.RecordStageState(jobID, stageID, state)
+		e = pipeline.Recorder.RecordStageState(jobID, stage.ID, state)
 		if e != nil {
 			err = util.ErrorAppend(err, errors.Wrap(e, "error recording stage state"))
 		}
@@ -255,7 +255,7 @@ func (pipeline *Pipeline) Execute(ctx context.Context, spec shared.Spec, working
 		}
 
 		if err != nil {
-			e = pipeline.Recorder.RecordLog(jobID, err.Error(), shared.LogTypeStdErr, stageID)
+			e = pipeline.Recorder.RecordLog(jobID, err.Error(), shared.LogTypeStdErr, stage.ID)
 			return util.ErrorAppend(err, errors.Wrap(e, "error recording failure"))
 		}
 	}

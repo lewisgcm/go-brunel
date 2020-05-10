@@ -15,7 +15,7 @@ import (
 )
 
 func TestJsonnetParser_Parse(t *testing.T) {
-	suites := []struct {
+	var suites = []struct {
 		env        map[string]string                           // environment variables to create for testing
 		files      map[string]string                           // files to create for testing
 		cloneFiles map[string]string                           // files to create when vcs.Clone is called
@@ -29,6 +29,43 @@ func TestJsonnetParser_Parse(t *testing.T) {
 			},
 			expect: func(t *testing.T, spec *shared.Spec, err error) {
 				test.ExpectErrorLike(t, errors.New("error parsing"), err)
+			},
+		},
+
+		// Tests that stage names should be unique
+		{
+			files: map[string]string{
+				".brunel.jsonnet": `
+{
+    stages: [
+		{
+			name: 'test'
+		},
+		{
+			name: 'test'
+		}
+    ]
+}`,
+			},
+			expect: func(t *testing.T, spec *shared.Spec, err error) {
+				test.ExpectErrorLike(t, errors.New("stage names should be unique"), err)
+			},
+		},
+
+		// Tests that stage names cannot be empty
+		{
+			files: map[string]string{
+				".brunel.jsonnet": `
+{
+    stages: [
+		{
+			name: '   '
+		},
+    ]
+}`,
+			},
+			expect: func(t *testing.T, spec *shared.Spec, err error) {
+				test.ExpectErrorLike(t, errors.New("stage names must be specified"), err)
 			},
 		},
 
@@ -46,8 +83,9 @@ local shared = brunel.shared({
 {
     version: "v1",
     description: shared.SOME_VAL,
-    stages: {
-        test: {
+    stages: [
+        {
+			name: 'test',
             services: [
                 {
                     image: "nginx:latest",
@@ -63,8 +101,7 @@ local shared = brunel.shared({
 
             ],
         },
-
-    }
+    ]
 }`,
 				"file.jsonnet": `
 {
@@ -74,9 +111,9 @@ local shared = brunel.shared({
 			expect: func(t *testing.T, spec *shared.Spec, err error) {
 				test.ExpectString(t, spec.Version, "v1")
 				test.ExpectString(t, spec.Description, "value my env!!")
-				test.ExpectString(t, spec.Stages["test"].Services[0].Image, "nginx:latest")
-				test.ExpectString(t, spec.Stages["test"].Services[0].Hostname, "my env!!")
-				test.ExpectString(t, spec.Stages["test"].Steps[0].EntryPoint, "my env!!")
+				test.ExpectString(t, spec.Stages[0].Services[0].Image, "nginx:latest")
+				test.ExpectString(t, spec.Stages[0].Services[0].Hostname, "my env!!")
+				test.ExpectString(t, spec.Stages[0].Steps[0].EntryPoint, "my env!!")
 			},
 		},
 
@@ -91,8 +128,7 @@ local shared = brunel.shared({
 {
     version: "v1",
     description: shared.SOME_VAL,
-    stages: {
-    }
+    stages: []
 }`,
 				"file.jsonnet": `
 local shared = brunel.shared({
@@ -118,8 +154,7 @@ local shared = brunel.shared({
 {
     version: "v1",
     description: shared.SOME_VAL,
-    stages: {
-    }
+    stages: []
 }`,
 			},
 			expect: func(t *testing.T, spec *shared.Spec, err error) {
@@ -138,8 +173,7 @@ local shared = brunel.shared({
 {
     version: "v1",
     description: shared.SOME_VAL,
-    stages: {
-    }
+    stages: []
 }`,
 			},
 			expect: func(t *testing.T, spec *shared.Spec, err error) {
@@ -167,8 +201,7 @@ local sharedTwo = brunel.shared({
 {
     version: "v1",
 	description: shared.description + sharedTwo.description,
-    stages: {
-    }
+    stages: []
 }`,
 			},
 			cloneFiles: map[string]string{
@@ -198,8 +231,7 @@ local shared = brunel.shared({
 {
     version: "v1",
 	description: shared.description,
-    stages: {
-    }
+    stages: []
 }`,
 			},
 			cloneFiles: map[string]string{
@@ -238,8 +270,7 @@ local shared = brunel.shared({
 {
     version: "v1",
 	description: shared.description,
-    stages: {
-    }
+    stages: []
 }`,
 			},
 			cloneFiles: map[string]string{
@@ -268,7 +299,6 @@ local shared = brunel.shared({
 			},
 		},
 	}
-
 	for i, suite := range suites {
 		t.Run(
 			fmt.Sprintf("suites[%d]", i),
@@ -311,7 +341,7 @@ local shared = brunel.shared({
 
 				p := JsonnetParser{
 					WorkingDirectory:    testWorkSpaceDir,
-					EnvironmentProvider: factory.Create([]string{}),
+					EnvironmentProvider: factory.Create(nil),
 					VCS:                 mockVCS,
 				}
 				spec, err := p.Parse(".brunel.jsonnet", ioutil.Discard)

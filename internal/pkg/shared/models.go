@@ -107,6 +107,7 @@ type ContainerMeta struct {
 // Stage defines a runnable stage that can be restricted to specific environments with
 // sidecar services and steps
 type Stage struct {
+	ID           StageID `json:"name"`
 	Environments []string
 	Services     []Container
 	Steps        []Container
@@ -115,8 +116,9 @@ type Stage struct {
 // Spec is used for defining the pipeline
 type Spec struct {
 	Version     string
+	Description string
 	Maintainers []string
-	Stages      map[StageID]Stage
+	Stages      []Stage
 }
 
 // Commit is used to denote a commit for a job

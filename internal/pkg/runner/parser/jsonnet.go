@@ -55,6 +55,19 @@ func (parser *JsonnetParser) Parse(file string, progress io.Writer) (*shared.Spe
 	if err != nil {
 		return nil, errors.Wrap(err, "error parsing json")
 	}
+
+	// Make sure we dont have any stage ids that are the same
+	for i, s := range spec.Stages {
+		if len(strings.TrimSpace(string(s.ID))) == 0 {
+			return nil, errors.New("stage names must be specified")
+		}
+		for j, o := range spec.Stages {
+			if i != j && s.ID == o.ID {
+				return nil, errors.New("stage names should be unique")
+			}
+		}
+	}
+
 	return &spec, nil
 }
 

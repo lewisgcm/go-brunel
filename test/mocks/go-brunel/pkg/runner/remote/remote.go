@@ -61,6 +61,36 @@ func (mr *MockRemoteMockRecorder) ContainerLog(arg0, arg1, arg2 interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ContainerLog", reflect.TypeOf((*MockRemote)(nil).ContainerLog), arg0, arg1, arg2)
 }
 
+// GetEnvironmentSecret mocks base method
+func (m *MockRemote) GetEnvironmentSecret(arg0 shared.EnvironmentID, arg1 string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetEnvironmentSecret", arg0, arg1)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetEnvironmentSecret indicates an expected call of GetEnvironmentSecret
+func (mr *MockRemoteMockRecorder) GetEnvironmentSecret(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEnvironmentSecret", reflect.TypeOf((*MockRemote)(nil).GetEnvironmentSecret), arg0, arg1)
+}
+
+// GetEnvironmentValue mocks base method
+func (m *MockRemote) GetEnvironmentValue(arg0 shared.EnvironmentID, arg1 string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetEnvironmentValue", arg0, arg1)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetEnvironmentValue indicates an expected call of GetEnvironmentValue
+func (mr *MockRemoteMockRecorder) GetEnvironmentValue(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEnvironmentValue", reflect.TypeOf((*MockRemote)(nil).GetEnvironmentValue), arg0, arg1)
+}
+
 // GetNextAvailableJob mocks base method
 func (m *MockRemote) GetNextAvailableJob() (*shared.Job, error) {
 	m.ctrl.T.Helper()
@@ -103,36 +133,6 @@ func (m *MockRemote) Log(arg0 shared.JobID, arg1 string, arg2 shared.LogType, ar
 func (mr *MockRemoteMockRecorder) Log(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Log", reflect.TypeOf((*MockRemote)(nil).Log), arg0, arg1, arg2, arg3)
-}
-
-// SearchForSecret mocks base method
-func (m *MockRemote) SearchForSecret(arg0 []string, arg1 string) (string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SearchForSecret", arg0, arg1)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// SearchForSecret indicates an expected call of SearchForSecret
-func (mr *MockRemoteMockRecorder) SearchForSecret(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchForSecret", reflect.TypeOf((*MockRemote)(nil).SearchForSecret), arg0, arg1)
-}
-
-// SearchForValue mocks base method
-func (m *MockRemote) SearchForValue(arg0 []string, arg1 string) (string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SearchForValue", arg0, arg1)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// SearchForValue indicates an expected call of SearchForValue
-func (mr *MockRemoteMockRecorder) SearchForValue(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchForValue", reflect.TypeOf((*MockRemote)(nil).SearchForValue), arg0, arg1)
 }
 
 // SetContainerState mocks base method
