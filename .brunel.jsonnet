@@ -1,8 +1,24 @@
 {
     version: "v1",
     description: "Brunel CI/CD Build Pipeline",
-    stages: {
-        "Build Runner": {
+    stages: [
+        {
+            name: "unit test",
+            steps: [
+                {
+                    image: "golang:1.13.6-buster",
+                    entryPoint: "sh",
+                    workingDir: "/workspace/",
+                    args: [
+                        "-c",
+                        "--",
+                        "go test go-brunel/internal...",
+                    ]
+                }
+            ]
+        },
+        {
+            name: "build",
             services: [
                 {
                     image: "docker:dind",
@@ -60,5 +76,5 @@
                 },
             ]
         },
-    }
+    ]
 }
