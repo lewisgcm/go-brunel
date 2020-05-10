@@ -24,11 +24,12 @@
                     entryPoint: "sh",
                     environment: {
                         "DOCKER_HOST": "tcp://docker:2375",
+                        "DOCKER_HUB_ACCESS_TOKEN": brunel.secret('DOCKER_HUB_ACCESS_TOKEN')
                     },
                     args: [
                         "-c",
                         "--",
-                        "docker build -f ./Dockerfile.runner .",
+                        "docker login -u lewisgcm -p $DOCKER_HUB_ACCESS_TOKEN",
                     ]
                 },
                 {
@@ -41,9 +42,36 @@
                     args: [
                         "-c",
                         "--",
-                        "docker build -f ./Dockerfile .",
+                        "docker build -t lewisgcm/go-brunel:runner -f ./Dockerfile.runner .",
                     ]
-                }
+                },
+                {
+                    image: "docker:dind",
+                    workingDir: "/workspace/",
+                    entryPoint: "sh",
+                    environment: {
+                        "DOCKER_HOST": "tcp://docker:2375",
+                    },
+                    args: [
+                        "-c",
+                        "--",
+                        "docker build -t lewisgcm/go-brunel:latest -f ./Dockerfile .",
+                    ]
+                },
+                {
+                    image: "docker:dind",
+                    workingDir: "/workspace/",
+                    entryPoint: "sh",
+                    environment: {
+                        "DOCKER_HOST": "tcp://docker:2375",
+                        "DOCKER_HUB_ACCESS_TOKEN": brunel.secret('DOCKER_HUB_ACCESS_TOKEN')
+                    },
+                    args: [
+                        "-c",
+                        "--",
+                        "docker push lewisgcm/go-brunel:runner && docker push lewisgcm/go-brunel:latest",
+                    ]
+                },
             ]
         },
     }
