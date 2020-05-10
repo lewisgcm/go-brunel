@@ -96,7 +96,9 @@ export const EnvironmentPage = connect(
 			<EnvironmentDetail
 				isEdit={isEdit}
 				onEdit={() => setIsEdit(true)}
-				detail={Object.assign({}, detail)}
+				detail={{
+					...detail,
+				}}
 				onCancel={() => {
 					setIsEdit(false);
 					setSelectedEnvironmentId(selectedEnvironmentId ? selectedEnvironmentId : environments.length ? environments[0].ID : undefined);

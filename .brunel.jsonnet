@@ -19,6 +19,7 @@
         },
         {
             name: "build",
+            when: brunel.environment.variable("RELEASE") == "1",
             services: [
                 {
                     image: "docker:dind",
@@ -66,7 +67,7 @@
                     entryPoint: "sh",
                     environment: {
                         "DOCKER_HOST": "tcp://docker:2375",
-                        "DOCKER_HUB_ACCESS_TOKEN": brunel.secret('DOCKER_HUB_ACCESS_TOKEN')
+                        "DOCKER_HUB_ACCESS_TOKEN": brunel.environment.variable('DOCKER_HUB_ACCESS_TOKEN')
                     },
                     args: [
                         "-c",

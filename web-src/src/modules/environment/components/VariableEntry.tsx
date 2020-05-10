@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
 	Grid,
 	TextField,
@@ -26,6 +26,10 @@ export function VariableEntry({isEdit, variable, onSave, onRemove}: VariableProp
 	const [value, setValue] = useState((variable && variable.Value) || '');
 	const [showPassword, setShowPassword] = useState(false);
 	const [sensitive, setSensitive] = useState((variable && variable.Type === EnvironmentVariableType.Password) ? true : false);
+
+	useEffect(() => {
+		setValue((variable && variable.Value) || '');
+	}, [variable]);
 
 	const save = () => {
 		onSave({
