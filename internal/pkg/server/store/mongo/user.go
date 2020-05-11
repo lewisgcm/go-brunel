@@ -83,6 +83,11 @@ func (r *UserStore) AddOrUpdate(user store.User) (*store.User, error) {
 		Role:      user.Role,
 	}
 
+	insert := bson.M{"created_at": time.Now()}
+	if entity.Role == "" {
+		insert = bson.M{"created_at": time.Now(), "role": security.UserRoleReader}
+	}
+
 	upsert := true
 	after := options.After
 	if err := r.
@@ -93,7 +98,7 @@ func (r *UserStore) AddOrUpdate(user store.User) (*store.User, error) {
 			bson.M{"username": user.Username},
 			bson.M{
 				"$set":         entity,
-				"$setOnInsert": bson.M{"created_at": time.Now(), "role": security.UserRoleReader},
+				"$setOnInsert": insert,
 			},
 			&options.FindOneAndUpdateOptions{Upsert: &upsert, ReturnDocument: &after},
 		).Decode(&entity); err != nil {

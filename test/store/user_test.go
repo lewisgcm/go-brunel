@@ -22,11 +22,11 @@ func TestAddUser(t *testing.T) {
 		})
 
 		if err != nil {
-			t.Fatalf("could not create user: %e", err)
+			t.Fatalf("could not create user: %s", err)
 		}
 
 		if e := userStore.Delete(user.Username, true); e != nil {
-			t.Fatalf("could not delete test user: %e", e)
+			t.Fatalf("could not delete test user: %s", e)
 		}
 
 		test.ExpectString(t, "username", user.Username)
@@ -53,11 +53,11 @@ func TestAddUserDefaultRole(t *testing.T) {
 		})
 
 		if err != nil {
-			t.Fatalf("could not create user: %e", err)
+			t.Fatalf("could not create user: %s", err)
 		}
 
 		if e := userStore.Delete(user.Username, true); e != nil {
-			t.Fatalf("could not delete test user: %e", e)
+			t.Fatalf("could not delete test user: %s", e)
 		}
 
 		test.ExpectString(t, string(security.UserRoleReader), string(user.Role))
@@ -77,7 +77,7 @@ func TestUpdateUser(t *testing.T) {
 		})
 
 		if err != nil {
-			t.Fatalf("could not create user: %e", err)
+			t.Fatalf("could not create user: %s", err)
 		}
 
 		updatedUser, err := userStore.AddOrUpdate(store.User{
@@ -89,11 +89,11 @@ func TestUpdateUser(t *testing.T) {
 		})
 
 		if e := userStore.Delete(user.Username, true); e != nil {
-			t.Fatalf("could not delete test user: %e", e)
+			t.Fatalf("could not delete test user: %s", e)
 		}
 
 		if err != nil {
-			t.Fatalf("could not update user: %e", err)
+			t.Fatalf("could not update user: %s", err)
 		}
 
 		test.ExpectString(t, "username", updatedUser.Username)
@@ -121,7 +121,7 @@ func TestFilterUser(t *testing.T) {
 		})
 
 		if err != nil {
-			t.Fatalf("could not create user: %e", err)
+			t.Fatalf("could not create user: %s", err)
 		}
 
 		users, err := userStore.Filter("")
@@ -145,7 +145,7 @@ func TestFilterUser(t *testing.T) {
 		}
 
 		if e := userStore.Delete(user.Username, true); e != nil {
-			t.Fatalf("could not delete test user: %e", e)
+			t.Fatalf("could not delete test user: %s", e)
 		}
 	}
 }

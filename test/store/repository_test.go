@@ -26,11 +26,11 @@ func TestAddRepository(t *testing.T) {
 		})
 
 		if err != nil {
-			t.Fatalf("error saving repository: %e", err)
+			t.Fatalf("error saving repository: %s", err)
 		}
 
 		if e := repositoryStore.Delete(repo.ID, true); e != nil {
-			t.Fatalf("error deleting repository: %e", e)
+			t.Fatalf("error deleting repository: %s", e)
 		}
 
 		if repo.ID == "" {
@@ -78,7 +78,7 @@ func TestUpdateRepository(t *testing.T) {
 		})
 
 		if err != nil {
-			t.Fatalf("error saving repository: %e", err)
+			t.Fatalf("error saving repository: %s", err)
 		}
 
 		now := time.Now()
@@ -96,11 +96,11 @@ func TestUpdateRepository(t *testing.T) {
 		})
 
 		if err != nil {
-			t.Errorf("error saving updated repository: %e", err)
+			t.Errorf("error saving updated repository: %s", err)
 		}
 
 		if e := repositoryStore.Delete(repo.ID, true); e != nil {
-			t.Fatalf("error deleting repository: %e", e)
+			t.Fatalf("error deleting repository: %s", e)
 		}
 
 		test.ExpectString(t, string(repo.ID), string(updatedRepo.ID))
@@ -144,13 +144,13 @@ func TestGetRepository(t *testing.T) {
 		})
 
 		if err != nil {
-			t.Fatalf("error saving repository: %e", err)
+			t.Fatalf("error saving repository: %s", err)
 		}
 
 		getRepo, err := repositoryStore.Get(repo.ID)
 
 		if e := repositoryStore.Delete(repo.ID, true); e != nil {
-			t.Fatalf("error deleting repository: %e", e)
+			t.Fatalf("error deleting repository: %s", e)
 		}
 
 		if getRepo == nil || err != nil {
@@ -207,7 +207,7 @@ func TestFilterRepository(t *testing.T) {
 		})
 
 		if err != nil {
-			t.Fatalf("error saving repository: %e", err)
+			t.Fatalf("error saving repository: %s", err)
 		}
 
 		if repos, err := repositoryStore.Filter(""); len(repos) == 0 || err != nil {
@@ -227,7 +227,7 @@ func TestFilterRepository(t *testing.T) {
 		}
 
 		if e := repositoryStore.Delete(repo.ID, true); e != nil {
-			t.Fatalf("error deleting repository: %e", e)
+			t.Fatalf("error deleting repository: %s", e)
 		}
 	}
 }
@@ -250,7 +250,7 @@ func TestSetTriggerRepository(t *testing.T) {
 		})
 
 		if err != nil {
-			t.Fatalf("error saving repository: %e", err)
+			t.Fatalf("error saving repository: %s", err)
 		}
 
 		if e := repositoryStore.SetTriggers(repo.ID, []store.RepositoryTrigger{
@@ -264,7 +264,7 @@ func TestSetTriggerRepository(t *testing.T) {
 
 		getRepo, err := repositoryStore.Get(repo.ID)
 		if err != nil {
-			t.Errorf("error getting repository: %e", err)
+			t.Errorf("error getting repository: %s", err)
 		}
 
 		if len(getRepo.Triggers) != 1 || getRepo.Triggers[0].Pattern != "patternz" || getRepo.Triggers[0].Type != store.RepositoryTriggerTypeTag {
@@ -272,7 +272,7 @@ func TestSetTriggerRepository(t *testing.T) {
 		}
 
 		if e := repositoryStore.Delete(repo.ID, true); e != nil {
-			t.Fatalf("error deleting repository: %e", e)
+			t.Fatalf("error deleting repository: %s", e)
 		}
 	}
 }

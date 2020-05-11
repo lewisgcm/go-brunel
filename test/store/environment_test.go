@@ -33,7 +33,7 @@ func TestAddEnvironment(t *testing.T) {
 		}
 
 		if e := environmentStore.Delete(env.ID, true); e != nil {
-			t.Fatalf("could not delete old environment %e", e)
+			t.Fatalf("could not delete old environment %s", e)
 		}
 
 		if env.ID == "" {
@@ -98,7 +98,7 @@ func TestAddAndUpdateEnvironment(t *testing.T) {
 		}
 
 		if e := environmentStore.Delete(env.ID, true); e != nil {
-			t.Fatalf("could not delete old environment %e", e)
+			t.Fatalf("could not delete old environment %s", e)
 		}
 
 		if updatedEnv.ID != env.ID {
@@ -158,7 +158,7 @@ func TestUniqueNameEnvironment(t *testing.T) {
 		})
 
 		if e := environmentStore.Delete(env.ID, true); e != nil {
-			t.Fatalf("could not delete old environment %e", e)
+			t.Fatalf("could not delete old environment %s", e)
 		}
 
 		test.ExpectError(t, errors.New("environment name must be unique"), err)
@@ -187,7 +187,7 @@ func TestGetEnvironment(t *testing.T) {
 		getEnv, err := environmentStore.Get(env.ID)
 
 		if e := environmentStore.Delete(env.ID, true); e != nil {
-			t.Fatalf("could not delete old environment %e", e)
+			t.Fatalf("could not delete old environment %s", e)
 		}
 
 		if getEnv == nil || err != nil {
@@ -262,7 +262,7 @@ func TestGetEnvironmentVariable(t *testing.T) {
 		test.ExpectErrorLike(t, errors.New("environment variable not found"), err)
 
 		if e := environmentStore.Delete(env.ID, true); e != nil {
-			t.Fatalf("could not delete old environment %e", e)
+			t.Fatalf("could not delete old environment %s", e)
 		}
 	}
 }
@@ -307,7 +307,7 @@ func TestFilterEnvironments(t *testing.T) {
 		}
 
 		if e := environmentStore.Delete(env.ID, true); e != nil {
-			t.Fatalf("could not delete old environment %e", e)
+			t.Fatalf("could not delete old environment %s", e)
 		}
 	}
 }
