@@ -6,6 +6,7 @@ import (
 	"go-brunel/internal/pkg/server/security"
 	"go-brunel/internal/pkg/server/store"
 	"net/http"
+	"strings"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/go-chi/chi"
@@ -20,16 +21,32 @@ type authHandler struct {
 	userStore        store.UserStore
 }
 
+func (handler *authHandler) sendErrorMessage(w http.ResponseWriter, err string) {
+	if _, err := fmt.Fprintf(
+		w,
+		`<html><head></head><body><script>window.opener.postMessage({error: '%s'}, '*');</script></body></html>`,
+		err,
+	); err != nil {
+		log.Error("error occurred attempting to write error to client ", err)
+	}
+}
+
 func (handler *authHandler) oAuthComplete(w http.ResponseWriter, user goth.User) {
+	email := strings.TrimSpace(user.Email)
+	if len(strings.TrimSpace(email)) == 0 {
+		handler.sendErrorMessage(w, "You must have at least one verified primary email address to login using oAuth.")
+		return
+	}
+
 	roles, err := handler.userStore.AddOrUpdate(store.User{
-		Username:  user.Email,
-		Email:     user.Email,
+		Username:  email,
+		Email:     email,
 		Name:      user.Name,
 		AvatarURL: user.AvatarURL,
 	})
 	if err != nil {
 		log.Error("error occurred updating user ", err)
-		api.HandleError(w, http.StatusInternalServerError, errors.New("error authenticating"))
+		handler.sendErrorMessage(w, "Error attempting to log in.")
 		return
 	}
 
@@ -40,7 +57,7 @@ func (handler *authHandler) oAuthComplete(w http.ResponseWriter, user goth.User)
 	token, err := handler.serializer.Encode(security.Identity{Username: roles.Username, Role: roles.Role})
 	if err != nil {
 		log.Error("error occurred creating jwt token ", err)
-		api.HandleError(w, http.StatusInternalServerError, errors.New("error authenticating"))
+		handler.sendErrorMessage(w, "Error attempting to log in.")
 		return
 	}
 

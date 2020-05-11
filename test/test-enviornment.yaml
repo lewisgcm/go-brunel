@@ -31,20 +31,3 @@ spec:
   resources:
     requests:
       storage: 3Gi
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: global
-  namespace: brunel
-type: Opaque
-stringData:
-  MY_SECRET: Super sassy secret
----
-apiVersion: v1
-data:
-  MY_CONFIG: My super config VAL yaaalll
-kind: ConfigMap
-metadata:
-  name: global
-  namespace: brunel

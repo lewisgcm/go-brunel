@@ -28,6 +28,9 @@ const useStyles = makeStyles((theme: Theme) =>
 		},
 		login: {
 			textAlign: 'center',
+			maxWidth: '180px',
+			marginRight: 'auto',
+			marginLeft: 'auto',
 		},
 		gitlab: {
 			background: 'linear-gradient(45deg, #e24228 30%, #fca326 90%)',
@@ -61,30 +64,36 @@ export const Login = connect(
 		const history = useHistory();
 		const [isOpen, setOpen] = useState(false);
 		const [provider, setProvider] = useState<'github' | 'gitlab'>('github');
+		const [error, setError] = useState<string | undefined>(undefined);
 
 		return <Container className={classes.container}>
-			<div className={classes.login}>
-				<Typography variant={'h5'}>
-					Brunel CI
-				</Typography>
+			<div>
+				<div className={classes.login}>
+					<Typography variant={'h5'}>
+						Brunel CI
+					</Typography>
 
-				<Divider className={classes.divider}/>
+					<Divider className={classes.divider}/>
 
-				<Button className={classes.gitlab} onClick={() => {
-					setProvider('gitlab');
-					setOpen(true);
-				}}>
-					<FaGitlab style={{paddingRight: '10px', verticalAlign: 'middle'}} />
-					Login with GitLab
-				</Button>
+					<Button className={classes.gitlab} onClick={() => {
+						setProvider('gitlab');
+						setOpen(true);
+					}}>
+						<FaGitlab style={{paddingRight: '10px', verticalAlign: 'middle'}} />
+						Login with GitLab
+					</Button>
 
-				<Button className={classes.github} onClick={() => {
-					setProvider('github');
-					setOpen(true);
-				}}>
-					<FaGithub style={{paddingRight: '10px', verticalAlign: 'middle'}} />
-					Login with GitHub
-				</Button>
+					<Button className={classes.github} onClick={() => {
+						setProvider('github');
+						setOpen(true);
+					}}>
+						<FaGithub style={{paddingRight: '10px', verticalAlign: 'middle'}} />
+						Login with GitHub
+					</Button>
+				</div>
+				{error && <Typography style={{maxWidth: '250px', textAlign: 'center'}} color="error">
+					{error}
+				</Typography>}
 			</div>
 			<OAuthPopup
 				isOpen={isOpen}
@@ -94,6 +103,10 @@ export const Login = connect(
 					setUserRole(authService.getRole());
 					setLoggedIn();
 					history.push('/repository/');
+					setError(undefined);
+				}}
+				onError={(e) => {
+					setError(e);
 				}}
 			/>
 		</Container>;

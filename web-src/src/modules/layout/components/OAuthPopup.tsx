@@ -4,9 +4,10 @@ interface Props {
 	isOpen: boolean;
 	provider: string;
 	onDone: (token: string) => void;
+	onError: (error: string) => void;
 }
 
-export function OAuthPopup({isOpen, provider, onDone}: Props) {
+export function OAuthPopup({isOpen, provider, onDone, onError}: Props) {
 	useEffect(
 		() => {
 			const url = `${process.env.REACT_APP_OAUTH_BASE_URL}/api/user/login?provider=${provider}`;
@@ -21,6 +22,11 @@ export function OAuthPopup({isOpen, provider, onDone}: Props) {
 							onDone(e.data.token);
 							window.removeEventListener('message', listener);
 						}
+						if (e.data.error) {
+							popup.close();
+							onError(e.data.error);
+							window.removeEventListener('message', listener);
+						}
 					};
 
 					return () => {
@@ -29,7 +35,7 @@ export function OAuthPopup({isOpen, provider, onDone}: Props) {
 				}
 			}
 		},
-		[isOpen, provider, onDone],
+		[isOpen, provider, onDone, onError],
 	);
 
 	return <Fragment />;
