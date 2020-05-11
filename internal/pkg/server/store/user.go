@@ -6,17 +6,25 @@ import (
 )
 
 type User struct {
-	ID        string `bson:"-"`
 	Username  string
 	Email     string
 	Name      string
-	AvatarURL string `bson:"avatar_url"`
+	AvatarURL string
 	Role      security.UserRole
-	CreatedAt time.Time `bson:"created_at"`
+	CreatedAt time.Time
+}
+
+type UserList struct {
+	Username string
+	Role     security.UserRole
 }
 
 type UserStore interface {
-	AddOrUpdate(user User) (User, error)
+	Filter(filter string) ([]UserList, error)
 
-	GetByUsername(username string) (User, error)
+	AddOrUpdate(user User) (*User, error)
+
+	GetByUsername(username string) (*User, error)
+
+	Delete(username string, hard bool) error
 }

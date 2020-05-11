@@ -12,6 +12,7 @@ p, admin, /api/job/*/reschedule, POST
 p, admin, /api/environment*, POST
 p, admin, /api/repository*, PUT
 p, admin, /api/environment*, GET
+p, admin, /api/user/, GET
 
 g, , anonymous
 g, owner, reader

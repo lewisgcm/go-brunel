@@ -104,6 +104,15 @@ func (handler *authHandler) profile(r *http.Request) api.Response {
 	return api.Ok(user)
 }
 
+func (handler *authHandler) list(r *http.Request) api.Response {
+	filter := r.URL.Query().Get("filter")
+	users, err := handler.userStore.Filter(filter)
+	if err != nil {
+		return api.InternalServerError(errors.Wrap(err, "error getting users"))
+	}
+	return api.Ok(users)
+}
+
 func Routes(
 	defaultAdminUser string,
 	userStore store.UserStore,
@@ -124,5 +133,6 @@ func Routes(
 	router.Get("/login", handler.login)
 	router.Get("/callback", handler.callback)
 	router.Get("/profile", api.Handle(handler.profile))
+	router.Get("/", api.Handle(handler.list))
 	return router
 }
