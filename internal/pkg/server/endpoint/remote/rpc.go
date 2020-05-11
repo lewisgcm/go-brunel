@@ -21,7 +21,7 @@ type RPC struct {
 	StageStore       store.StageStore
 }
 
-func (t *RPC) GetNextAvailableJob(args *remote.Empty, reply *remote.GetNextAvailableJobResponse) error {
+func (t *RPC) GetNextAvailableJob(_ *remote.Empty, reply *remote.GetNextAvailableJobResponse) error {
 	job, e := t.JobStore.Next()
 	if e != nil {
 		return errors.Wrap(e, "error getting next job from store")
@@ -49,7 +49,7 @@ func (t *RPC) GetNextAvailableJob(args *remote.Empty, reply *remote.GetNextAvail
 	return nil
 }
 
-func (t *RPC) SetJobState(args *remote.SetJobStateRequest, reply *remote.Empty) error {
+func (t *RPC) SetJobState(args *remote.SetJobStateRequest, _ *remote.Empty) error {
 	if args.State > shared.JobStateProcessing {
 		log.Info("job with id ", args.Id, " has stopped")
 
@@ -74,7 +74,7 @@ func (t *RPC) HasBeenCancelled(args *shared.JobID, reply *bool) error {
 	return e
 }
 
-func (t *RPC) Log(args *remote.LogRequest, reply *remote.Empty) error {
+func (t *RPC) Log(args *remote.LogRequest, _ *remote.Empty) error {
 	return errors.Wrap(
 		t.LogStore.Log(store.Log{
 			JobID:   args.Id,
@@ -87,7 +87,7 @@ func (t *RPC) Log(args *remote.LogRequest, reply *remote.Empty) error {
 	)
 }
 
-func (t *RPC) SetStageState(args *remote.SetStageStateRequest, reply *remote.Empty) error {
+func (t *RPC) SetStageState(args *remote.SetStageStateRequest, _ *remote.Empty) error {
 	var startTime time.Time
 	var stopTime time.Time
 
@@ -108,7 +108,7 @@ func (t *RPC) SetStageState(args *remote.SetStageStateRequest, reply *remote.Emp
 	return errors.Wrap(err, "error storing stage stopped time")
 }
 
-func (t *RPC) AddContainer(args *remote.AddContainerRequest, reply *remote.Empty) error {
+func (t *RPC) AddContainer(args *remote.AddContainerRequest, _ *remote.Empty) error {
 	return errors.Wrap(
 		t.ContainerStore.Add(store.Container{
 			JobID:       args.Id,
@@ -122,7 +122,7 @@ func (t *RPC) AddContainer(args *remote.AddContainerRequest, reply *remote.Empty
 	)
 }
 
-func (t *RPC) SetContainerState(args *remote.SetContainerStateRequest, reply *remote.Empty) error {
+func (t *RPC) SetContainerState(args *remote.SetContainerStateRequest, _ *remote.Empty) error {
 	if args.State == shared.ContainerStateStopped {
 		if err := t.ContainerStore.UpdateStoppedAtByContainerID(args.Id, time.Now()); err != nil {
 			return errors.Wrap(err, "error storing container stop time")
@@ -138,7 +138,7 @@ func (t *RPC) SetContainerState(args *remote.SetContainerStateRequest, reply *re
 	)
 }
 
-func (t *RPC) ContainerLog(args *remote.ContainerLogRequest, reply *remote.Empty) error {
+func (t *RPC) ContainerLog(args *remote.ContainerLogRequest, _ *remote.Empty) error {
 	return errors.Wrap(
 		t.LogStore.ContainerLog(store.ContainerLog{
 			ContainerID: args.Id,

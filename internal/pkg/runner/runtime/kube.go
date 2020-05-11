@@ -189,7 +189,25 @@ func (pipeline *KubeRuntime) writeContainerLogsSince(
 			// The log is raw JSON, we need to decode it
 			var parsedLog dockerLogFormat
 			if err := json.NewDecoder(strings.NewReader(log)).Decode(&parsedLog); err != nil {
-				return errors.Wrap(err, "error decoding log")
+				err = errors.Wrap(err, fmt.Sprintf("error decoding log: '%s'", log))
+
+				// Attempt to parse non json log
+				parts := strings.SplitN(log, " ", 4)
+				if len(parts) != 4 {
+					return errors.Wrap(err, "failed to parse using fallback plaintext")
+				}
+
+				// Attempt to parse our time for the logs
+				t, err := time.Parse(time.RFC3339Nano, parts[0])
+				if err != nil {
+					return errors.Wrap(err, "failed to parse time using fallback plaintext")
+				}
+
+				parsedLog = dockerLogFormat{
+					Log:    parts[3] + "\n",
+					Stream: parts[1],
+					Time:   t,
+				}
 			}
 
 			// It seems as though the since kubernetes API variable isnt quite accurate so we do an

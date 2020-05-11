@@ -4,6 +4,7 @@ package runtime
 
 import (
 	"context"
+	"flag"
 	"go-brunel/internal/pkg/runner/runtime"
 	"go-brunel/internal/pkg/shared"
 	"io"
@@ -21,6 +22,12 @@ import (
 
 type testSuite struct {
 	runtimes []runtimeTestEnvironment
+}
+
+var kubeConfig = ""
+
+func init() {
+	flag.StringVar(&kubeConfig, "kube-config", "/Users/lewis/.kube/config", "Kube Config")
 }
 
 type mockBufferWriteCloser struct {
@@ -54,7 +61,7 @@ func setup(t *testing.T) testSuite {
 
 	// Create the kube runtime
 	kubeConfig := shared.KubernetesConfig{
-		ConfigFile:      "/Users/lewis/.kube/config",
+		ConfigFile:      kubeConfig,
 		Namespace:       "brunel",
 		VolumeClaimName: "brunel-workspace-volume-claim",
 	}
