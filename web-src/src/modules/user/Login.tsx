@@ -5,17 +5,13 @@ import {Button, Container, Divider, Typography} from '@material-ui/core';
 import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
 import {FaGitlab, FaGithub} from 'react-icons/fa';
 
-import {withDependency} from '../../container';
+import {useDependency} from '../../container';
 import {AuthService, UserRole} from '../../services';
 import {setAuthenticated, OAuthPopup, setRole} from '../layout';
 
 interface Props {
 	setLoggedIn: () => void;
 	setUserRole: (role?: UserRole) => void;
-}
-
-interface Dependencies {
-	authService: AuthService;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -54,14 +50,11 @@ export const Login = connect(
 		setUserRole: (role?: UserRole) => dispatch(setRole(role)),
 		setLoggedIn: () => dispatch(setAuthenticated(true)),
 	}),
-)(withDependency<Props, Dependencies>(
-	(container) => ({
-		authService: container.get(AuthService),
-	}),
 )(
-	({authService, setLoggedIn, setUserRole}) => {
+	({setLoggedIn, setUserRole}: Props) => {
 		const classes = useStyles();
 		const history = useHistory();
+		const authService = useDependency(AuthService);
 		const [isOpen, setOpen] = useState(false);
 		const [provider, setProvider] = useState<'github' | 'gitlab'>('github');
 		const [error, setError] = useState<string | undefined>(undefined);
@@ -113,4 +106,4 @@ export const Login = connect(
 			/>
 		</Container>;
 	},
-));
+);
