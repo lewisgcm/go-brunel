@@ -42,7 +42,7 @@ func (handler *jobHandler) get(r *http.Request) api.Response {
 		Repository store.Repository
 	}{
 		Job:        job,
-		Repository: repository,
+		Repository: *repository,
 	})
 }
 
