@@ -18,7 +18,7 @@
             ]
         },
         {
-            name: "data store integration test",
+            name: "data test",
             services: [
                 {
                     image: "mongo:4.2.1-bionic",

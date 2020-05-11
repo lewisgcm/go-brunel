@@ -1,16 +1,14 @@
 package store
 
 import (
-	"github.com/pkg/errors"
 	"go-brunel/internal/pkg/shared"
 	"regexp"
 	"time"
 )
 
 type RepositoryID string
-type RepositoryTriggerType int8
 
-var ErrorNotFound = errors.New("entity not found")
+type RepositoryTriggerType int8
 
 const (
 	RepositoryTriggerTypeTag    RepositoryTriggerType = 0
@@ -28,10 +26,10 @@ type Repository struct {
 	Project   string
 	Name      string
 	URI       string
-	Triggers  []RepositoryTrigger `bson:",omitempty"`
-	CreatedAt time.Time           `bson:"created_at"`
-	UpdatedAt time.Time           `bson:"updated_at"`
-	DeletedAt *time.Time          `bson:"deleted_at" json:",omitempty"`
+	Triggers  []RepositoryTrigger
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time
 }
 
 func (repository *Repository) IsValid() bool {
@@ -51,11 +49,13 @@ func (trigger *RepositoryTrigger) IsValid() bool {
 }
 
 type RepositoryStore interface {
-	AddOrUpdate(repository Repository) (Repository, error)
+	AddOrUpdate(repository Repository) (*Repository, error)
 
 	SetTriggers(id RepositoryID, triggers []RepositoryTrigger) error
 
-	Get(id RepositoryID) (Repository, error)
+	Get(id RepositoryID) (*Repository, error)
 
 	Filter(filter string) ([]Repository, error)
+
+	Delete(id RepositoryID, hard bool) error
 }

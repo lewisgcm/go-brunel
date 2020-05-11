@@ -101,10 +101,7 @@ func (s *EnvironmentStore) AddOrUpdate(environment store.Environment) (*store.En
 
 	criteria := bson.M{}
 
-	if environment.ID == "" {
-		t := time.Now()
-		mongoEntity.CreatedAt = &t
-	} else {
+	if environment.ID != "" {
 		oid, err := primitive.ObjectIDFromHex(string(environment.ID))
 		if err != nil {
 			return nil, errors.Wrap(err, "error parsing object id")
@@ -121,7 +118,8 @@ func (s *EnvironmentStore) AddOrUpdate(environment store.Environment) (*store.En
 			context.Background(),
 			criteria,
 			bson.M{
-				"$set": mongoEntity,
+				"$set":         mongoEntity,
+				"$setOnInsert": bson.M{"created_at": time.Now()},
 			},
 			&options.FindOneAndUpdateOptions{Upsert: &upsert, ReturnDocument: &after},
 		).Decode(&mongoEntity); err != nil {

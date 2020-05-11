@@ -22,30 +22,54 @@ type RepositoryStore struct {
 }
 
 type mongoRepository struct {
-	ObjectID         primitive.ObjectID `bson:"_id,omitempty"`
-	store.Repository `bson:",inline"`
+	ObjectID  primitive.ObjectID        `bson:"_id,omitempty"`
+	Project   string                    `bson:"project"`
+	Name      string                    `bson:"name"`
+	URI       string                    `bson:"uri"`
+	Triggers  []store.RepositoryTrigger `bson:",omitempty"`
+	CreatedAt *time.Time                `bson:"created_at,omitempty"`
+	UpdatedAt time.Time                 `bson:"updated_at"`
+	DeletedAt *time.Time                `bson:"deleted_at" json:",omitempty"`
 }
 
-func (r *RepositoryStore) AddOrUpdate(repository store.Repository) (store.Repository, error) {
-	var repo mongoRepository
-	repo.UpdatedAt = time.Now()
+func (r *mongoRepository) ToRepository() *store.Repository {
+	return &store.Repository{
+		ID:        store.RepositoryID(r.ObjectID.Hex()),
+		Project:   r.Project,
+		Name:      r.Name,
+		URI:       r.URI,
+		Triggers:  r.Triggers,
+		CreatedAt: *r.CreatedAt,
+		UpdatedAt: r.UpdatedAt,
+		DeletedAt: r.DeletedAt,
+	}
+}
+
+func (r *RepositoryStore) AddOrUpdate(repository store.Repository) (*store.Repository, error) {
+	repo := mongoRepository{
+		Project:   repository.Project,
+		Name:      repository.Name,
+		URI:       repository.URI,
+		Triggers:  repository.Triggers,
+		UpdatedAt: time.Now(),
+		DeletedAt: repository.DeletedAt,
+	}
+
 	upsert := true
 	after := options.After
-	err := r.
+	if err := r.
 		Database.
 		Collection(repositoryCollectionName).
 		FindOneAndUpdate(
 			context.Background(),
 			bson.M{"project": repository.Project, "name": repository.Name},
-			bson.M{"$set": repository},
+			bson.M{"$set": repo, "$setOnInsert": bson.M{"created_at": time.Now()}},
 			&options.FindOneAndUpdateOptions{Upsert: &upsert, ReturnDocument: &after},
-		).Decode(&repo)
-	if err != nil {
-		return store.Repository{}, errors.Wrap(err, "error adding or updating repository")
+		).Decode(&repo); err != nil {
+		return nil, errors.Wrap(err, "error adding or updating repository")
 	}
 
-	repo.Repository.ID = store.RepositoryID(repo.ObjectID.Hex())
-	return repo.Repository, nil
+	return repo.ToRepository(), nil
 }
 
 func (r *RepositoryStore) SetTriggers(id store.RepositoryID, triggers []store.RepositoryTrigger) error {
@@ -72,10 +96,10 @@ func (r *RepositoryStore) SetTriggers(id store.RepositoryID, triggers []store.Re
 	return nil
 }
 
-func (r *RepositoryStore) Get(id store.RepositoryID) (store.Repository, error) {
+func (r *RepositoryStore) Get(id store.RepositoryID) (*store.Repository, error) {
 	objectID, err := primitive.ObjectIDFromHex(string(id))
 	if err != nil {
-		return store.Repository{}, err
+		return nil, err
 	}
 
 	var d mongoRepository
@@ -87,14 +111,13 @@ func (r *RepositoryStore) Get(id store.RepositoryID) (store.Repository, error) {
 		Decode(&d)
 
 	if err == mongo.ErrNoDocuments {
-		return store.Repository{}, store.ErrorNotFound
+		return nil, store.ErrorNotFound
 	}
 	if err != nil {
-		return store.Repository{}, errors.Wrap(err, "error getting repository")
+		return nil, errors.Wrap(err, "error getting repository")
 	}
 
-	d.Repository.ID = store.RepositoryID(d.ObjectID.Hex())
-	return d.Repository, nil
+	return d.ToRepository(), nil
 }
 
 func (r *RepositoryStore) Filter(filter string) ([]store.Repository, error) {
@@ -106,8 +129,8 @@ func (r *RepositoryStore) Filter(filter string) ([]store.Repository, error) {
 		[]bson.M{
 			{"$match": bson.M{
 				"$or": []bson.M{
-					{"name": bsonx.Regex(fmt.Sprintf(".*%s.*", filter), "")},
-					{"project": bsonx.Regex(fmt.Sprintf(".*%s.*", filter), "")},
+					{"name": bsonx.Regex(fmt.Sprintf(".*%s.*", filter), "i")},
+					{"project": bsonx.Regex(fmt.Sprintf(".*%s.*", filter), "i")},
 				}}},
 		},
 	)
@@ -121,8 +144,31 @@ func (r *RepositoryStore) Filter(filter string) ([]store.Repository, error) {
 		if err != nil {
 			return nil, errors.Wrap(err, "error decoding repository list")
 		}
-		repo.ID = store.RepositoryID(repo.ObjectID.Hex())
-		repos = append(repos, repo.Repository)
+		repos = append(repos, *repo.ToRepository())
 	}
 	return repos, nil
+}
+
+func (r *RepositoryStore) Delete(id store.RepositoryID, hard bool) error {
+	objectID, err := primitive.ObjectIDFromHex(string(id))
+	if err != nil {
+		return err
+	}
+
+	if hard {
+		_, err = r.
+			Database.
+			Collection(repositoryCollectionName).
+			DeleteOne(context.Background(), bson.M{"_id": objectID})
+
+		return errors.Wrap(err, "error deleting")
+	} else {
+		err = r.
+			Database.
+			Collection(repositoryCollectionName).
+			FindOneAndUpdate(context.Background(), bson.M{"_id": objectID}, bson.M{"deleted_at": time.Now()}).
+			Err()
+
+		return errors.Wrap(err, "error soft deleting")
+	}
 }
