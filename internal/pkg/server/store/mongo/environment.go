@@ -99,8 +99,7 @@ func (s *EnvironmentStore) AddOrUpdate(environment store.Environment) (*store.En
 		UpdatedAt: time.Now(),
 	}
 
-	criteria := bson.M{}
-
+	criteria := bson.M{"name": environment.Name}
 	if environment.ID != "" {
 		oid, err := primitive.ObjectIDFromHex(string(environment.ID))
 		if err != nil {

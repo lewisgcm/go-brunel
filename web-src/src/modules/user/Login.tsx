@@ -91,7 +91,7 @@ export const Login = connect(
 						Login with GitHub
 					</Button>
 				</div>
-				{error && <Typography style={{maxWidth: '250px', textAlign: 'center'}} color="error">
+				{error && <Typography style={{maxWidth: '250px', textAlign: 'center', marginTop: '10px'}} color="error">
 					{error}
 				</Typography>}
 			</div>
@@ -99,14 +99,16 @@ export const Login = connect(
 				isOpen={isOpen}
 				provider={provider}
 				onDone={(e) => {
+					setError(undefined);
+					setOpen(false);
 					authService.setAuthentication(e);
 					setUserRole(authService.getRole());
 					setLoggedIn();
 					history.push('/repository/');
-					setError(undefined);
 				}}
 				onError={(e) => {
 					setError(e);
+					setOpen(false);
 				}}
 			/>
 		</Container>;

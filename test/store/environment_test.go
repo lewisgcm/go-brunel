@@ -311,3 +311,39 @@ func TestFilterEnvironments(t *testing.T) {
 		}
 	}
 }
+
+func TestAddTwoEnvironments(t *testing.T) {
+	suite := setup(t)
+
+	for _, environmentStore := range suite.environmentStores {
+
+		envOne, err := environmentStore.AddOrUpdate(store.Environment{
+			Name: "xxxxxxxxxx1",
+			Variables: []store.EnvironmentVariable{},
+		})
+		if err != nil {
+			t.Fatalf("error saving environment %s", err.Error())
+		}
+
+		envTwo, err := environmentStore.AddOrUpdate(store.Environment{
+			Name: "xxxxxxxxxx2",
+			Variables: []store.EnvironmentVariable{},
+		})
+		if err != nil {
+			t.Errorf("error saving environment %s", err.Error())
+		}
+
+		environments, err := environmentStore.Filter("xxxxxxxxxx")
+		if len(environments) != 2 || err != nil {
+			t.Errorf("incorrect environments returned for 'xxxxxxxxxx'")
+		}
+
+		if e := environmentStore.Delete(envOne.ID, true); e != nil {
+			t.Errorf("could not delete old environment %s", e)
+		}
+
+		if e := environmentStore.Delete(envTwo.ID, true); e != nil {
+			t.Fatalf("could not delete old environment %s", e)
+		}
+	}
+}

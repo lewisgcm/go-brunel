@@ -21,8 +21,7 @@ export function OAuthPopup({isOpen, provider, onDone, onError}: Props) {
 							popup.close();
 							onDone(e.data.token);
 							window.removeEventListener('message', listener);
-						}
-						if (e.data.error) {
+						} else if (e.data.error) {
 							popup.close();
 							onError(e.data.error);
 							window.removeEventListener('message', listener);
