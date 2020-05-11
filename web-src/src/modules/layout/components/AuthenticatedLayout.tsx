@@ -94,6 +94,10 @@ export function AuthenticatedLayout(props: ResponsiveDrawerProps) {
 							isAdmin &&
 							<Button className={classes.buttonActive} component={NavLink} activeClassName='is-active' to={'/environment'} color="inherit">Environments</Button>
 						}
+						{
+							isAdmin &&
+							<Button className={classes.buttonActive} component={NavLink} activeClassName='is-active' to={'/user'} color="inherit">Users</Button>
+						}
 					</Hidden>
 					<div className={classes.grow} />
 					<CurrentUser/>

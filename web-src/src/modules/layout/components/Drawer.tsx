@@ -127,6 +127,17 @@ export const Drawer = connect(
 									<ListItemText primary={'Environments'} />
 								</ListItem>
 							}
+							{
+								isAdmin &&
+								<ListItem
+									button
+									component={NavLink}
+									to={'/user'}
+									activeClassName='Mui-selected'
+									onClick={() => onToggleSideBar()} >
+									<ListItemText primary={'Users'} />
+								</ListItem>
+							}
 						</List>
 						<Divider />
 						{sidebar()}

@@ -77,6 +77,11 @@ export interface User {
 	AvatarURL: string;
 }
 
+export interface UserList {
+	Username: string;
+	Role: UserRole;
+}
+
 export enum JobState {
 	Waiting = 0,
 	Processing = 1,

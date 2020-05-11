@@ -26,7 +26,7 @@ type mongoUser struct {
 	Email     string            `bson:"email"`
 	Name      string            `bson:"name"`
 	AvatarURL string            `bson:"avatar_url"`
-	Role      security.UserRole `bson:"role"`
+	Role      security.UserRole `bson:"role,omitempty"`
 	CreatedAt *time.Time        `bson:"created_at,omitempty"`
 }
 
@@ -93,7 +93,7 @@ func (r *UserStore) AddOrUpdate(user store.User) (*store.User, error) {
 			bson.M{"username": user.Username},
 			bson.M{
 				"$set":         entity,
-				"$setOnInsert": bson.M{"created_at": time.Now()},
+				"$setOnInsert": bson.M{"created_at": time.Now(), "role": security.UserRoleReader},
 			},
 			&options.FindOneAndUpdateOptions{Upsert: &upsert, ReturnDocument: &after},
 		).Decode(&entity); err != nil {

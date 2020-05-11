@@ -44,11 +44,11 @@ func TestAddEnvironment(t *testing.T) {
 			t.Errorf("name was not returned correctly: %s != %s", env.Name, "testing")
 		}
 
-		if env.CreatedAt.Before(now) {
+		if env.CreatedAt.Unix() < now.Unix() {
 			t.Errorf("created at date not returned correctly: %s before %s", env.CreatedAt.String(), now.String())
 		}
 
-		if env.UpdatedAt.Before(now) {
+		if env.UpdatedAt.Unix() < now.Unix() {
 			t.Errorf("updated at date not returned correctly: %s before %s", env.UpdatedAt.String(), now.String())
 		}
 
@@ -113,7 +113,7 @@ func TestAddAndUpdateEnvironment(t *testing.T) {
 			t.Errorf("created at date should not have updated")
 		}
 
-		if updatedEnv.UpdatedAt.Before(now) {
+		if updatedEnv.UpdatedAt.Unix() < now.Unix() {
 			t.Errorf("updated at date not returned correctly %s", env.UpdatedAt.String())
 		}
 

@@ -8,7 +8,7 @@ import {RepositoryJobs} from './RepositoryJobs';
 import {useDependency} from '../../../container';
 import {Repository, RepositoryService} from '../../../services';
 import {RepositoryListComponent} from '../components/RepositoryListComponent';
-import { connect } from 'react-redux';
+import {connect} from 'react-redux';
 
 interface Props {
 	match: match<{repositoryId: string}>;

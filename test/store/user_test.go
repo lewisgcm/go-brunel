@@ -41,6 +41,29 @@ func TestAddUser(t *testing.T) {
 	}
 }
 
+func TestAddUserDefaultRole(t *testing.T) {
+	suite := setup(t)
+
+	for _, userStore := range suite.userStores {
+		user, err := userStore.AddOrUpdate(store.User{
+			Username:  "username",
+			Email:     "email",
+			Name:      "name",
+			AvatarURL: "avatar",
+		})
+
+		if err != nil {
+			t.Fatalf("could not create user: %e", err)
+		}
+
+		if e := userStore.Delete(user.Username, true); e != nil {
+			t.Fatalf("could not delete test user: %e", e)
+		}
+
+		test.ExpectString(t, string(security.UserRoleReader), string(user.Role))
+	}
+}
+
 func TestUpdateUser(t *testing.T) {
 	suite := setup(t)
 
@@ -84,7 +107,6 @@ func TestUpdateUser(t *testing.T) {
 		}
 	}
 }
-
 
 func TestFilterUser(t *testing.T) {
 	suite := setup(t)
