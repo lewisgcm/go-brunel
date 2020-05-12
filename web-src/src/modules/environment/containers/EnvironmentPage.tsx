@@ -48,15 +48,34 @@ export const EnvironmentPage = connect(
 
 	useEffect(
 		() => {
+			setSaveError('');
+		},
+		[isEdit],
+	);
+
+	useEffect(
+		() => {
+			setIsEdit(false);
+		},
+		[detail],
+	);
+
+	useEffect(
+		() => {
 			if (match.params.environmentId) {
 				environmentService
 					.get(match.params.environmentId)
-					.subscribe((environment) => {
-						setDetail(environment);
-					});
+					.subscribe(
+						(environment) => {
+							setDetail(environment);
+						},
+						() => {
+							setDetail(undefined);
+						},
+					);
 			}
 		},
-		[environmentService, match.params.environmentId],
+		[environmentService, match.params.environmentId, history],
 	);
 
 	useEffect(
@@ -102,30 +121,31 @@ export const EnvironmentPage = connect(
 			.save(environment)
 			.subscribe(
 				(newEnvironment) => {
-					setEnvironments(
-						environments.filter((e) => e.ID !== newEnvironment.ID).concat([
-							newEnvironment,
-						]),
-					);
-					setIsEdit(false);
-					history.push(`/environment/${environment.ID}`);
-					setSaveError(undefined);
+					if (!environment.ID) {
+						setEnvironments(
+							environments.filter((e) => e.ID !== newEnvironment.ID).concat([
+								newEnvironment,
+							]),
+						);
+						history.replace(`/environment/${newEnvironment.ID}`);
+					} else {
+						setDetail(newEnvironment);
+						setEnvironments(
+							environments.map(
+								(e) => e.ID === newEnvironment.ID ? newEnvironment : e,
+							),
+						);
+					}
 				},
 				(error) => {
-					let message = 'Failed to save environment';
-					if (error && error.Error) {
-						message = `${message}: ${error.Error}`;
-					}
-					setSaveError(message);
+					setSaveError(`Failed to save environment: ${error.message}`);
 				},
 			);
 	};
 
 	const AddButton = () => (<Button
 		onClick={() => {
-			history.push(`/environment/`);
 			hideMobileSidebar();
-			setIsEdit(true);
 			setDetail({
 				ID: '',
 				Name: '',
@@ -154,7 +174,6 @@ export const EnvironmentPage = connect(
 		onSearch={(term) => subject.next(term)}
 		onClick={(item) => {
 			hideMobileSidebar();
-			setIsEdit(false);
 			history.push(`/environment/${item.ID}`);
 		}}
 		children={<AddButton/>}/>;
@@ -162,14 +181,19 @@ export const EnvironmentPage = connect(
 	const content = () => {
 		return detail !== undefined ?
 			<EnvironmentDetail
-				isEdit={isEdit}
+				isEdit={(detail && !detail.ID) ? true : isEdit}
 				error={saveError}
 				onEdit={() => setIsEdit(true)}
 				detail={{
 					...detail,
 				}}
 				onCancel={() => {
-					setIsEdit(false);
+					if (!detail.ID) {
+						setDetail(undefined);
+						history.push(`/environment/`);
+					} else {
+						setIsEdit(false);
+					}
 				}}
 				onSave={onSave} /> :
 			<React.Fragment/>;
