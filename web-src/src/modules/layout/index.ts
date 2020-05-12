@@ -1,5 +1,4 @@
 export * from './containers/Layout';
-export * from './components/OAuthPopup';
 export * from './components/Drawer';
 export * from './components/ProtectedRoute';
 export * from './components/SearchableList';

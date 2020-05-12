@@ -5,9 +5,10 @@ import {Button, Container, Divider, Typography} from '@material-ui/core';
 import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
 import {FaGitlab, FaGithub} from 'react-icons/fa';
 
-import {useDependency} from '../../container';
-import {AuthService, UserRole} from '../../services';
-import {setAuthenticated, OAuthPopup, setRole} from '../layout';
+import {useDependency} from '../../../container';
+import {AuthService, UserRole} from '../../../services';
+import {setAuthenticated, setRole} from '../../layout';
+import {OAuthPopup} from './OAuthPopup';
 
 interface Props {
 	setLoggedIn: () => void;
@@ -101,6 +102,10 @@ export const Login = connect(
 				}}
 				onError={(e) => {
 					setError(e);
+					setOpen(false);
+				}}
+				onAbort={() => {
+					setError('Login aborted.');
 					setOpen(false);
 				}}
 			/>
