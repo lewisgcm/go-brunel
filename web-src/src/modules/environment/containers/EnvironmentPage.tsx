@@ -33,6 +33,7 @@ export const EnvironmentPage = connect(
 	const [selectedEnvironmentId, setSelectedEnvironmentId] = useState<string | undefined>(match.params.environmentId);
 	const [detail, setDetail] = useState<Environment>();
 	const [isEdit, setIsEdit] = useState(false);
+	const [listError, setListError] = useState<string | undefined>(undefined);
 
 	useEffect(() => {
 		const subscription = merge(
@@ -52,6 +53,10 @@ export const EnvironmentPage = connect(
 				if (items.length > 0) {
 					setSelectedEnvironmentId(items[0].ID);
 				}
+			},
+			() => {
+				setListError('');
+				setLoading(false);
 			},
 		);
 

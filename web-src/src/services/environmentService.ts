@@ -4,6 +4,7 @@ import {switchMap} from 'rxjs/operators';
 
 import {AuthService} from './authService';
 import {EnvironmentList, Environment} from './models';
+import {handleResponse} from './util';
 
 @injectable()
 export class EnvironmentService {
@@ -18,7 +19,7 @@ export class EnvironmentService {
 		return from(fetch(
 			`/api/environment?${query}`,
 			{headers: this._authService.getAuthHeaders()})).pipe(
-			switchMap((response) => response.json()),
+			switchMap(handleResponse),
 		);
 	}
 
@@ -26,7 +27,7 @@ export class EnvironmentService {
 		return from(fetch(
 			`/api/environment/${id}`,
 			{headers: this._authService.getAuthHeaders()})).pipe(
-			switchMap((response) => response.json()),
+			switchMap(handleResponse),
 		);
 	}
 
@@ -38,7 +39,7 @@ export class EnvironmentService {
 				headers: this._authService.getAuthHeaders(),
 				body: JSON.stringify(environment),
 			})).pipe(
-			switchMap((response) => response.json()),
+			switchMap(handleResponse),
 		);
 	}
 }

@@ -4,6 +4,7 @@ import {switchMap} from 'rxjs/operators';
 
 import {AuthService} from './authService';
 import {RepositoryTrigger, Repository, RepositoryJobPage} from './models';
+import {handleResponse} from './util';
 
 @injectable()
 export class RepositoryService {
@@ -18,7 +19,9 @@ export class RepositoryService {
 				headers: this._authService.getAuthHeaders(),
 				body: JSON.stringify(triggers),
 			},
-		));
+		)).pipe(
+			switchMap(handleResponse),
+		);
 	}
 
 	list(filter = ''): Observable<Repository[]> {
@@ -33,7 +36,7 @@ export class RepositoryService {
 				headers: this._authService.getAuthHeaders(),
 			},
 		)).pipe(
-			switchMap((response) => response.json()),
+			switchMap(handleResponse),
 		);
 	}
 
@@ -45,7 +48,7 @@ export class RepositoryService {
 				headers: this._authService.getAuthHeaders(),
 			},
 		)).pipe(
-			switchMap((response) => response.json()),
+			switchMap(handleResponse),
 		);
 	}
 
@@ -72,7 +75,7 @@ export class RepositoryService {
 				headers: this._authService.getAuthHeaders(),
 			},
 		)).pipe(
-			switchMap((response) => response.json()),
+			switchMap(handleResponse),
 		);
 	}
 }

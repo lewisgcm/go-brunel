@@ -4,6 +4,7 @@ import {map, scan, switchMap, takeWhile} from 'rxjs/operators';
 
 import {AuthService} from './authService';
 import {Job, JobProgress, JobState} from './models';
+import {handleResponse} from './util';
 
 const POLL_INTERVAL_MS = 2 * 1000;
 
@@ -17,7 +18,7 @@ export class JobService {
 			`/api/job/${id}`,
 			{headers: this._authService.getAuthHeaders()},
 		)).pipe(
-			switchMap((response) => response.json()),
+			switchMap(handleResponse),
 		);
 	}
 
@@ -35,7 +36,7 @@ export class JobService {
 			`/api/job/${id}/reschedule`,
 			{headers: this._authService.getAuthHeaders(), method: 'POST'},
 		)).pipe(
-			switchMap((response) => response.json()),
+			switchMap(handleResponse),
 		);
 	}
 
@@ -68,7 +69,7 @@ export class JobService {
 						headers: this._authService.getAuthHeaders(),
 					},
 				)).pipe(
-					switchMap((response) => response.json()),
+					switchMap(handleResponse),
 				),
 			),
 			scan(

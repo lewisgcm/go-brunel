@@ -9,6 +9,7 @@ import {
 	TextField,
 	LinearProgress,
 } from '@material-ui/core';
+import {Alert} from '@material-ui/lab';
 
 import {UserList} from '../../../services';
 
@@ -37,6 +38,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 interface Props {
+	error?: string;
 	isLoading: boolean;
 	users: UserList[];
 	onClick: (user: UserList) => void;
@@ -46,6 +48,7 @@ interface Props {
 
 export function UserListComponent({
 	isLoading,
+	error,
 	users,
 	selectedUsername,
 	onClick,
@@ -58,7 +61,7 @@ export function UserListComponent({
 			label="Search for a user"
 			onChange={(e) => onSearch(e.target.value)} />
 		<LinearProgress className={isLoading ? '' : classes.hidden} />
-		{users.map(
+		{!error && users.map(
 			(user) => {
 				return <ListItem
 					className={`${classes.listItem} ${selectedUsername === user.Username ? classes.selectedItem : ''}`}
@@ -71,8 +74,11 @@ export function UserListComponent({
 				</ListItem>;
 			},
 		)}
-		{users.length === 0 && <Typography className={classes.empty}>
+		{!error && users.length === 0 && <Typography className={classes.empty}>
 			No users found.
 		</Typography>}
+		{error && <Alert severity="error">
+			{error}
+		</Alert>}
 	</List>;
 }

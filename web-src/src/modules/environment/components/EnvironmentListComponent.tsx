@@ -3,6 +3,7 @@ import {LinearProgress, List, ListItem, ListItemText, TextField, Typography, But
 import {Link} from 'react-router-dom';
 import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
 import AddIcon from '@material-ui/icons/Add';
+import {Alert} from '@material-ui/lab';
 
 import {EnvironmentList} from '../../../services';
 
@@ -34,6 +35,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 interface Props {
+	error?: string;
 	isLoading: boolean;
 	environments: EnvironmentList[];
 	onClick: (repository: string) => void;
@@ -43,6 +45,7 @@ interface Props {
 }
 
 export function EnvironmentListComponent({
+	error,
 	isLoading,
 	environments,
 	selectedEnvironmentId,
@@ -69,7 +72,7 @@ export function EnvironmentListComponent({
 
 		<LinearProgress className={isLoading ? '' : classes.hidden} />
 
-		{environments.map(
+		{!error && environments.map(
 			(r) => {
 				return <ListItem
 					className={`${classes.listItem} ${selectedEnvironmentId === r.ID ? classes.selectedItem : ''}`}
@@ -82,8 +85,11 @@ export function EnvironmentListComponent({
 				</ListItem>;
 			},
 		)}
-		{environments.length === 0 && <Typography className={classes.empty}>
+		{!error && environments.length === 0 && <Typography className={classes.empty}>
 			No environments found.
 		</Typography>}
+		{error && <Alert severity="error">
+			{error}
+		</Alert>}
 	</List>;
 }

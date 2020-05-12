@@ -2,12 +2,12 @@ import React, {useEffect, useState, Dispatch} from 'react';
 import {match, useHistory} from 'react-router';
 import {BehaviorSubject, merge} from 'rxjs';
 import {debounceTime, first, skip, switchMap, tap, distinctUntilChanged} from 'rxjs/operators';
+import {connect} from 'react-redux';
 
 import {Drawer, ActionTypes, toggleSidebar} from '../../layout';
 import {useDependency} from '../../../container';
 import {UserList, UserService, User} from '../../../services';
 import {UserListComponent} from '../components/UserListComponent';
-import {connect} from 'react-redux';
 
 interface Props {
 	match: match<{username: string}>;
@@ -32,6 +32,7 @@ export const UserPage = connect(
 	const [users, setUsers] = useState<UserList[]>([]);
 	const [selectedUsername, setSelectedUsername] = useState<string | undefined>(undefined);
 	const [selectedUser, setSelectedUser] = useState<User | undefined>(undefined);
+	const [listError, setListError] = useState<string | undefined>(undefined);
 
 	useEffect(() => {
 		setSelectedUsername(match.params.username);
@@ -41,9 +42,14 @@ export const UserPage = connect(
 		if (selectedUsername) {
 			userService
 				.get(selectedUsername)
-				.subscribe((user) => {
-					setSelectedUser(user);
-				});
+				.subscribe(
+					(user) => {
+						setSelectedUser(user);
+					},
+					() => {
+						setSelectedUser(undefined);
+					},
+				);
 		}
 	}, [userService, selectedUsername]);
 
@@ -62,11 +68,17 @@ export const UserPage = connect(
 				tap(() => setLoading(false)),
 			).subscribe(
 				(items) => {
+					setListError(undefined);
 					setUsers(items);
 					if (items.length && (match.params && !match.params.username)) {
 						setSelectedUsername(items[0].Username);
 						history.push(`/user/${items[0].Username}`);
 					}
+				},
+				() => {
+					setListError('Error loading user list.');
+					setUsers([]);
+					setLoading(false);
 				},
 			);
 
@@ -81,6 +93,7 @@ export const UserPage = connect(
 		sidebar={() => <UserListComponent
 			isLoading={isLoading}
 			users={users}
+			error={listError}
 			selectedUsername={selectedUsername}
 			onClick={(user) => {
 				hideMobileSidebar();

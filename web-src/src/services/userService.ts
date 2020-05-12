@@ -4,6 +4,7 @@ import {switchMap} from 'rxjs/operators';
 
 import {User, UserList} from './models';
 import {AuthService} from './authService';
+import {handleResponse} from './util';
 
 @injectable()
 export class UserService {
@@ -15,7 +16,7 @@ export class UserService {
 			'/api/user/profile',
 			{headers: this._authService.getAuthHeaders()},
 		)).pipe(
-			switchMap((response) => response.json()),
+			switchMap(handleResponse),
 		);
 	}
 
@@ -24,7 +25,7 @@ export class UserService {
 			`/api/user/?filter=${filter}`,
 			{headers: this._authService.getAuthHeaders()},
 		)).pipe(
-			switchMap((response) => response.json()),
+			switchMap(handleResponse),
 		);
 	}
 
@@ -33,7 +34,7 @@ export class UserService {
 			`/api/user/profile/${username}`,
 			{headers: this._authService.getAuthHeaders()},
 		)).pipe(
-			switchMap((response) => response.json()),
+			switchMap(handleResponse),
 		);
 	}
 }
