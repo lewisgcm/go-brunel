@@ -8,6 +8,8 @@ import {
 	InputLabel,
 	IconButton,
 	InputAdornment,
+	Hidden,
+	Button,
 } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 
@@ -38,7 +40,7 @@ export function Trigger({trigger, onRemove, onChange, isValid}: TriggerProps) {
 	}, [trigger]);
 
 	return <React.Fragment>
-		<Grid item xs={3}>
+		<Grid item xs={12} md={3}>
 			<FormControl fullWidth>
 				<InputLabel>Type</InputLabel>
 				<Select
@@ -57,7 +59,7 @@ export function Trigger({trigger, onRemove, onChange, isValid}: TriggerProps) {
 				</Select>
 			</FormControl>
 		</Grid>
-		<Grid item xs={4}>
+		<Grid item xs={12} md={4}>
 			<TextField
 				InputProps={{
 					startAdornment: (<InputAdornment position="end">
@@ -82,7 +84,7 @@ export function Trigger({trigger, onRemove, onChange, isValid}: TriggerProps) {
 					});
 				}} />
 		</Grid>
-		<Grid item xs={4}>
+		<Grid item xs={12} md={4}>
 			<RepositoryEnvironmentSelection
 				value={environmentId}
 				onChange={(e) => {
@@ -94,13 +96,19 @@ export function Trigger({trigger, onRemove, onChange, isValid}: TriggerProps) {
 					});
 				}} />
 		</Grid>
-		{<Grid item xs={1}>
-			<IconButton
-				onClick={() => {
-					onRemove();
-				}} >
-				<DeleteIcon/>
-			</IconButton>
-		</Grid>}
+		<Hidden mdUp>
+			<Grid item xs={12}>
+				<Button color='secondary' variant='outlined' fullWidth onClick={() => onRemove()} >
+					Remove
+				</Button>
+			</Grid>
+		</Hidden>
+		<Hidden smDown>
+			<Grid item xs={1}>
+				<IconButton onClick={() => onRemove()} >
+					<DeleteIcon/>
+				</IconButton>
+			</Grid>
+		</Hidden>
 	</React.Fragment>;
 }

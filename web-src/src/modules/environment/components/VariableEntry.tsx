@@ -8,6 +8,7 @@ import {
 	Switch,
 	Hidden,
 	Divider,
+	Button,
 } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Visibility from '@material-ui/icons/Visibility';
@@ -54,18 +55,6 @@ export function VariableEntry({isEdit, variable, onSave, onRemove}: VariableProp
 				size="small"
 				fullWidth/>
 		</Grid>
-		{
-			isEdit &&
-			<Grid item xs={12} md={2} xl={1}>
-				<FormControlLabel
-					control={<Switch color="primary" checked={isSensitive} onChange={(e) => {
-						setShowPassword(false);
-						save(variable.Value, e.target.checked);
-					}}/>}
-					label="Secret"
-				/>
-			</Grid>
-		}
 		<Grid item xs={12} md={!isEdit ? 6 : 4} xl={!isEdit ? 6 : 5}>
 			<TextField
 				InputLabelProps={{shrink: true}}
@@ -94,13 +83,38 @@ export function VariableEntry({isEdit, variable, onSave, onRemove}: VariableProp
 		</Grid>
 		{
 			isEdit &&
-			<Grid item xs={12} md={1}>
-				{
-					<IconButton onClick={() => onRemove(variable.Name)}>
-						<DeleteIcon />
-					</IconButton>
-				}
+			<Grid item xs={12} md={2} xl={1}>
+				<FormControlLabel
+					control={<Switch color="primary" checked={isSensitive} onChange={(e) => {
+						setShowPassword(false);
+						save(variable.Value, e.target.checked);
+					}}/>}
+					label="Secret"
+				/>
 			</Grid>
+		}
+		{
+			isEdit &&
+			<React.Fragment>
+				<Hidden smDown>
+					<Grid item xs={2} md={1}>
+						{
+							<IconButton onClick={() => onRemove(variable.Name)}>
+								<DeleteIcon />
+							</IconButton>
+						}
+					</Grid>
+				</Hidden>
+				<Hidden mdUp>
+					<Grid item xs={12}>
+						{
+							<Button onClick={() => onRemove(variable.Name)} color='secondary' variant='outlined' fullWidth>
+								Remove
+							</Button>
+						}
+					</Grid>
+				</Hidden>
+			</React.Fragment>
 		}
 		<Hidden mdUp>
 			<Grid item xs={12} >

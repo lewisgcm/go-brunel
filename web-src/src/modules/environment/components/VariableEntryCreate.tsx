@@ -5,6 +5,8 @@ import {
 	FormControlLabel,
 	IconButton,
 	Switch,
+	Hidden,
+	Button,
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 
@@ -29,6 +31,18 @@ export function VariableEntryCreate({allVariables, onSave}: Props) {
 			.find((r) => r.Name.trim() === name.trim());
 
 		return !existing && (name && name.trim().length > 0 && name.trim().length < 10000);
+	};
+
+	const onSaveClick = () => {
+		onSave({
+			Name: name,
+			Value: value,
+			Type: sensitive ? EnvironmentVariableType.Password : EnvironmentVariableType.Text,
+		});
+		setName('');
+		setValue('');
+		setNameDirty(false);
+		setSensitive(false);
 	};
 
 	return <React.Fragment>
@@ -59,26 +73,25 @@ export function VariableEntryCreate({allVariables, onSave}: Props) {
 				fullWidth
 				multiline/>
 		</Grid>
-		<Grid item md={2} xl={1}>
+		<Grid item md={2} xl={1} xs={10}>
 			<FormControlLabel
 				control={<Switch color="primary" checked={sensitive} onChange={(e) => setSensitive(e.target.checked)} />}
 				label="Secret"
 			/>
 		</Grid>
-		<Grid item xs={1}>
-			<IconButton disabled={!isNameValid(name)} onClick={() => {
-				onSave({
-					Name: name,
-					Value: value,
-					Type: sensitive ? EnvironmentVariableType.Password : EnvironmentVariableType.Text,
-				});
-				setName('');
-				setValue('');
-				setNameDirty(false);
-				setSensitive(false);
-			}}>
-				<AddIcon />
-			</IconButton>
-		</Grid>
+		<Hidden smDown>
+			<Grid item md={1}>
+				<IconButton disabled={!isNameValid(name)} onClick={() => onSaveClick()}>
+					<AddIcon />
+				</IconButton>
+			</Grid>
+		</Hidden>
+		<Hidden smUp>
+			<Grid item xs={12}>
+				<Button disabled={!isNameValid(name)} onClick={() => onSaveClick()} color='primary' variant='outlined' fullWidth>
+					Add
+				</Button>
+			</Grid>
+		</Hidden>
 	</React.Fragment>;
 }

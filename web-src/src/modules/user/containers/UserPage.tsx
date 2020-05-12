@@ -91,7 +91,7 @@ export const UserPage = connect(
 	const sidebar = () => <SearchableList
 		state={listState}
 		emptyPlaceholder='No users found.'
-		errorPlaceholder='Error fetching user list.'
+		errorPlaceholder='Error fetching users.'
 		searchPlaceholder='Search for a user'
 		items={users}
 		render={(item: UserList) => ({
