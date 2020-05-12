@@ -47,7 +47,7 @@ function OAuthPopupComponent({isOpen, provider, onDone, onError, onAbort}: Props
 				}
 			}
 		},
-		[isOpen, provider, onDone, onError],
+		[isOpen, provider, onDone, onError, onAbort],
 	);
 
 	return <Fragment />;

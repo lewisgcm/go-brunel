@@ -76,11 +76,9 @@ func (handler *repositoryHandler) get(r *http.Request) api.Response {
 func (handler *repositoryHandler) setTriggers(r *http.Request) api.Response {
 	id := chi.URLParam(r, "id")
 	triggers := []store.RepositoryTrigger{}
-	err := json.NewDecoder(r.Body).Decode(&triggers)
-	if err != nil {
-		return api.InternalServerError(
-			errors.Wrap(err, "error decoding json"),
-		)
+
+	if err := json.NewDecoder(r.Body).Decode(&triggers); err != nil {
+		return api.InternalServerError(errors.Wrap(err, "error decoding json"))
 	}
 
 	for _, t := range triggers {
@@ -89,11 +87,8 @@ func (handler *repositoryHandler) setTriggers(r *http.Request) api.Response {
 		}
 	}
 
-	err = handler.repositoryStore.SetTriggers(store.RepositoryID(id), triggers)
-	if err != nil {
-		return api.InternalServerError(
-			errors.Wrap(err, "error saving environment"),
-		)
+	if err := handler.repositoryStore.SetTriggers(store.RepositoryID(id), triggers); err != nil {
+		return api.InternalServerError(errors.Wrap(err, "error saving environment"))
 	}
 
 	return api.NoContent()

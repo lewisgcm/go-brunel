@@ -33,7 +33,7 @@ func (handler *authHandler) sendErrorMessage(w http.ResponseWriter, err string) 
 
 func (handler *authHandler) oAuthComplete(w http.ResponseWriter, user goth.User) {
 	email := strings.TrimSpace(user.Email)
-	if len(strings.TrimSpace(email)) == 0 {
+	if len(email) == 0 {
 		handler.sendErrorMessage(w, "You must have at least one verified primary email address to login using oAuth.")
 		return
 	}
@@ -41,8 +41,8 @@ func (handler *authHandler) oAuthComplete(w http.ResponseWriter, user goth.User)
 	roles, err := handler.userStore.AddOrUpdate(store.User{
 		Username:  email,
 		Email:     email,
-		Name:      user.Name,
-		AvatarURL: user.AvatarURL,
+		Name:      strings.TrimSpace(user.Name),
+		AvatarURL: strings.TrimSpace(user.AvatarURL),
 	})
 	if err != nil {
 		log.Error("error occurred updating user ", err)
@@ -62,7 +62,6 @@ func (handler *authHandler) oAuthComplete(w http.ResponseWriter, user goth.User)
 	}
 
 	// Write our current user item to local storage and redirect to the dashboard
-	// TODO this could be nicer: https://stackoverflow.com/questions/9153445/how-to-communicate-between-iframe-and-the-parent-site
 	if _, err := fmt.Fprintf(
 		w,
 		`<html><head></head><body><script>window.opener.postMessage({token: '%s'}, '*');</script></body></html>`,

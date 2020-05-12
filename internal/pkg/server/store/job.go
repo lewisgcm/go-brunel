@@ -2,6 +2,7 @@ package store
 
 import (
 	"go-brunel/internal/pkg/shared"
+	"strings"
 	"time"
 )
 
@@ -24,7 +25,10 @@ type Job struct {
 }
 
 func (job *Job) IsValid() bool {
-	return job.Commit.Branch != "" && job.Commit.Revision != ""
+	job.Commit.Branch = strings.TrimSpace(job.Commit.Branch)
+	job.Commit.Revision = strings.TrimSpace(job.Commit.Revision)
+
+	return len(job.Commit.Branch) != 0 && len(job.Commit.Revision) != 0
 }
 
 type JobDetail struct {

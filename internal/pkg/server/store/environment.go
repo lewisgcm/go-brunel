@@ -54,7 +54,7 @@ func (environment *Environment) IsValid() (string, bool) {
 		}
 
 		if variable.Type != EnvironmentVariableTypePassword && variable.Type != EnvironmentVariableTypeText {
-			return "environment variable type be either password or text", false
+			return "environment variable type must be either password or text", false
 		}
 
 		for j, other := range environment.Variables {

@@ -3,6 +3,7 @@ package store
 import (
 	"go-brunel/internal/pkg/shared"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -33,7 +34,11 @@ type Repository struct {
 }
 
 func (repository *Repository) IsValid() bool {
-	return repository.Name != "" && repository.Project != "" && repository.URI != ""
+	repository.Name = strings.TrimSpace(repository.Name)
+	repository.Project = strings.TrimSpace(repository.Project)
+	repository.URI = strings.TrimSpace(repository.URI)
+
+	return len(repository.Name) != 0 && len(repository.Project) != 0 && len(repository.URI) != 0
 }
 
 func (trigger *RepositoryTrigger) IsValid() bool {

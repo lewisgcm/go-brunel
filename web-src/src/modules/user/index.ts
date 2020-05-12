@@ -1,2 +1,2 @@
-export * from './components/Login';
+export * from './containers/Login';
 export * from './UserRoutes';
