@@ -48,6 +48,7 @@ export function RepositoryTriggers(props: Props) {
 	useEffect(
 		() => {
 			setTriggers(props.triggers || []);
+			setError(undefined);
 		},
 		[props],
 	);
