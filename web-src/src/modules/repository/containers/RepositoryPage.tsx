@@ -2,22 +2,15 @@ import React, {useEffect, useState, Dispatch} from 'react';
 import {match, useHistory} from 'react-router';
 import {BehaviorSubject, merge} from 'rxjs';
 import {debounceTime, first, skip, switchMap, tap, distinctUntilChanged} from 'rxjs/operators';
+import {connect} from 'react-redux';
 
-import {Drawer, ActionTypes, toggleSidebar} from '../../layout';
+import {Drawer, ActionTypes, toggleSidebar, SearchableList, SearchListState} from '../../layout';
 import {RepositoryJobs} from './RepositoryJobs';
 import {useDependency} from '../../../container';
 import {Repository, RepositoryService} from '../../../services';
-import {RepositoryListComponent} from '../components/RepositoryListComponent';
-import {connect} from 'react-redux';
 
 interface Props {
 	match: match<{repositoryId: string}>;
-}
-
-function content(selectedRepository: Repository | undefined) {
-	return () => selectedRepository ?
-		<RepositoryJobs repository={selectedRepository}/> :
-		<React.Fragment/>;
 }
 
 function mapDispatchToProps(dispatch: Dispatch<ActionTypes>) {
@@ -35,18 +28,9 @@ export const RepositoryPage = connect(
 	const repositoryService = useDependency(RepositoryService);
 	const history = useHistory();
 	const [subject] = useState(new BehaviorSubject(''));
-	const [isLoading, setLoading] = useState(false);
-	const [repositoryItems, setRepositoryItems] = useState<Repository[]>([]);
-	const [selectedRepositoryId, setSelectedRepositoryId] = useState<string | undefined>(match.params.repositoryId);
+	const [listState, setListState] = useState(SearchListState.Loaded);
+	const [repositories, setRepositories] = useState<Repository[]>([]);
 	const [selectedRepository, setSelectedRepository] = useState<Repository | undefined>();
-
-	useEffect(() => {
-		if (repositoryItems.length > 0 && (!selectedRepository || (selectedRepository.ID !== selectedRepositoryId))) {
-			setSelectedRepository(
-				repositoryItems.find((r) => r.ID === selectedRepositoryId),
-			);
-		}
-	}, [repositoryItems, selectedRepositoryId, selectedRepository]);
 
 	useEffect(
 		() => {
@@ -58,16 +42,15 @@ export const RepositoryPage = connect(
 					debounceTime(200),
 				),
 			).pipe(
-				tap(() => setLoading(true)),
+				tap(() => setListState(SearchListState.Loading)),
 				switchMap((term) => repositoryService.list(term)),
-				tap(() => setLoading(false)),
+				tap(() => setListState(SearchListState.Loaded)),
 			).subscribe(
 				(items) => {
-					setRepositoryItems(items);
-					if (items.length && (match.params && !match.params.repositoryId)) {
-						setSelectedRepositoryId(items[0].ID);
-						history.push(`/repository/${items[0].ID}`);
-					}
+					setRepositories(items);
+				},
+				() => {
+					setListState(SearchListState.Error);
 				},
 			);
 
@@ -75,19 +58,45 @@ export const RepositoryPage = connect(
 				subscription.unsubscribe();
 			};
 		},
-		[repositoryService, subject, history, match.params],
+		[repositoryService, subject],
 	);
 
+	useEffect(
+		() => {
+			if (repositories.length && !match.params.repositoryId) {
+				history.push(`/repository/${repositories[0].ID}`);
+			} else if (repositories.length && match.params.repositoryId) {
+				setSelectedRepository(
+					repositories.find((r) => r.ID === match.params.repositoryId),
+				);
+			}
+		},
+		[repositories, match.params.repositoryId, history],
+	);
+
+	const sidebar = () => <SearchableList
+		emptyPlaceholder='No repositories found.'
+		errorPlaceholder='Error fetching repositories.'
+		searchPlaceholder='Search for a repository'
+		state={listState}
+		items={repositories}
+		render={(item) => ({
+			selected: item.ID === match.params.repositoryId,
+			text: `${item.Project}/${item.Name}`,
+			key: item.ID,
+		})}
+		onClick={(r) => {
+			hideMobileSidebar();
+			history.push(`/repository/${r.ID}`);
+		}}
+		onSearch={(term) =>subject.next(term)}/>;
+
+	const content = () => selectedRepository ?
+		<RepositoryJobs repository={selectedRepository}/> :
+		<React.Fragment/>;
+
 	return <Drawer
-		sidebar={() => <RepositoryListComponent
-			isLoading={isLoading}
-			repositories={repositoryItems}
-			selectedRepositoryId={selectedRepositoryId}
-			onClick={(r) => {
-				hideMobileSidebar();
-				setSelectedRepositoryId(r.ID);
-			}}
-			onSearch={(term) =>subject.next(term)}/>}
-		content={content(selectedRepository)}/>;
+		sidebar={sidebar}
+		content={content}/>;
 });
 

@@ -3,16 +3,12 @@ import {LinearProgress} from '@material-ui/core';
 import {createStyles, makeStyles, Theme} from '@material-ui/core/styles';
 import {delay} from 'rxjs/operators';
 
-import {withDependency} from '../../../container';
+import {useDependency} from '../../../container';
 import {ContainerState, JobService} from '../../../services';
 
-interface Dependencies {
-    jobService: JobService;
-}
-
 interface Props {
-    containerId: string;
-    containerState: ContainerState;
+	containerId: string;
+	containerState: ContainerState;
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -28,15 +24,14 @@ const useStyles = makeStyles((theme: Theme) =>
 
 require('./JobContainerLogs.css');
 
-export const JobContainerLogs = React.memo<Props>(
-	withDependency<Props, Dependencies>((container) => ({
-		jobService: container.get(JobService),
-	}))(({jobService, containerId, containerState}) => {
-		const classes = useStyles();
-		const [content, setContent] = useState<null | HTMLDivElement>();
-		const [isLoading, setIsLoading] = useState(false);
+export const JobContainerLogs = React.memo<Props>((({containerId, containerState}) => {
+	const classes = useStyles();
+	const jobService = useDependency(JobService);
+	const [content, setContent] = useState<null | HTMLDivElement>();
+	const [isLoading, setIsLoading] = useState(false);
 
-		useEffect(() => {
+	useEffect(
+		() => {
 			if (content) {
 				setIsLoading(true);
 
@@ -50,21 +45,26 @@ export const JobContainerLogs = React.memo<Props>(
 							content.innerHTML = progress;
 							setIsLoading(false);
 						},
+						() => {
+							setIsLoading(false);
+						},
 					);
 
 				return () => {
 					return subscription.unsubscribe();
 				};
 			}
-		}, [jobService, containerId, content]);
+		},
+		[jobService, containerId, content],
+	);
 
-		return <React.Fragment>
-			<LinearProgress className={isLoading ? '' : classes.hidden}/>
-			<div className={'term-container ' + (containerState === ContainerState.Error ? classes.failed : '')}
-				ref={(r) => setContent(r)} />
-		</React.Fragment>;
-	}),
-	(prevProps, nextProps) =>
-		(prevProps.containerId === nextProps.containerId) && prevProps.containerState > ContainerState.Running,
+	return <React.Fragment>
+		<LinearProgress className={isLoading ? '' : classes.hidden}/>
+		<div className={'term-container ' + (containerState === ContainerState.Error ? classes.failed : '')}
+			ref={(ref) => setContent(ref)} />
+	</React.Fragment>;
+}),
+(prevProps, nextProps) =>
+	(prevProps.containerId === nextProps.containerId) && prevProps.containerState > ContainerState.Running,
 );
 

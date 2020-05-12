@@ -6,9 +6,9 @@ import {JobStage, Stage, StageState} from '../../../services';
 import moment from 'moment';
 
 interface StageGraphProps {
-    stages: JobStage[];
-    selectedStageId?: string;
-    onStageSelect: (stage: JobStage) => void;
+	stages: JobStage[];
+	selectedStageId?: string;
+	onStageSelect: (stage: JobStage) => void;
 }
 
 const stageSpacing = 100;

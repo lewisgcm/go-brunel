@@ -1,5 +1,4 @@
-import React, {ReactNode, useState, useEffect} from 'react';
-import {Link, match} from 'react-router-dom';
+import React, {ReactNode} from 'react';
 import {makeStyles, Theme, createStyles} from '@material-ui/core/styles';
 import {
 	List,
@@ -10,9 +9,6 @@ import {
 	LinearProgress,
 } from '@material-ui/core';
 import {Alert} from '@material-ui/lab';
-
-import {Observable, BehaviorSubject, merge} from 'rxjs';
-import {first, distinctUntilChanged, skip, debounceTime, tap, switchMap} from 'rxjs/operators';
 
 const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
@@ -44,91 +40,63 @@ export interface RenderItem {
 	key: string;
 }
 
+export enum SearchListState {
+	Loading = 0,
+	Loaded = 1,
+	Error = 2,
+}
+
 interface Props<T> {
+	state: SearchListState;
 	emptyPlaceholder: string;
 	searchPlaceholder: string;
 	errorPlaceholder: string;
-	provider: (term: string) => Observable<T[]>;
+	items: T[];
 	render: (item: T) => RenderItem;
-	onClick: (item: T) => void;
 	children?: ReactNode;
+	onSearch: (term: string) => void;
+	onClick: (item: T) => void;
 }
 
 export function SearchableList<T>({
+	state,
 	emptyPlaceholder,
 	searchPlaceholder,
 	errorPlaceholder,
-	provider,
-	onClick,
-	children,
+	items,
 	render,
+	children,
+	onSearch,
+	onClick,
 }: Props<T>) {
 	const classes = useStyles({});
-	const [subject] = useState(new BehaviorSubject(''));
-	const [isLoading, setLoading] = useState(false);
-	const [items, setItems] = useState<T[]>([]);
-	const [hasError, setHasError] = useState<boolean>(false);
-
-	useEffect(
-		() => {
-			const subscription = merge(
-				subject.pipe(first()),
-				subject.pipe(
-					distinctUntilChanged(),
-					skip(1),
-					debounceTime(200),
-				),
-			).pipe(
-				tap(() => setLoading(true)),
-				switchMap(provider),
-				tap(() => setLoading(false)),
-			).subscribe(
-				(items) => {
-					setHasError(false);
-					setItems(items);
-				},
-				() => {
-					setHasError(true);
-					setItems([]);
-					setLoading(false);
-				},
-			);
-
-			return () => {
-				subscription.unsubscribe();
-			};
-		},
-		[provider, subject],
-	);
 
 	return <List className={classes.list}>
 		{children}
 
 		<TextField className={classes.input}
 			label={searchPlaceholder}
-			onChange={(e) => subject.next(e.target.value)} />
+			onChange={(e) => onSearch(e.target.value)} />
 
-		<LinearProgress className={isLoading ? '' : classes.hidden} />
+		<LinearProgress className={state === SearchListState.Loading ? '' : classes.hidden} />
 
-		{!hasError && items.map((i) => ({r: render(i), item: i})).map(
+		{state === SearchListState.Loaded && items.map((i) => ({r: render(i), item: i})).map(
 			(item) => {
 				return <ListItem
 					className={`${classes.listItem} ${item.r.selected ? classes.selectedItem : ''}`}
 					button
-					// component={Link}
 					key={item.r.key}
-					// to={`/user/${user.Username}`}
 					onClick={() => onClick(item.item)} >
 					<ListItemText>{item.r.text}</ListItemText>
 				</ListItem>;
 			},
 		)}
 
-		{!hasError && items.length === 0 && <Typography className={classes.empty}>
+		{state === SearchListState.Loaded && items.length === 0 && <Typography className={classes.empty}>
 			{emptyPlaceholder}
 		</Typography>}
 
-		{hasError && <Alert severity="error">
+		{state === SearchListState.Error && <Alert severity="error">
 			{errorPlaceholder}
 		</Alert>}
 	</List>;

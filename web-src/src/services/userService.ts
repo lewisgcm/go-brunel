@@ -22,7 +22,7 @@ export class UserService {
 
 	list(filter: string): Observable<UserList[]> {
 		return from(fetch(
-			`/api/user/?filter=${filter}`,
+			`/api/user?filter=${filter}`,
 			{headers: this._authService.getAuthHeaders()},
 		)).pipe(
 			switchMap(handleResponse),

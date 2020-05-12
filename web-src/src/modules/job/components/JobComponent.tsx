@@ -9,21 +9,21 @@ import {
 	FaUserTimes,
 	FaRegClock,
 } from 'react-icons/fa';
+import moment from 'moment';
 
 import {withDependency} from '../../../container';
 import {Job, JobProgress, JobService, JobState, UserRole} from '../../../services';
 import {JobProgressGraph} from './JobProgressGraph';
 import {JobContainerLogs} from './JobContainerLogs';
 import {JobStageLogs} from './JobStageLogs';
-import moment from 'moment';
-import {useHasRole} from '../../layout/hooks';
+import {useHasRole} from '../../layout';
 
 interface Dependencies {
-    jobService: JobService;
+	jobService: JobService;
 }
 
 interface Props {
-    match: match<{jobId: string}>;
+	match: match<{jobId: string}>;
 }
 
 const useStyles = makeStyles((theme: Theme) =>

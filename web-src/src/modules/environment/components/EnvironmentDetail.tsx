@@ -9,6 +9,7 @@ import {
 	Divider,
 	Hidden,
 } from '@material-ui/core';
+import {Alert} from '@material-ui/lab';
 
 import {VariableEntry} from './VariableEntry';
 import {VariableEntryCreate} from './VariableEntryCreate';
@@ -16,6 +17,7 @@ import {Environment} from '../../../services';
 
 interface Props {
 	isEdit: boolean;
+	error?: string;
 	detail: Environment;
 	onSave: (detail: Environment) => void;
 	onCancel: () => void;
@@ -40,7 +42,7 @@ const useStyles = makeStyles((theme: Theme) =>
 	}),
 );
 
-export function EnvironmentDetail({detail, onSave, onCancel, isEdit, onEdit}: Props) {
+export function EnvironmentDetail({detail, onSave, onCancel, isEdit, onEdit, error}: Props) {
 	const classes = useStyles({});
 	const [isNameDirty, setNameIsDirty] = useState(false);
 	const [name, setName] = useState(detail.Name);
@@ -143,6 +145,11 @@ export function EnvironmentDetail({detail, onSave, onCancel, isEdit, onEdit}: Pr
 					</Button>
 				</Grid>
 			</React.Fragment>}
+			{error && <Grid item xs={12}>
+				<Alert severity="error">
+					{error}
+				</Alert>
+			</Grid>}
 		</Grid>
 	</div>;
 }

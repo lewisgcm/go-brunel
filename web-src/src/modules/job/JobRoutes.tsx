@@ -4,7 +4,7 @@ import {Route, match} from 'react-router-dom';
 import {JobComponent} from './components/JobComponent';
 
 interface Props {
-    match: match;
+	match: match;
 }
 
 export function JobRoutes({match}: Props) {
