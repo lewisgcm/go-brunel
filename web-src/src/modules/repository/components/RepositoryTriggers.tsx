@@ -14,6 +14,7 @@ import {
 } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import {Alert} from '@material-ui/lab';
 
 import {Trigger} from './Trigger';
 import {
@@ -42,10 +43,14 @@ export function RepositoryTriggers(props: Props) {
 	const classes = useStyles({});
 	const repositoryService = useDependency(RepositoryService);
 	const [triggers, setTriggers] = useState<RepositoryTriggerItem[]>(props.triggers || []);
+	const [error, setError] = useState<string | undefined>();
 
-	useEffect(() => {
-		setTriggers(props.triggers || []);
-	}, [props]);
+	useEffect(
+		() => {
+			setTriggers(props.triggers || []);
+		},
+		[props],
+	);
 
 	const isTriggerValid = (trigger: RepositoryTrigger) => {
 		return trigger && trigger.Pattern.trim().length > 0 && trigger.Pattern.trim().length < 100;
@@ -54,7 +59,14 @@ export function RepositoryTriggers(props: Props) {
 	const onSave = (triggers: RepositoryTrigger[]) => {
 		repositoryService
 			.setTriggers(props.id, triggers)
-			.subscribe(() => { });
+			.subscribe(
+				() => {
+					setError(undefined);
+				},
+				() => {
+					setError('Failed to save repository triggers.');
+				},
+			);
 	};
 
 	return <ExpansionPanel className={classes.triggers}>
@@ -98,6 +110,11 @@ export function RepositoryTriggers(props: Props) {
 						})
 					}
 				</Grid>
+				{error && <Grid item xs={12} >
+					<Alert severity='error'>
+						{error}
+					</Alert>
+				</Grid>}
 			</Grid>
 		</ExpansionPanelDetails>
 		<Divider />

@@ -1,5 +1,5 @@
 import {injectable} from 'inversify';
-import {Observable, from} from 'rxjs';
+import {Observable, from, throwError} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 
 import {AuthService} from './authService';
@@ -20,7 +20,10 @@ export class RepositoryService {
 				body: JSON.stringify(triggers),
 			},
 		)).pipe(
-			switchMap(handleResponse),
+			switchMap((response) => response.ok ?
+				response.text() :
+				throwError(new Error(response.statusText)),
+			),
 		);
 	}
 
