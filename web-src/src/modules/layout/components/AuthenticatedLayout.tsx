@@ -88,7 +88,7 @@ export function AuthenticatedLayout(props: ResponsiveDrawerProps) {
 						</Typography>
 					</Hidden>
 
-					<Hidden xsDown>
+					<Hidden smDown>
 						<Button className={classes.buttonActive} component={NavLink} activeClassName='is-active' to={'/repository'} color="inherit">Repositories</Button>
 						{
 							isAdmin &&
