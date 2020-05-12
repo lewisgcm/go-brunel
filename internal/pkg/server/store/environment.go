@@ -33,24 +33,38 @@ type EnvironmentVariable struct {
 	Type  EnvironmentVariableType
 }
 
-func (environment *Environment) IsValid() bool {
-	if len(strings.TrimSpace(environment.Name)) == 0 {
-		return false
+func (environment *Environment) Clean() {
+	environment.Name = strings.TrimSpace(environment.Name)
+
+	for _, variable := range environment.Variables {
+		variable.Name = strings.TrimSpace(variable.Name)
+	}
+}
+
+func (environment *Environment) IsValid() (string, bool) {
+	environment.Clean()
+
+	if len(environment.Name) == 0 {
+		return "environment name cannot be empty", false
 	}
 
 	for i, variable := range environment.Variables {
-		if len(strings.TrimSpace(variable.Name)) == 0 {
-			return false
+		if len(variable.Name) == 0 {
+			return "environment variable name cannot be empty", false
+		}
+
+		if variable.Type != EnvironmentVariableTypePassword && variable.Type != EnvironmentVariableTypeText {
+			return "environment variable type be either password or text", false
 		}
 
 		for j, other := range environment.Variables {
 			if i != j && variable.Name == other.Name {
-				return false
+				return "environment variable names must be unique", false
 			}
 		}
 	}
 
-	return true
+	return "", true
 }
 
 type EnvironmentStore interface {

@@ -34,8 +34,12 @@ func (handler *environmentHandler) get(r *http.Request) api.Response {
 
 func (handler *environmentHandler) save(r *http.Request) api.Response {
 	environment := store.Environment{}
-	if e := json.NewDecoder(r.Body).Decode(&environment); e != nil || !environment.IsValid() {
+	if e := json.NewDecoder(r.Body).Decode(&environment); e != nil {
 		return api.BadRequest(e, "bad request")
+	}
+
+	if m, v := environment.IsValid(); !v {
+		return api.BadRequest(errors.New(m), m)
 	}
 
 	result, err := handler.environmentStore.AddOrUpdate(environment)
