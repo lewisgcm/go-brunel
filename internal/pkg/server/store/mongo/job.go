@@ -67,10 +67,10 @@ func (r *JobStore) Next() (*store.Job, error) {
 	return &job.Job, nil
 }
 
-func (r *JobStore) Get(id shared.JobID) (store.Job, error) {
+func (r *JobStore) Get(id shared.JobID) (*store.Job, error) {
 	jobID, err := primitive.ObjectIDFromHex(string(id))
 	if err != nil {
-		return store.Job{}, errors.Wrap(err, "error parsing id")
+		return nil, errors.Wrap(err, "error parsing id")
 	}
 
 	var mJob mongoJob
@@ -82,10 +82,10 @@ func (r *JobStore) Get(id shared.JobID) (store.Job, error) {
 			bson.M{"_id": jobID},
 		).Decode(&mJob)
 	if err == mongo.ErrNoDocuments {
-		return store.Job{}, store.ErrorNotFound
+		return nil, store.ErrorNotFound
 	}
 	if err != nil {
-		return store.Job{}, errors.Wrap(err, "error getting job")
+		return nil, errors.Wrap(err, "error getting job")
 	}
 
 	mJob.Job.ID = shared.JobID(mJob.ObjectID.Hex())
@@ -94,21 +94,23 @@ func (r *JobStore) Get(id shared.JobID) (store.Job, error) {
 		hex := shared.EnvironmentID(mJob.EnvironmentID.Hex())
 		mJob.Job.EnvironmentID = &hex
 	}
-	return mJob.Job, nil
+	return &mJob.Job, nil
 }
 
-func (r *JobStore) Add(j store.Job) (shared.JobID, error) {
+func (r *JobStore) Add(j store.Job) (*store.Job, error) {
 	mJob := mongoJob{Job: j}
+	mJob.CreatedAt = time.Now()
+
 	repoID, err := primitive.ObjectIDFromHex(string(j.RepositoryID))
 	if err != nil {
-		return shared.JobID(""), errors.Wrap(err, "error parsing id")
+		return nil, errors.Wrap(err, "error parsing id")
 	}
 	mJob.RepositoryID = repoID
 
 	if j.EnvironmentID != nil {
 		envID, err := primitive.ObjectIDFromHex(string(*j.EnvironmentID))
 		if err != nil {
-			return shared.JobID(""), errors.Wrap(err, "error parsing id")
+			return nil, errors.Wrap(err, "error parsing id")
 		}
 		mJob.EnvironmentID = &envID
 	}
@@ -121,9 +123,11 @@ func (r *JobStore) Add(j store.Job) (shared.JobID, error) {
 			mJob,
 		)
 	if err != nil {
-		return shared.JobID(""), errors.Wrap(err, "error adding job")
+		return nil, errors.Wrap(err, "error adding job")
 	}
-	return shared.JobID(result.InsertedID.(primitive.ObjectID).Hex()), nil
+
+	mJob.Job.ID = shared.JobID(result.InsertedID.(primitive.ObjectID).Hex())
+	return &mJob.Job, nil
 }
 
 func (r *JobStore) update(id shared.JobID, update mongoJobUpdate) error {
@@ -156,7 +160,7 @@ func (r *JobStore) CancelByID(id shared.JobID, userID string) error {
 }
 
 func (r *JobStore) FilterByRepositoryID(
-	repositoryID string,
+	repositoryID store.RepositoryID,
 	filter string,
 	pageIndex int64,
 	pageSize int64,
@@ -166,9 +170,13 @@ func (r *JobStore) FilterByRepositoryID(
 	page := store.JobListPage{}
 	page.Jobs = []store.Job{}
 
-	repositoryObjectID, err := primitive.ObjectIDFromHex(repositoryID)
+	repositoryObjectID, err := primitive.ObjectIDFromHex(string(repositoryID))
 	if err != nil {
 		return page, errors.Wrap(err, "error parsing id")
+	}
+
+	if sortColumn != "create_at" && sortColumn != "state" {
+		sortColumn = "created_at"
 	}
 
 	bsonFilter := []bson.M{
@@ -234,4 +242,18 @@ func (r *JobStore) FilterByRepositoryID(
 		}
 	}
 	return page, nil
+}
+
+func (r *JobStore) Delete(id shared.JobID) error {
+	objectID, err := primitive.ObjectIDFromHex(string(id))
+	if err != nil {
+		return err
+	}
+
+	_, err = r.
+		Database.
+		Collection(jobCollectionName).
+		DeleteOne(context.Background(), bson.M{"_id": objectID})
+
+	return errors.Wrap(err, "error deleting")
 }

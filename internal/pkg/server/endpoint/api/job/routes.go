@@ -41,7 +41,7 @@ func (handler *jobHandler) get(r *http.Request) api.Response {
 		store.Job
 		Repository store.Repository
 	}{
-		Job:        job,
+		Job:        *job,
 		Repository: *repository,
 	})
 }
@@ -169,10 +169,9 @@ func (handler *jobHandler) reschedule(r *http.Request) api.Response {
 		StartedBy:     identity.Username,
 		CreatedAt:     time.Now(),
 	}
-	newJobId, err := handler.jobStore.Add(newJob)
-	newJob.ID = newJobId
+	savedJob, err := handler.jobStore.Add(newJob)
 
-	return api.Ok(newJob)
+	return api.Ok(savedJob)
 }
 
 func Routes(

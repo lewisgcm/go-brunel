@@ -42,7 +42,7 @@ func (handler *webHookHandler) finishHandling(repository store.Repository, job s
 		}
 
 		if r.Match([]byte(job.Commit.Branch)) {
-			id, err := handler.jobStore.Add(store.Job{
+			j, err := handler.jobStore.Add(store.Job{
 				RepositoryID:  repo.ID,
 				EnvironmentID: t.EnvironmentID,
 				Commit:        job.Commit,
@@ -54,7 +54,7 @@ func (handler *webHookHandler) finishHandling(repository store.Repository, job s
 				return api.InternalServerError(errors.Wrap(err, "error storing hook event job"))
 			}
 
-			if err := handler.notifier.Notify(id); err != nil {
+			if err := handler.notifier.Notify(j.ID); err != nil {
 				return api.InternalServerError(errors.Wrap(err, "error notifying job status from hook event"))
 			}
 		}

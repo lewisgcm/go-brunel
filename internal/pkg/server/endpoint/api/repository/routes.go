@@ -30,10 +30,6 @@ func (handler *repositoryHandler) jobs(r *http.Request) api.Response {
 		sortOrder = 1
 	}
 
-	if sortColumn != "create_at" && sortColumn != "state" {
-		sortColumn = "created_at"
-	}
-
 	pageIndex, err := api.ParseQueryInt(r, "pageIndex", false, 0)
 	if err != nil {
 		return api.BadRequest(err, "error parsing pageIndex query parameter")
@@ -48,7 +44,7 @@ func (handler *repositoryHandler) jobs(r *http.Request) api.Response {
 		return api.BadRequest(err, "requested page size is above limit")
 	}
 
-	jobs, err := handler.jobStore.FilterByRepositoryID(id, filter, pageIndex, pageSize, string(sortColumn), sortOrder)
+	jobs, err := handler.jobStore.FilterByRepositoryID(store.RepositoryID(id), filter, pageIndex, pageSize, string(sortColumn), sortOrder)
 	if err != nil {
 		return api.InternalServerError(errors.Wrap(err, "error getting repository jobs"))
 	}

@@ -15,6 +15,7 @@ type testSuite struct {
 	environmentStores []store.EnvironmentStore
 	repositoryStores  []store.RepositoryStore
 	userStores        []store.UserStore
+	jobStores         []store.JobStore
 }
 
 var mongoUri = ""
@@ -55,9 +56,14 @@ func setup(t *testing.T) testSuite {
 	var userStores []store.UserStore
 	userStores = append(userStores, &mongo2.UserStore{Database: mongoDb})
 
+	// Initialize job stores
+	var jobStores []store.JobStore
+	jobStores = append(jobStores, &mongo2.JobStore{Database: mongoDb})
+
 	return testSuite{
 		environmentStores: environmentStores,
 		repositoryStores:  repositoryStores,
 		userStores:        userStores,
+		jobStores:         jobStores,
 	}
 }

@@ -42,9 +42,9 @@ type JobDetail struct {
 type JobStore interface {
 	Next() (*Job, error)
 
-	Get(id shared.JobID) (Job, error)
+	Get(id shared.JobID) (*Job, error)
 
-	Add(job Job) (shared.JobID, error)
+	Add(job Job) (*Job, error)
 
 	UpdateStoppedAtByID(id shared.JobID, t time.Time) error
 
@@ -53,11 +53,13 @@ type JobStore interface {
 	CancelByID(id shared.JobID, userID string) error
 
 	FilterByRepositoryID(
-		repositoryID string,
+		repositoryID RepositoryID,
 		filter string,
 		pageIndex int64,
 		pageSize int64,
 		sortColumn string,
 		sortOrder int,
 	) (JobListPage, error)
+
+	Delete(id shared.JobID) error
 }
