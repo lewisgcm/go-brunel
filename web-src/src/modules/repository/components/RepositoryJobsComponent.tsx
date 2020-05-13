@@ -158,7 +158,7 @@ export function RepositoryJobsComponent(
 				<Paper square>
 					<LinearProgress className={isLoading ? '' : classes.hidden}/>
 					<TableContainer>
-						<Table size={'small'}>
+						<Table size={'medium'}>
 							<TableHead>
 								<TableRow className={classes.headerRow}>
 									<TableCell align={'center'}
