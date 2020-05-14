@@ -75,6 +75,7 @@ export interface User {
 	Email: string;
 	Name: string;
 	AvatarURL: string;
+	Role: UserRole;
 }
 
 export interface UserList {

@@ -78,8 +78,8 @@ func (handler *repositoryHandler) setTriggers(r *http.Request) api.Response {
 	}
 
 	for _, t := range triggers {
-		if !t.IsValid() {
-			return api.BadRequest(errors.New("invalid trigger supplied"), "invalid trigger")
+		if e := t.IsValid(); e != nil {
+			return api.BadRequest(errors.Wrap(e, "invalid trigger"), e.Error())
 		}
 	}
 

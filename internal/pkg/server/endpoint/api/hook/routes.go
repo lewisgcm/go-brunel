@@ -20,12 +20,15 @@ type webHookHandler struct {
 }
 
 func (handler *webHookHandler) finishHandling(repository store.Repository, job store.Job) api.Response {
-	if !repository.IsValid() {
-		return api.BadRequest(nil, "invalid project name or namespace supplied")
+	job.Clean()
+	repository.Clean()
+
+	if e := repository.IsValid(); e != nil {
+		return api.BadRequest(errors.Wrap(e, "invalid repository"), e.Error())
 	}
 
-	if !job.IsValid() {
-		return api.BadRequest(nil, "invalid branch or revision supplied")
+	if e := job.IsValid(); e != nil {
+		return api.BadRequest(errors.Wrap(e, "invalid job"), e.Error())
 	}
 
 	repo, err := handler.repositoryStore.AddOrUpdate(repository)

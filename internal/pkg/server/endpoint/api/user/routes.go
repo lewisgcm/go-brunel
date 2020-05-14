@@ -1,6 +1,7 @@
 package user
 
 import (
+	"encoding/json"
 	"fmt"
 	"go-brunel/internal/pkg/server/endpoint/api"
 	"go-brunel/internal/pkg/server/security"
@@ -124,6 +125,45 @@ func (handler *authHandler) list(r *http.Request) api.Response {
 	return api.Ok(users)
 }
 
+type userUpdateRequest struct {
+	Role security.UserRole
+}
+
+func (r *userUpdateRequest) IsValid() error {
+	if r.Role != security.UserRoleAdmin && r.Role != security.UserRoleReader {
+		return fmt.Errorf("unknown fole: %s", r.Role)
+	}
+
+	return nil
+}
+
+func (handler *authHandler) setRole(r *http.Request) api.Response {
+	username := chi.URLParam(r, "username")
+	user, err := handler.userStore.GetByUsername(username)
+	if err != nil {
+		if err == store.ErrorNotFound {
+			return api.NotFound()
+		}
+		return api.InternalServerError(errors.Wrap(err, "error getting user"))
+	}
+
+	updateRequest := userUpdateRequest{}
+	if e := json.NewDecoder(r.Body).Decode(&updateRequest); e != nil {
+		return api.BadRequest(e, "bad request data")
+	}
+
+	if e := updateRequest.IsValid(); e != nil {
+		return api.BadRequest(errors.Wrap(e, "error validating user update"), "invalid request data")
+	}
+
+	user.Role = updateRequest.Role
+	if _, e := handler.userStore.AddOrUpdate(*user); e != nil {
+		return api.InternalServerError(errors.Wrap(e, "error saving user"))
+	}
+
+	return api.Ok(user)
+}
+
 func Routes(
 	defaultAdminUser string,
 	userStore store.UserStore,
@@ -145,6 +185,7 @@ func Routes(
 	router.Get("/callback", handler.callback)
 	router.Get("/profile", api.Handle(handler.profile))
 	router.Get("/profile/{username}", api.Handle(handler.get))
+	router.Post("/profile/{username}", api.Handle(handler.setRole))
 	router.Get("/", api.Handle(handler.list))
 	return router
 }

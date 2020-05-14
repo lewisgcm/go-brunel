@@ -23,9 +23,9 @@ type UserStore struct {
 
 type mongoUser struct {
 	Username  string            `bson:"username"`
-	Email     string            `bson:"email"`
-	Name      string            `bson:"name"`
-	AvatarURL string            `bson:"avatar_url"`
+	Email     string            `bson:"email,omitempty"`
+	Name      string            `bson:"name,omitempty"`
+	AvatarURL string            `bson:"avatar_url,omitempty"`
 	Role      security.UserRole `bson:"role,omitempty"`
 	CreatedAt *time.Time        `bson:"created_at,omitempty"`
 }
