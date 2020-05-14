@@ -1,15 +1,15 @@
 .term-container {
-    background: #171717;
-    border-radius: 0px;
-    color: white;
-    word-break: break-word;
-    overflow-wrap: break-word;
-    overflow-x: scroll;
-    font-family: "SFMono-Regular", Monaco, Menlo, Consolas, "Liberation Mono", Courier, monospace;
-    font-size: 12px;
-    line-height: 20px;
-    padding: 14px 18px;
-    white-space: pre-wrap;
+	background: #171717;
+	border-radius: 0px;
+	color: white;
+	word-break: break-word;
+	overflow-wrap: break-word;
+	overflow-x: scroll;
+	font-family: "SFMono-Regular", Monaco, Menlo, Consolas, "Liberation Mono", Courier, monospace;
+	font-size: 12px;
+	line-height: 20px;
+	padding: 14px 18px;
+	white-space: nowrap;
 }
 
 .term-container img { max-width: 100%; }
@@ -18,9 +18,9 @@
 .term a:hover { color: #2882F9 }
 
 @keyframes blink-animation {
-    to {
-        visibility: hidden;
-    }
+	to {
+		visibility: hidden;
+	}
 }
 
 .term-fg1 { } /* don't bold beccause it looks weird */
