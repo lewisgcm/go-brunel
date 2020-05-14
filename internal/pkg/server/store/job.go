@@ -1,6 +1,7 @@
 package store
 
 import (
+	"errors"
 	"go-brunel/internal/pkg/shared"
 	"strings"
 	"time"
@@ -24,11 +25,17 @@ type Job struct {
 	StoppedAt     *time.Time `bson:"stopped_at"`
 }
 
-func (job *Job) IsValid() bool {
+func (job *Job) Clean() {
 	job.Commit.Branch = strings.TrimSpace(job.Commit.Branch)
 	job.Commit.Revision = strings.TrimSpace(job.Commit.Revision)
+}
 
-	return len(job.Commit.Branch) != 0 && len(job.Commit.Revision) != 0
+func (job *Job) IsValid() error {
+	if len(job.Commit.Branch) == 0 || len(job.Commit.Revision) == 0 {
+		return errors.New("branch and revision are required")
+	}
+
+	return nil
 }
 
 type JobDetail struct {

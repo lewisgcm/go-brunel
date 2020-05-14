@@ -1,6 +1,8 @@
 package store
 
 import (
+	"fmt"
+	"github.com/pkg/errors"
 	"go-brunel/internal/pkg/shared"
 	"regexp"
 	"strings"
@@ -33,24 +35,29 @@ type Repository struct {
 	DeletedAt *time.Time
 }
 
-func (repository *Repository) IsValid() bool {
+func (repository *Repository) Clean() {
 	repository.Name = strings.TrimSpace(repository.Name)
 	repository.Project = strings.TrimSpace(repository.Project)
 	repository.URI = strings.TrimSpace(repository.URI)
-
-	return len(repository.Name) != 0 && len(repository.Project) != 0 && len(repository.URI) != 0
 }
 
-func (trigger *RepositoryTrigger) IsValid() bool {
+func (repository *Repository) IsValid() error {
+	if len(repository.Name) == 0 || len(repository.Project) == 0 || len(repository.URI) != 0 {
+		return errors.New("repository name, project, and uri are required")
+	}
+	return nil
+}
+
+func (trigger *RepositoryTrigger) IsValid() error {
 	if trigger.Type != RepositoryTriggerTypeTag && trigger.Type != RepositoryTriggerTypeBranch {
-		return false
+		return fmt.Errorf("unknown trigger type: %d", trigger.Type)
 	}
 
 	if _, e := regexp.Compile(trigger.Pattern); e != nil {
-		return false
+		return errors.Wrap(e, "invalid trigger pattern")
 	}
 
-	return true
+	return nil
 }
 
 type RepositoryStore interface {

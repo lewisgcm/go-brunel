@@ -14,6 +14,7 @@ p, admin, /api/repository*, PUT
 p, admin, /api/environment*, GET
 p, admin, /api/user, GET
 p, admin, /api/user/profile/*, GET
+p, admin, /api/user/profile/*, POST
 
 g, , anonymous
 g, owner, reader

@@ -7,6 +7,7 @@ import {first, distinctUntilChanged, skip, debounceTime, tap, switchMap} from 'r
 import {Drawer, ActionTypes, toggleSidebar, SearchableList, SearchListState} from '../../layout';
 import {useDependency} from '../../../container';
 import {UserList, UserService, User} from '../../../services';
+import { UserDetail } from '../components/UserDetail';
 
 interface Props {
 	match: match<{username: string}>;
@@ -105,9 +106,9 @@ export const UserPage = connect(
 		}}
 		onSearch={(term) => subject.next(term)} />;
 
-	const content = () => <div>
-		<h1>{selectedUser && selectedUser.Name}</h1>
-	</div>;
+	const content = () => selectedUser ?
+		<UserDetail user={selectedUser} /> :
+		<React.Fragment></React.Fragment>;
 
 	return <Drawer
 		sidebar={sidebar}

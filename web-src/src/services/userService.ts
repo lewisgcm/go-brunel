@@ -2,7 +2,7 @@ import {injectable} from 'inversify';
 import {Observable, from} from 'rxjs';
 import {switchMap} from 'rxjs/operators';
 
-import {User, UserList} from './models';
+import {User, UserList, UserRole} from './models';
 import {AuthService} from './authService';
 import {handleResponse} from './util';
 
@@ -33,6 +33,15 @@ export class UserService {
 		return from(fetch(
 			`/api/user/profile/${username}`,
 			{headers: this._authService.getAuthHeaders()},
+		)).pipe(
+			switchMap(handleResponse),
+		);
+	}
+
+	update(username: string, update: { Role: UserRole }): Observable<User> {
+		return from(fetch(
+			`/api/user/profile/${username}`,
+			{headers: this._authService.getAuthHeaders(), method: 'POST', body: JSON.stringify(update)},
 		)).pipe(
 			switchMap(handleResponse),
 		);

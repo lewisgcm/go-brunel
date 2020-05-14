@@ -38,8 +38,9 @@ func (handler *environmentHandler) save(r *http.Request) api.Response {
 		return api.BadRequest(e, "bad request")
 	}
 
-	if m, v := environment.IsValid(); !v {
-		return api.BadRequest(errors.New(m), m)
+	environment.Clean()
+	if e := environment.IsValid(); e != nil {
+		return api.BadRequest(errors.Wrap(e, "invalid environment"), e.Error())
 	}
 
 	result, err := handler.environmentStore.AddOrUpdate(environment)

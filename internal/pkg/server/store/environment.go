@@ -1,6 +1,7 @@
 package store
 
 import (
+	"github.com/pkg/errors"
 	"go-brunel/internal/pkg/shared"
 	"strings"
 	"time"
@@ -41,30 +42,28 @@ func (environment *Environment) Clean() {
 	}
 }
 
-func (environment *Environment) IsValid() (string, bool) {
-	environment.Clean()
-
+func (environment *Environment) IsValid() error {
 	if len(environment.Name) == 0 {
-		return "environment name cannot be empty", false
+		return errors.New("environment name cannot be empty")
 	}
 
 	for i, variable := range environment.Variables {
 		if len(variable.Name) == 0 {
-			return "environment variable name cannot be empty", false
+			return errors.New("environment variable name cannot be empty")
 		}
 
 		if variable.Type != EnvironmentVariableTypePassword && variable.Type != EnvironmentVariableTypeText {
-			return "environment variable type must be either password or text", false
+			return errors.New("environment variable type must be either password or text")
 		}
 
 		for j, other := range environment.Variables {
 			if i != j && variable.Name == other.Name {
-				return "environment variable names must be unique", false
+				return errors.New("environment variable names must be unique")
 			}
 		}
 	}
 
-	return "", true
+	return nil
 }
 
 type EnvironmentStore interface {
