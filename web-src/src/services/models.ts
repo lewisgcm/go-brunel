@@ -1,4 +1,3 @@
-
 export interface Commit {
 	Branch: string;
 	Revision: string;
@@ -67,7 +66,7 @@ export interface Container {
 export enum StageState {
 	Running = 0,
 	Success = 1,
-	Error = 2
+	Error = 2,
 }
 
 export interface User {
@@ -88,7 +87,7 @@ export enum JobState {
 	Processing = 1,
 	Failed = 2,
 	Success = 3,
-	Cancelled = 4
+	Cancelled = 4,
 }
 
 export interface RepositoryJobPage {
@@ -127,12 +126,12 @@ export interface RepositoryTrigger {
 
 export enum RepositoryTriggerType {
 	Tag = 0,
-	Branch = 1
+	Branch = 1,
 }
 
 export enum EnvironmentVariableType {
 	Text = 0,
-	Password = 1
+	Password = 1,
 }
 
 export interface EnvironmentVariable {
@@ -151,6 +150,57 @@ export interface Environment extends EnvironmentList {
 }
 
 export enum UserRole {
-	Admin = 'admin',
-	Reader = 'reader',
+	Admin = "admin",
+	Reader = "reader",
+}
+
+export enum EventType {
+	JobCreated = "JOB_CREATED",
+	JobUpdated = "JOB_UPDATED",
+	RepositoryCreated = "REPOSITORY_CREATED",
+	EnvironmentCreated = "ENVIRONMENT_CREATED",
+	EnvironmentUpdated = "ENVIRONMENT_UPDATED",
+}
+
+export type EventTypes =
+	| JobCreatedEvent
+	| RepositoryCreatedEvent
+	| JobUpdatedEvent
+	| EnvironmentCreatedEvent
+	| EnvironmentUpdatedEvent;
+
+export interface RepositoryCreatedEvent {
+	Type: EventType.RepositoryCreated;
+	Payload: {
+		RepositoryID: string;
+	};
+}
+
+export interface JobCreatedEvent {
+	Type: EventType.JobCreated;
+	Payload: {
+		RepositoryID: string;
+		JobID: string;
+	};
+}
+
+export interface JobUpdatedEvent {
+	Type: EventType.JobUpdated;
+	Payload: {
+		JobID: string;
+	};
+}
+
+export interface EnvironmentCreatedEvent {
+	Type: EventType.EnvironmentCreated;
+	Payload: {
+		EnvironmentID: string;
+	};
+}
+
+export interface EnvironmentUpdatedEvent {
+	Type: EventType.EnvironmentUpdated;
+	Payload: {
+		EnvironmentID: string;
+	};
 }

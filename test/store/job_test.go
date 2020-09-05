@@ -199,7 +199,7 @@ func TestFilterJobsByRepositoryID(t *testing.T) {
 			RepositoryID:  repoId,
 			EnvironmentID: nil,
 			Commit: shared.Commit{
-				Branch:   "branch1",
+				Branch:   "branch-sort1",
 				Revision: "revision1",
 			},
 			State:     shared.JobStateSuccess,
@@ -213,7 +213,7 @@ func TestFilterJobsByRepositoryID(t *testing.T) {
 			RepositoryID:  repoId,
 			EnvironmentID: nil,
 			Commit: shared.Commit{
-				Branch:   "branch2",
+				Branch:   "branch-sort2",
 				Revision: "revision2",
 			},
 			State:     shared.JobStateSuccess,
@@ -228,7 +228,7 @@ func TestFilterJobsByRepositoryID(t *testing.T) {
 		if err != nil {
 			t.Errorf("error filtering repository: %s", err)
 		}
-		if len(page.Jobs) != 1 || page.Jobs[0].Commit.Branch != "branch1" || page.Count != 2 {
+		if len(page.Jobs) != 1 || page.Jobs[0].Commit.Branch != "branch-sort1" || page.Count != 2 {
 			t.Errorf("unexpected page sorting by created ascending")
 		}
 
@@ -237,7 +237,7 @@ func TestFilterJobsByRepositoryID(t *testing.T) {
 		if err != nil {
 			t.Errorf("error filtering repository: %s", err)
 		}
-		if len(page.Jobs) != 1 || page.Jobs[0].Commit.Branch != "branch2" || page.Count != 2 {
+		if len(page.Jobs) != 1 || page.Jobs[0].Commit.Branch != "branch-sort2" || page.Count != 2 {
 			t.Errorf("unexpected page sorting by created ascending")
 		}
 
@@ -246,16 +246,16 @@ func TestFilterJobsByRepositoryID(t *testing.T) {
 		if err != nil {
 			t.Errorf("error filtering repository: %s", err)
 		}
-		if len(page.Jobs) != 1 || page.Jobs[0].Commit.Branch != "branch2" || page.Count != 2 {
+		if len(page.Jobs) != 1 || page.Jobs[0].Commit.Branch != "branch-sort2" || page.Count != 2 {
 			t.Errorf("unexpected page sorting by created descending")
 		}
 
 		// Filter based on the branch name
-		page, err = jobStore.FilterByRepositoryID(repoId, "branch2", 0, 10, "created_at", -1)
+		page, err = jobStore.FilterByRepositoryID(repoId, "branch-sort2", 0, 10, "created_at", -1)
 		if err != nil {
 			t.Errorf("error filtering repository: %s", err)
 		}
-		if len(page.Jobs) != 1 || page.Jobs[0].Commit.Branch != "branch2" || page.Count != 1 {
+		if len(page.Jobs) != 1 || page.Jobs[0].Commit.Branch != "branch-sort2" || page.Count != 1 {
 			t.Errorf("unexpected page when filtering branch")
 		}
 

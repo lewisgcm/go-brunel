@@ -62,12 +62,25 @@ func (p *jwtSerializer) Encode(identity Identity) (string, error) {
 	return t, nil
 }
 
-func (p *jwtSerializer) Decode(r *http.Request) (*Identity, error) {
-	h := r.Header.Get(authHeader)
-	parts := strings.Split(h, "Bearer ")
+func (p *jwtSerializer) getToken(r *http.Request) *string {
+	queryToken := r.URL.Query().Get("token")
+	if queryToken != "" {
+		return &queryToken
+	}
+
+	parts := strings.Split(r.Header.Get(authHeader), "Bearer ")
 	if len(parts) == 2 {
+		return &parts[1]
+	}
+
+	return nil
+}
+
+func (p *jwtSerializer) Decode(r *http.Request) (*Identity, error) {
+	token := p.getToken(r)
+	if token != nil {
 		claims := &roleClaims{}
-		tkn, err := jwt.ParseWithClaims(parts[1], claims, func(token *jwt.Token) (interface{}, error) {
+		tkn, err := jwt.ParseWithClaims(*token, claims, func(token *jwt.Token) (interface{}, error) {
 			return p.hMACSecret, nil
 		})
 		if err != nil {

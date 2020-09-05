@@ -14,7 +14,7 @@ type JobListPage struct {
 
 type Job struct {
 	ID            shared.JobID          `bson:"-"`
-	RepositoryID  RepositoryID          `bson:"-"`
+	RepositoryID  shared.RepositoryID   `bson:"-"`
 	EnvironmentID *shared.EnvironmentID `bson:"-"`
 	Commit        shared.Commit
 	State         shared.JobState
@@ -60,7 +60,7 @@ type JobStore interface {
 	CancelByID(id shared.JobID, userID string) error
 
 	FilterByRepositoryID(
-		repositoryID RepositoryID,
+		repositoryID shared.RepositoryID,
 		filter string,
 		pageIndex int64,
 		pageSize int64,

@@ -1,10 +1,10 @@
-import React, {PropsWithChildren} from 'react';
-import {connect} from 'react-redux';
+import React, { PropsWithChildren } from "react";
+import { connect } from "react-redux";
 
-import {AuthenticatedLayout} from '../components/AuthenticatedLayout';
-import {State} from '../reducer';
-import {getAuthenticated} from '../selectors';
-import {toggleSidebar} from '../actions';
+import { AuthenticatedLayout } from "../components/AuthenticatedLayout";
+import { State } from "../reducer";
+import { getAuthenticated } from "../selectors";
+import { toggleSidebar } from "../actions";
 
 interface Props {
 	isAuthenticated: boolean;
@@ -17,17 +17,21 @@ export const Layout = connect(
 	}),
 	(dispatch) => ({
 		onSidebarToggle: () => dispatch(toggleSidebar()),
-	}),
+	})
 )(
-	({isAuthenticated, children, onSidebarToggle}: PropsWithChildren<Props>) => {
+	({
+		isAuthenticated,
+		children,
+		onSidebarToggle,
+	}: PropsWithChildren<Props>) => {
 		if (!isAuthenticated) {
-			return <React.Fragment>
-				{children}
-			</React.Fragment>;
+			return <React.Fragment>{children}</React.Fragment>;
 		}
 
-		return <AuthenticatedLayout onSidebarToggle={() => onSidebarToggle()}>
-			{children}
-		</AuthenticatedLayout>;
-	},
+		return (
+			<AuthenticatedLayout onSidebarToggle={() => onSidebarToggle()}>
+				{children}
+			</AuthenticatedLayout>
+		);
+	}
 );

@@ -1,9 +1,11 @@
-import {UserRole} from '../../services';
+import { UserRole } from "../../services";
 
 export class Type {
-	static SET_ROLE: '@@LAYOUT/SET_ROLE' = '@@LAYOUT/SET_ROLE';
-	static SET_AUTHENTICATED: '@@LAYOUT/SET_AUTHENTICATED' = '@@LAYOUT/SET_AUTHENTICATED';
-	static TOGGLE_SIDEBAR: '@@LAYOUT/TOGGLE_SIDEBAR' = '@@LAYOUT/TOGGLE_SIDEBAR';
+	static SET_ROLE: "@@LAYOUT/SET_ROLE" = "@@LAYOUT/SET_ROLE";
+	static SET_AUTHENTICATED: "@@LAYOUT/SET_AUTHENTICATED" =
+		"@@LAYOUT/SET_AUTHENTICATED";
+	static TOGGLE_SIDEBAR: "@@LAYOUT/TOGGLE_SIDEBAR" =
+		"@@LAYOUT/TOGGLE_SIDEBAR";
 }
 
 export function setAuthenticated(authenticated: boolean) {
@@ -33,4 +35,7 @@ export function toggleSidebar(isOpen?: boolean) {
 	};
 }
 
-export type ActionTypes = ReturnType<typeof setAuthenticated> | ReturnType<typeof toggleSidebar> | ReturnType<typeof setRole>;
+export type ActionTypes =
+	| ReturnType<typeof setAuthenticated>
+	| ReturnType<typeof toggleSidebar>
+	| ReturnType<typeof setRole>;

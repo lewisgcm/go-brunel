@@ -1,7 +1,7 @@
 package remote
 
 import (
-	"go-brunel/internal/pkg/server/notify"
+	"go-brunel/internal/pkg/server/bus"
 	"go-brunel/internal/pkg/server/store"
 	"go-brunel/internal/pkg/shared"
 	"go-brunel/internal/pkg/shared/remote"
@@ -12,7 +12,7 @@ import (
 )
 
 type RPC struct {
-	Notify           notify.Notify
+	Bus              bus.EventBus
 	JobStore         store.JobStore
 	LogStore         store.LogStore
 	ContainerStore   store.ContainerStore
@@ -63,13 +63,16 @@ func (t *RPC) SetJobState(args *remote.SetJobStateRequest, _ *remote.Empty) erro
 	}
 
 	return errors.Wrap(
-		t.Notify.Notify(args.Id),
-		"error notifying job status",
+		t.Bus.Send(shared.NewJobUpdated(args.Id)),
+		"error trigger job update event",
 	)
 }
 
 func (t *RPC) HasBeenCancelled(args *shared.JobID, reply *bool) error {
 	c, e := t.JobStore.Get(*args)
+	if e != nil {
+		return errors.Wrap(e, "error getting job")
+	}
 	*reply = c.State == shared.JobStateCancelled
 	return e
 }

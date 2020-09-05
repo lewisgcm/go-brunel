@@ -6,6 +6,7 @@ p, reader, /api/user/profile, GET
 p, reader, /api/repository*, GET
 p, reader, /api/job/*, GET
 p, reader, /api/container/*, GET
+p, reader, /api/event, GET
 
 p, admin, /api/job/*, DELETE
 p, admin, /api/job/*/reschedule, POST

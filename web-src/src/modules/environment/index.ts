@@ -1,1 +1,1 @@
-export * from './EnvironmentRoutes';
+export * from "./EnvironmentRoutes";

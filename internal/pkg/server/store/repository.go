@@ -9,8 +9,6 @@ import (
 	"time"
 )
 
-type RepositoryID string
-
 type RepositoryTriggerType int8
 
 const (
@@ -25,7 +23,7 @@ type RepositoryTrigger struct {
 }
 
 type Repository struct {
-	ID        RepositoryID `bson:"-"`
+	ID        shared.RepositoryID `bson:"-"`
 	Project   string
 	Name      string
 	URI       string
@@ -42,7 +40,7 @@ func (repository *Repository) Clean() {
 }
 
 func (repository *Repository) IsValid() error {
-	if len(repository.Name) == 0 || len(repository.Project) == 0 || len(repository.URI) != 0 {
+	if len(repository.Name) == 0 || len(repository.Project) == 0 || len(repository.URI) == 0 {
 		return errors.New("repository name, project, and uri are required")
 	}
 	return nil
@@ -63,11 +61,11 @@ func (trigger *RepositoryTrigger) IsValid() error {
 type RepositoryStore interface {
 	AddOrUpdate(repository Repository) (*Repository, error)
 
-	SetTriggers(id RepositoryID, triggers []RepositoryTrigger) error
+	SetTriggers(id shared.RepositoryID, triggers []RepositoryTrigger) error
 
-	Get(id RepositoryID) (*Repository, error)
+	Get(id shared.RepositoryID) (*Repository, error)
 
 	Filter(filter string) ([]Repository, error)
 
-	Delete(id RepositoryID, hard bool) error
+	Delete(id shared.RepositoryID, hard bool) error
 }

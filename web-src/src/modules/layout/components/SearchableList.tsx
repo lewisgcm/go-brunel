@@ -1,5 +1,5 @@
-import React, {ReactNode} from 'react';
-import {makeStyles, Theme, createStyles} from '@material-ui/core/styles';
+import React, { ReactNode } from "react";
+import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 import {
 	List,
 	ListItem,
@@ -7,8 +7,8 @@ import {
 	Typography,
 	TextField,
 	LinearProgress,
-} from '@material-ui/core';
-import {Alert} from '@material-ui/lab';
+} from "@material-ui/core";
+import { Alert } from "@material-ui/lab";
 
 const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
@@ -19,19 +19,19 @@ const useStyles = makeStyles((theme: Theme) =>
 			borderBottom: `1px solid ${theme.palette.grey[300]}`,
 		},
 		input: {
-			width: '100%',
+			width: "100%",
 		},
 		hidden: {
-			visibility: 'hidden',
+			visibility: "hidden",
 		},
 		empty: {
-			textAlign: 'center',
+			textAlign: "center",
 			paddingTop: theme.spacing(1),
 		},
 		selectedItem: {
 			backgroundColor: theme.palette.grey[300],
 		},
-	}),
+	})
 );
 
 export interface RenderItem {
@@ -71,33 +71,49 @@ export function SearchableList<T>({
 }: Props<T>) {
 	const classes = useStyles({});
 
-	return <List className={classes.list}>
-		{children}
+	return (
+		<List className={classes.list}>
+			{children}
 
-		<TextField className={classes.input}
-			label={searchPlaceholder}
-			onChange={(e) => onSearch(e.target.value)} />
+			<TextField
+				className={classes.input}
+				label={searchPlaceholder}
+				onChange={(e) => onSearch(e.target.value)}
+			/>
 
-		<LinearProgress className={state === SearchListState.Loading ? '' : classes.hidden} />
+			<LinearProgress
+				className={
+					state === SearchListState.Loading ? "" : classes.hidden
+				}
+			/>
 
-		{state === SearchListState.Loaded && items.map((i) => ({r: render(i), item: i})).map(
-			(item) => {
-				return <ListItem
-					className={`${classes.listItem} ${item.r.selected ? classes.selectedItem : ''}`}
-					button
-					key={item.r.key}
-					onClick={() => onClick(item.item)} >
-					<ListItemText>{item.r.text}</ListItemText>
-				</ListItem>;
-			},
-		)}
+			{state === SearchListState.Loaded &&
+				items
+					.map((i) => ({ r: render(i), item: i }))
+					.map((item) => {
+						return (
+							<ListItem
+								className={`${classes.listItem} ${
+									item.r.selected ? classes.selectedItem : ""
+								}`}
+								button
+								key={item.r.key}
+								onClick={() => onClick(item.item)}
+							>
+								<ListItemText>{item.r.text}</ListItemText>
+							</ListItem>
+						);
+					})}
 
-		{state === SearchListState.Loaded && items.length === 0 && <Typography className={classes.empty}>
-			{emptyPlaceholder}
-		</Typography>}
+			{state === SearchListState.Loaded && items.length === 0 && (
+				<Typography className={classes.empty}>
+					{emptyPlaceholder}
+				</Typography>
+			)}
 
-		{state === SearchListState.Error && <Alert severity="error">
-			{errorPlaceholder}
-		</Alert>}
-	</List>;
+			{state === SearchListState.Error && (
+				<Alert severity="error">{errorPlaceholder}</Alert>
+			)}
+		</List>
+	);
 }

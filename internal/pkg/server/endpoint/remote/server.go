@@ -2,7 +2,7 @@ package remote
 
 import (
 	"crypto/tls"
-	"go-brunel/internal/pkg/server/notify"
+	"go-brunel/internal/pkg/server/bus"
 	"go-brunel/internal/pkg/server/store"
 	"go-brunel/internal/pkg/shared/remote"
 	"net/rpc"
@@ -18,7 +18,7 @@ func Server(
 	rr store.RepositoryStore,
 	er store.EnvironmentStore,
 	sr store.StageStore,
-	notify notify.Notify,
+	bus bus.EventBus,
 	credentials remote.Credentials,
 	listen string,
 ) error {
@@ -29,7 +29,7 @@ func Server(
 		RepositoryStore:  rr,
 		EnvironmentStore: er,
 		StageStore:       sr,
-		Notify:           notify,
+		Bus:              bus,
 	}
 	err := rpc.Register(service)
 	if err != nil {

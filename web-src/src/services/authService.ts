@@ -1,8 +1,8 @@
-import {injectable} from 'inversify';
-import jwtDecode from 'jwt-decode';
-import moment from 'moment';
+import { injectable } from "inversify";
+import jwtDecode from "jwt-decode";
+import moment from "moment";
 
-import {UserRole} from './models';
+import { UserRole } from "./models";
 
 interface JWT {
 	exp: string;
@@ -12,7 +12,7 @@ interface JWT {
 @injectable()
 export class AuthService {
 	isAuthenticated(): boolean {
-		const token = window.localStorage.getItem('jwt');
+		const token = window.localStorage.getItem("jwt");
 		if (token) {
 			try {
 				return moment
@@ -26,7 +26,7 @@ export class AuthService {
 	}
 
 	getRole(): UserRole | undefined {
-		const token = window.localStorage.getItem('jwt');
+		const token = window.localStorage.getItem("jwt");
 		if (token) {
 			return (jwtDecode(token) as JWT).role;
 		}
@@ -34,12 +34,16 @@ export class AuthService {
 	}
 
 	setAuthentication(token: string) {
-		window.localStorage.setItem('jwt', token);
+		window.localStorage.setItem("jwt", token);
+	}
+
+	getToken(): string | null {
+		return window.localStorage.getItem("jwt");
 	}
 
 	getAuthHeaders(): HeadersInit {
 		return {
-			Authorization: `Bearer ${window.localStorage.getItem('jwt')}`,
+			Authorization: `Bearer ${window.localStorage.getItem("jwt")}`,
 		} as HeadersInit;
 	}
 }

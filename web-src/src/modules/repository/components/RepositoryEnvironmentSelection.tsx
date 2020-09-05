@@ -1,9 +1,9 @@
-import React, {useState, useEffect} from 'react';
-import {TextField, CircularProgress} from '@material-ui/core';
-import {Autocomplete} from '@material-ui/lab';
+import React, { useState, useEffect } from "react";
+import { TextField, CircularProgress } from "@material-ui/core";
+import { Autocomplete } from "@material-ui/lab";
 
-import {EnvironmentList, EnvironmentService} from '../../../services';
-import {useDependency} from '../../../container';
+import { EnvironmentList, EnvironmentService } from "../../../services";
+import { useDependency } from "../../../container";
 
 interface RepositoryEnvironmentSelectionProps {
 	value: string | undefined;
@@ -23,8 +23,13 @@ export default function RepositoryEnvironmentSelection({
 	const environmentService = useDependency(EnvironmentService);
 	const [open, setOpen] = useState(false);
 	const [options, setOptions] = useState<EnvironmentList[]>([]);
-	const [selectedEnvironment, setSelectedEnvironment] = useState<EnvironmentList | null>(null);
-	const loading = (open && options.length === 0) || (!!value && selectedEnvironment === null);
+	const [
+		selectedEnvironment,
+		setSelectedEnvironment,
+	] = useState<EnvironmentList | null>(null);
+	const loading =
+		(open && options.length === 0) ||
+		(!!value && selectedEnvironment === null);
 
 	useEffect(() => {
 		let active = true;
@@ -33,19 +38,17 @@ export default function RepositoryEnvironmentSelection({
 			return undefined;
 		}
 
-		environmentService
-			.list('')
-			.subscribe((items) => {
-				if (active) {
-					setOptions(items);
+		environmentService.list("").subscribe((items) => {
+			if (active) {
+				setOptions(items);
+			}
+			if (value) {
+				const item = items.find((i) => i.ID === value);
+				if (item) {
+					setSelectedEnvironment(item);
 				}
-				if (value) {
-					const item = items.find((i) => i.ID === value);
-					if (item) {
-						setSelectedEnvironment(item);
-					}
-				}
-			});
+			}
+		});
 
 		return () => {
 			active = false;
@@ -88,7 +91,12 @@ export default function RepositoryEnvironmentSelection({
 						...params.InputProps,
 						endAdornment: (
 							<React.Fragment>
-								{loading ? <CircularProgress color="inherit" size={20} /> : null}
+								{loading ? (
+									<CircularProgress
+										color="inherit"
+										size={20}
+									/>
+								) : null}
 								{params.InputProps.endAdornment}
 							</React.Fragment>
 						),

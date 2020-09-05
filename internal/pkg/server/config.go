@@ -6,6 +6,7 @@ import (
 	"github.com/markbates/goth/providers/github"
 	"github.com/markbates/goth/providers/gitlab"
 	"github.com/pkg/errors"
+	"go-brunel/internal/pkg/server/bus"
 	"go-brunel/internal/pkg/server/notify"
 	"go-brunel/internal/pkg/server/security"
 	"go-brunel/internal/pkg/server/store"
@@ -240,4 +241,8 @@ func (config *Config) GetContainerStore() (store.ContainerStore, error) {
 	default:
 		return nil, errors.New("no persistence configuration detected")
 	}
+}
+
+func (config *Config) GetEventBus() (bus.EventBus, error) {
+	return &bus.InMemoryEventBus{}, nil
 }

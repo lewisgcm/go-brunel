@@ -15,6 +15,8 @@ type ContainerState uint8
 // ContainerWaitState are the states that we can wait for a container to be in
 type ContainerWaitState uint8
 
+type RepositoryID string
+
 // EnvironmentID is the ID of an environment
 type EnvironmentID string
 

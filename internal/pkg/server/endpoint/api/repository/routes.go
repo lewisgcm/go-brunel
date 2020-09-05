@@ -5,6 +5,7 @@ import (
 	"github.com/pkg/errors"
 	"go-brunel/internal/pkg/server/endpoint/api"
 	"go-brunel/internal/pkg/server/store"
+	"go-brunel/internal/pkg/shared"
 	"net/http"
 
 	"github.com/go-chi/chi"
@@ -44,7 +45,7 @@ func (handler *repositoryHandler) jobs(r *http.Request) api.Response {
 		return api.BadRequest(err, "requested page size is above limit")
 	}
 
-	jobs, err := handler.jobStore.FilterByRepositoryID(store.RepositoryID(id), filter, pageIndex, pageSize, string(sortColumn), sortOrder)
+	jobs, err := handler.jobStore.FilterByRepositoryID(shared.RepositoryID(id), filter, pageIndex, pageSize, string(sortColumn), sortOrder)
 	if err != nil {
 		return api.InternalServerError(errors.Wrap(err, "error getting repository jobs"))
 	}
@@ -62,7 +63,7 @@ func (handler *repositoryHandler) list(r *http.Request) api.Response {
 
 func (handler *repositoryHandler) get(r *http.Request) api.Response {
 	id := chi.URLParam(r, "id")
-	repositories, err := handler.repositoryStore.Get(store.RepositoryID(id))
+	repositories, err := handler.repositoryStore.Get(shared.RepositoryID(id))
 	if err != nil {
 		return api.InternalServerError(errors.Wrap(err, "error getting repository"))
 	}
@@ -83,7 +84,7 @@ func (handler *repositoryHandler) setTriggers(r *http.Request) api.Response {
 		}
 	}
 
-	if err := handler.repositoryStore.SetTriggers(store.RepositoryID(id), triggers); err != nil {
+	if err := handler.repositoryStore.SetTriggers(shared.RepositoryID(id), triggers); err != nil {
 		return api.InternalServerError(errors.Wrap(err, "error saving environment"))
 	}
 

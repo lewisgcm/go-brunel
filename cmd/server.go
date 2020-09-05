@@ -11,11 +11,13 @@ import (
 	"go-brunel/internal/pkg/server"
 	"go-brunel/internal/pkg/server/endpoint/api/container"
 	"go-brunel/internal/pkg/server/endpoint/api/environment"
+	"go-brunel/internal/pkg/server/endpoint/api/event"
 	"go-brunel/internal/pkg/server/endpoint/api/hook"
 	"go-brunel/internal/pkg/server/endpoint/api/job"
 	"go-brunel/internal/pkg/server/endpoint/api/repository"
 	"go-brunel/internal/pkg/server/endpoint/api/user"
 	"go-brunel/internal/pkg/server/endpoint/remote"
+	"go-brunel/internal/pkg/server/notify"
 	"go-brunel/internal/pkg/server/security"
 	"net/http"
 	"os"
@@ -119,8 +121,17 @@ func main() {
 		log.Fatal(err)
 	}
 
+	bus, err := serverConfig.GetEventBus()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	oauths, err := serverConfig.GetOAuthProviders()
 	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := notify.NewListener(bus, notifier); err != nil {
 		log.Fatal(err)
 	}
 
@@ -131,7 +142,7 @@ func main() {
 		repositoryStore,
 		environmentStore,
 		stageStore,
-		notifier,
+		bus,
 		*serverConfig.Remote.Credentials,
 		serverConfig.Remote.Listen,
 	)
@@ -156,12 +167,13 @@ func main() {
 				security.Middleware("keymatch_model.conf", "routes.csv", jwtSerializer),
 				middleware.Recoverer,
 			)
-			r.Mount("/hook", hook.Routes(serverConfig.WebHook, jobStore, repositoryStore, notifier))
-			r.Mount("/environment", environment.Routes(environmentStore))
+			r.Mount("/hook", hook.Routes(serverConfig.WebHook, jobStore, repositoryStore, bus))
+			r.Mount("/environment", environment.Routes(environmentStore, bus))
 			r.Mount("/repository", repository.Routes(repositoryStore, jobStore))
 			r.Mount("/job", job.Routes(jobStore, logStore, stageStore, containerStore, repositoryStore, jwtSerializer))
 			r.Mount("/container", container.Routes(logStore, containerStore, jwtSerializer))
 			r.Mount("/user", user.Routes(serverConfig.DefaultAdminUser, userStore, oauths, jwtSerializer))
+			r.Mount("/event", event.Routes(bus))
 		})
 
 	FileServer(router)

@@ -10,6 +10,7 @@ import (
 	"github.com/mongodb/mongo-go-driver/x/bsonx"
 	"github.com/pkg/errors"
 	"go-brunel/internal/pkg/server/store"
+	"go-brunel/internal/pkg/shared"
 	"time"
 )
 
@@ -34,7 +35,7 @@ type mongoRepository struct {
 
 func (r *mongoRepository) ToRepository() *store.Repository {
 	return &store.Repository{
-		ID:        store.RepositoryID(r.ObjectID.Hex()),
+		ID:        shared.RepositoryID(r.ObjectID.Hex()),
 		Project:   r.Project,
 		Name:      r.Name,
 		URI:       r.URI,
@@ -66,13 +67,13 @@ func (r *RepositoryStore) AddOrUpdate(repository store.Repository) (*store.Repos
 			bson.M{"$set": repo, "$setOnInsert": bson.M{"created_at": time.Now()}},
 			&options.FindOneAndUpdateOptions{Upsert: &upsert, ReturnDocument: &after},
 		).Decode(&repo); err != nil {
-		return nil, errors.Wrap(err, "error adding or updating repository")
+		return nil, errors.Wrap(err, "error saving repository")
 	}
 
 	return repo.ToRepository(), nil
 }
 
-func (r *RepositoryStore) SetTriggers(id store.RepositoryID, triggers []store.RepositoryTrigger) error {
+func (r *RepositoryStore) SetTriggers(id shared.RepositoryID, triggers []store.RepositoryTrigger) error {
 	objectID, err := primitive.ObjectIDFromHex(string(id))
 	if err != nil {
 		return errors.Wrap(err, "error parsing object id")
@@ -96,7 +97,7 @@ func (r *RepositoryStore) SetTriggers(id store.RepositoryID, triggers []store.Re
 	return nil
 }
 
-func (r *RepositoryStore) Get(id store.RepositoryID) (*store.Repository, error) {
+func (r *RepositoryStore) Get(id shared.RepositoryID) (*store.Repository, error) {
 	objectID, err := primitive.ObjectIDFromHex(string(id))
 	if err != nil {
 		return nil, err
@@ -149,7 +150,7 @@ func (r *RepositoryStore) Filter(filter string) ([]store.Repository, error) {
 	return repos, nil
 }
 
-func (r *RepositoryStore) Delete(id store.RepositoryID, hard bool) error {
+func (r *RepositoryStore) Delete(id shared.RepositoryID, hard bool) error {
 	objectID, err := primitive.ObjectIDFromHex(string(id))
 	if err != nil {
 		return err

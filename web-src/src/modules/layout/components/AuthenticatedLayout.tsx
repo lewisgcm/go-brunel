@@ -1,31 +1,27 @@
-import React from 'react';
-import {NavLink} from 'react-router-dom';
-import AppBar from '@material-ui/core/AppBar';
-import {Button, IconButton, Toolbar, Hidden} from '@material-ui/core';
-import MenuIcon from '@material-ui/icons/Menu';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import Typography from '@material-ui/core/Typography';
-import {
-	makeStyles,
-	Theme,
-	createStyles,
-} from '@material-ui/core/styles';
+import React from "react";
+import { NavLink } from "react-router-dom";
+import AppBar from "@material-ui/core/AppBar";
+import { Button, IconButton, Toolbar, Hidden } from "@material-ui/core";
+import MenuIcon from "@material-ui/icons/Menu";
+import CssBaseline from "@material-ui/core/CssBaseline";
+import Typography from "@material-ui/core/Typography";
+import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 
-import {CurrentUser} from '../containers/CurrentUser';
-import {useHasRole} from '../hooks';
-import {UserRole} from '../../../services';
+import { CurrentUser } from "../containers/CurrentUser";
+import { useHasRole } from "../hooks";
+import { UserRole } from "../../../services";
 
 const useStyles = makeStyles((theme: Theme) =>
 	createStyles({
 		root: {
-			display: 'flex',
+			display: "flex",
 		},
 		appBar: {
 			width: `100%`,
 			zIndex: theme.zIndex.drawer + 1,
 		},
 		buttonActive: {
-			'&.is-active': {
+			"&.is-active": {
 				backgroundColor: theme.palette.primary.light,
 			},
 		},
@@ -33,14 +29,14 @@ const useStyles = makeStyles((theme: Theme) =>
 			marginRight: theme.spacing(2),
 		},
 		drawerPaper: {
-			width: '100%',
+			width: "100%",
 		},
 		drawerHeader: {
-			display: 'flex',
-			alignItems: 'center',
+			display: "flex",
+			alignItems: "center",
 			padding: theme.spacing(0, 1),
 			...theme.mixins.toolbar,
-			justifyContent: 'flex-end',
+			justifyContent: "flex-end",
 		},
 		toolbar: theme.mixins.toolbar,
 		content: {
@@ -54,7 +50,7 @@ const useStyles = makeStyles((theme: Theme) =>
 		title: {
 			marginRight: theme.spacing(1),
 		},
-	}),
+	})
 );
 
 interface ResponsiveDrawerProps {
@@ -63,7 +59,7 @@ interface ResponsiveDrawerProps {
 }
 
 export function AuthenticatedLayout(props: ResponsiveDrawerProps) {
-	const {children} = props;
+	const { children } = props;
 	const classes = useStyles({});
 	const isAdmin = useHasRole(UserRole.Admin);
 
@@ -77,37 +73,67 @@ export function AuthenticatedLayout(props: ResponsiveDrawerProps) {
 			<AppBar position="fixed" className={classes.appBar}>
 				<Toolbar>
 					<Hidden mdUp>
-						<IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu" onClick={handleDrawerToggle}>
+						<IconButton
+							edge="start"
+							className={classes.menuButton}
+							color="inherit"
+							aria-label="menu"
+							onClick={handleDrawerToggle}
+						>
 							<MenuIcon />
 						</IconButton>
 					</Hidden>
 
 					<Hidden smDown>
-						<Typography className={classes.title} variant="h6" noWrap>
+						<Typography
+							className={classes.title}
+							variant="h6"
+							noWrap
+						>
 							Brunel CI
 						</Typography>
 					</Hidden>
 
 					<Hidden smDown>
-						<Button className={classes.buttonActive} component={NavLink} activeClassName='is-active' to={'/repository'} color="inherit">Repositories</Button>
-						{
-							isAdmin &&
-							<Button className={classes.buttonActive} component={NavLink} activeClassName='is-active' to={'/environment'} color="inherit">Environments</Button>
-						}
-						{
-							isAdmin &&
-							<Button className={classes.buttonActive} component={NavLink} activeClassName='is-active' to={'/user'} color="inherit">Users</Button>
-						}
+						<Button
+							className={classes.buttonActive}
+							component={NavLink}
+							activeClassName="is-active"
+							to={"/repository"}
+							color="inherit"
+						>
+							Repositories
+						</Button>
+						{isAdmin && (
+							<Button
+								className={classes.buttonActive}
+								component={NavLink}
+								activeClassName="is-active"
+								to={"/environment"}
+								color="inherit"
+							>
+								Environments
+							</Button>
+						)}
+						{isAdmin && (
+							<Button
+								className={classes.buttonActive}
+								component={NavLink}
+								activeClassName="is-active"
+								to={"/user"}
+								color="inherit"
+							>
+								Users
+							</Button>
+						)}
 					</Hidden>
 					<div className={classes.grow} />
-					<CurrentUser/>
+					<CurrentUser />
 				</Toolbar>
 			</AppBar>
-			<div style={{width: '100%'}}>
+			<div style={{ width: "100%" }}>
 				<div className={classes.toolbar} />
-				<main className={classes.content}>
-					{children}
-				</main>
+				<main className={classes.content}>{children}</main>
 			</div>
 		</div>
 	);

@@ -1,1 +1,1 @@
-export * from './RepositoryRoutes';
+export * from "./RepositoryRoutes";

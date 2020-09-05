@@ -1,1 +1,1 @@
-export * from './JobRoutes';
+export * from "./JobRoutes";

@@ -42,7 +42,7 @@
                     args: [
                         "-c",
                         "--",
-                        'go test go-brunel/test/store... -mongo-db-uri="mongodb://root:example@mongo:27017"',
+                        'go test -p 1 go-brunel/test/store... -mongo-db-uri="mongodb://root:example@mongo:27017"',
                     ]
                 }
             ]
@@ -84,7 +84,7 @@
                             ./kind create cluster --wait 5m --config test/kind.yaml && \
                             sed -i 's/0.0.0.0/kind-control-plane/g' /root/.kube/config && \
                             ./kubectl apply -f test/test-enviornment.yaml && \
-                            go test go-brunel/test/runtime... -kube-config=/root/.kube/config
+                            go test -p 1 go-brunel/test/runtime... -kube-config=/root/.kube/config
                         |||,
                     ]
                 }

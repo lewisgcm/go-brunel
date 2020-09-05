@@ -4,19 +4,21 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/pkg/errors"
 	"go-brunel/internal/pkg/server"
+	"go-brunel/internal/pkg/server/bus"
 	"go-brunel/internal/pkg/server/endpoint/api"
-	"go-brunel/internal/pkg/server/notify"
 	"go-brunel/internal/pkg/server/store"
+	"go-brunel/internal/pkg/shared"
 	"regexp"
+	"time"
 
 	"github.com/go-chi/chi"
 )
 
 type webHookHandler struct {
 	configuration   server.WebHookConfiguration
-	notifier        notify.Notify
 	jobStore        store.JobStore
 	repositoryStore store.RepositoryStore
+	bus             bus.EventBus
 }
 
 func (handler *webHookHandler) finishHandling(repository store.Repository, job store.Job) api.Response {
@@ -31,16 +33,23 @@ func (handler *webHookHandler) finishHandling(repository store.Repository, job s
 		return api.BadRequest(errors.Wrap(e, "invalid job"), e.Error())
 	}
 
+	now := time.Now()
 	repo, err := handler.repositoryStore.AddOrUpdate(repository)
 	if err != nil {
-		return api.InternalServerError(errors.Wrap(err, "error storing github hook event repository"))
+		return api.InternalServerError(errors.Wrap(err, "error storing repository"))
+	}
+
+	if repo.CreatedAt.Unix() >= now.Unix() {
+		if e := handler.bus.Send(shared.NewRepositoryCreated(repo.ID)); e != nil {
+			return api.InternalServerError(errors.Wrap(err, "error trigger repository created event"))
+		}
 	}
 
 	for _, t := range repo.Triggers {
 		r, e := regexp.Compile(t.Pattern)
 		if e != nil {
 			return api.InternalServerError(
-				errors.Wrap(e, "invalid pattern"),
+				errors.Wrap(e, "error compiling trigger pattern"),
 			)
 		}
 
@@ -57,8 +66,8 @@ func (handler *webHookHandler) finishHandling(repository store.Repository, job s
 				return api.InternalServerError(errors.Wrap(err, "error storing hook event job"))
 			}
 
-			if err := handler.notifier.Notify(j.ID); err != nil {
-				return api.InternalServerError(errors.Wrap(err, "error notifying job status from hook event"))
+			if e := handler.bus.Send(shared.NewJobCreated(j.ID, j.RepositoryID)); e != nil {
+				return api.InternalServerError(errors.Wrap(e, "error create job event"))
 			}
 		}
 	}
@@ -71,13 +80,13 @@ func Routes(
 	configuration server.WebHookConfiguration,
 	jobStore store.JobStore,
 	repositoryStore store.RepositoryStore,
-	notifier notify.Notify,
+	bus bus.EventBus,
 ) *chi.Mux {
 	handler := webHookHandler{
 		configuration:   configuration,
 		jobStore:        jobStore,
 		repositoryStore: repositoryStore,
-		notifier:        notifier,
+		bus:             bus,
 	}
 	router := chi.NewRouter()
 	router.Post("/gitlab", api.Handle(handler.gitLab))

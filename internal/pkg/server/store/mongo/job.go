@@ -54,7 +54,7 @@ func (r *JobStore) Next() (*store.Job, error) {
 		return nil, nil
 	}
 	job.Job.ID = shared.JobID(job.ObjectID.Hex())
-	job.Job.RepositoryID = store.RepositoryID(job.RepositoryID.Hex())
+	job.Job.RepositoryID = shared.RepositoryID(job.RepositoryID.Hex())
 	if job.EnvironmentID != nil {
 		e := shared.EnvironmentID(job.EnvironmentID.Hex())
 		job.Job.EnvironmentID = &e
@@ -89,7 +89,7 @@ func (r *JobStore) Get(id shared.JobID) (*store.Job, error) {
 	}
 
 	mJob.Job.ID = shared.JobID(mJob.ObjectID.Hex())
-	mJob.Job.RepositoryID = store.RepositoryID(mJob.RepositoryID.Hex())
+	mJob.Job.RepositoryID = shared.RepositoryID(mJob.RepositoryID.Hex())
 	if mJob.EnvironmentID != nil {
 		hex := shared.EnvironmentID(mJob.EnvironmentID.Hex())
 		mJob.Job.EnvironmentID = &hex
@@ -160,7 +160,7 @@ func (r *JobStore) CancelByID(id shared.JobID, userID string) error {
 }
 
 func (r *JobStore) FilterByRepositoryID(
-	repositoryID store.RepositoryID,
+	repositoryID shared.RepositoryID,
 	filter string,
 	pageIndex int64,
 	pageSize int64,
@@ -213,7 +213,7 @@ func (r *JobStore) FilterByRepositoryID(
 			return page, errors.Wrap(err, "error decoding job")
 		}
 		r.Job.ID = shared.JobID(r.ObjectID.Hex())
-		r.Job.RepositoryID = store.RepositoryID(r.RepositoryID.Hex())
+		r.Job.RepositoryID = shared.RepositoryID(r.RepositoryID.Hex())
 		if r.Job.EnvironmentID != nil {
 			hex := shared.EnvironmentID(r.EnvironmentID.Hex())
 			r.Job.EnvironmentID = &hex

@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from "react";
 import {
 	TextField,
 	makeStyles,
@@ -8,12 +8,12 @@ import {
 	Grid,
 	Divider,
 	Hidden,
-} from '@material-ui/core';
-import {Alert} from '@material-ui/lab';
+} from "@material-ui/core";
+import { Alert } from "@material-ui/lab";
 
-import {VariableEntry} from './VariableEntry';
-import {VariableEntryCreate} from './VariableEntryCreate';
-import {Environment} from '../../../services';
+import { VariableEntry } from "./VariableEntry";
+import { VariableEntryCreate } from "./VariableEntryCreate";
+import { Environment } from "../../../services";
 
 interface Props {
 	isEdit: boolean;
@@ -33,16 +33,23 @@ const useStyles = makeStyles((theme: Theme) =>
 			margin: 0,
 		},
 		sensitiveSwitch: {
-			height: '100%',
+			height: "100%",
 		},
 		subheader: {
 			marginTop: 0,
 			color: theme.palette.grey[600],
 		},
-	}),
+	})
 );
 
-export function EnvironmentDetail({detail, onSave, onCancel, isEdit, onEdit, error}: Props) {
+export function EnvironmentDetail({
+	detail,
+	onSave,
+	onCancel,
+	isEdit,
+	onEdit,
+	error,
+}: Props) {
 	const classes = useStyles({});
 	const [isNameDirty, setNameIsDirty] = useState(false);
 	const [name, setName] = useState(detail.Name);
@@ -57,99 +64,139 @@ export function EnvironmentDetail({detail, onSave, onCancel, isEdit, onEdit, err
 		setVariables(detail.Variables);
 	}, [detail]);
 
-	return <div>
-		<Grid container spacing={3}>
-			<Grid item xs={12}>
-				{!isEdit && <h1 style={{marginBottom: 0}}>{name}</h1>}
-				{isEdit && <TextField
-					required
-					onChange={(e) => {
-						setName(e.target.value);
-						setNameIsDirty(true);
-					}}
-					helperText={'Environment name is required and must be unique'}
-					className={classes.titleEdit}
-					error={!isNameValid(name) && isNameDirty}
-					value={name}
-					disabled={!isEdit}
-					label="Environment Name"
-					fullWidth/>}
-			</Grid>
+	return (
+		<div>
+			<Grid container spacing={3}>
+				<Grid item xs={12}>
+					{!isEdit && <h1 style={{ marginBottom: 0 }}>{name}</h1>}
+					{isEdit && (
+						<TextField
+							required
+							onChange={(e) => {
+								setName(e.target.value);
+								setNameIsDirty(true);
+							}}
+							helperText={
+								"Environment name is required and must be unique"
+							}
+							className={classes.titleEdit}
+							error={!isNameValid(name) && isNameDirty}
+							value={name}
+							disabled={!isEdit}
+							label="Environment Name"
+							fullWidth
+						/>
+					)}
+				</Grid>
 
-			{variables.length > 0 && <Grid item xs={12}>
-				<h3 className={classes.subheader}>Variables</h3>
-				<Divider />
-			</Grid>}
-
-			{variables.sort((a, b) => a.Name.localeCompare(b.Name)).map((variable) => {
-				return <VariableEntry
-					key={variable.Name}
-					isEdit={isEdit}
-					variable={variable}
-					onSave={(newVariable) => {
-						setVariables(
-							variables
-								.filter((v) => v.Name !== variable.Name)
-								.concat([newVariable]),
-						);
-					}}
-					onRemove={(name) => {
-						setVariables(variables.filter((v) => v.Name !== name));
-					}} />;
-			})}
-
-			{
-				isEdit && <React.Fragment>
+				{variables.length > 0 && (
 					<Grid item xs={12}>
-						<h3 className={classes.subheader}>Add Variable</h3>
+						<h3 className={classes.subheader}>Variables</h3>
 						<Divider />
 					</Grid>
-					<VariableEntryCreate
-						allVariables={variables}
-						onSave={(variable) => {
-							setVariables(variables.concat([variable]));
-						}}/>
-				</React.Fragment>
-			}
+				)}
 
-			{isEdit && <React.Fragment>
-				<Hidden xsDown>
-					<Grid item md={8}></Grid>
-				</Hidden>
+				{variables
+					.sort((a, b) => a.Name.localeCompare(b.Name))
+					.map((variable) => {
+						return (
+							<VariableEntry
+								key={variable.Name}
+								isEdit={isEdit}
+								variable={variable}
+								onSave={(newVariable) => {
+									setVariables(
+										variables
+											.filter(
+												(v) => v.Name !== variable.Name
+											)
+											.concat([newVariable])
+									);
+								}}
+								onRemove={(name) => {
+									setVariables(
+										variables.filter((v) => v.Name !== name)
+									);
+								}}
+							/>
+						);
+					})}
 
-				<Grid item md={2} xs={12}>
-					<Button variant="contained" fullWidth onClick={() => onCancel()}>
-						Cancel
-					</Button>
-				</Grid>
+				{isEdit && (
+					<React.Fragment>
+						<Grid item xs={12}>
+							<h3 className={classes.subheader}>Add Variable</h3>
+							<Divider />
+						</Grid>
+						<VariableEntryCreate
+							allVariables={variables}
+							onSave={(variable) => {
+								setVariables(variables.concat([variable]));
+							}}
+						/>
+					</React.Fragment>
+				)}
 
-				<Grid item md={2} xs={12}>
-					<Button variant="contained" color="primary" disabled={!isNameValid(name)} fullWidth onClick={() => {
-						onSave({
-							ID: detail ? detail.ID : '',
-							Name: name,
-							Variables: variables,
-						});
-						setNameIsDirty(false);
-					}}>Save</Button>
-				</Grid>
-			</React.Fragment>}
+				{isEdit && (
+					<React.Fragment>
+						<Hidden xsDown>
+							<Grid item md={8}></Grid>
+						</Hidden>
 
-			{!isEdit && <React.Fragment>
-				<Hidden xsDown>
-					<Grid item md={10}></Grid>
-				</Hidden>
-				<Grid item md={2} xs={12}>
-					<Button color="primary" variant="contained" fullWidth onClick={() => onEdit()}>
-						Edit
-					</Button>
-				</Grid>
-			</React.Fragment>}
-			{error && <Grid item xs={12}>
-				<Alert severity="error">
-					{error}
-				</Alert>
-			</Grid>}
-		</Grid>
-	</div>;
+						<Grid item md={2} xs={12}>
+							<Button
+								variant="contained"
+								fullWidth
+								onClick={() => onCancel()}
+							>
+								Cancel
+							</Button>
+						</Grid>
+
+						<Grid item md={2} xs={12}>
+							<Button
+								variant="contained"
+								color="primary"
+								disabled={!isNameValid(name)}
+								fullWidth
+								onClick={() => {
+									onSave({
+										ID: detail ? detail.ID : "",
+										Name: name,
+										Variables: variables,
+									});
+									setNameIsDirty(false);
+								}}
+							>
+								Save
+							</Button>
+						</Grid>
+					</React.Fragment>
+				)}
+
+				{!isEdit && (
+					<React.Fragment>
+						<Hidden xsDown>
+							<Grid item md={10}></Grid>
+						</Hidden>
+						<Grid item md={2} xs={12}>
+							<Button
+								color="primary"
+								variant="contained"
+								fullWidth
+								onClick={() => onEdit()}
+							>
+								Edit
+							</Button>
+						</Grid>
+					</React.Fragment>
+				)}
+				{error && (
+					<Grid item xs={12}>
+						<Alert severity="error">{error}</Alert>
+					</Grid>
+				)}
+			</Grid>
+		</div>
+	);
 }

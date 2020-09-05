@@ -1,10 +1,10 @@
 const {
-	override,
-	addDecoratorsLegacy,
-	addBabelPlugin,
+    override,
+    addDecoratorsLegacy,
+    addBabelPlugin,
 } = require("customize-cra");
 
 module.exports = override(
-	addDecoratorsLegacy(),
-	addBabelPlugin("babel-plugin-transform-typescript-metadata")
+    addDecoratorsLegacy(),
+    addBabelPlugin("babel-plugin-transform-typescript-metadata")
 );
